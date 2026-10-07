@@ -1,15 +1,17 @@
 {
-  "id": "/",
+  "id": "mint-tv-app",
   "short_name": "Mint TV",
   "name": "Mint TV Tracker",
   "description": "Mobile-first TV show tracker and release calendar",
+  "start_url": "/?mode=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#0F172A",
+  "theme_color": "#0F172A",
+  "categories": ["entertainment", "utilities"],
   "icons": [
-    {
-      "src": "/icon.svg",
-      "type": "image/svg+xml",
-      "sizes": "512x512 192x192",
-      "purpose": "any maskable"
-    },
     {
       "src": "/icon-192.png",
       "type": "image/png",
@@ -21,13 +23,17 @@
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512"
     }
-  ],
-  "start_url": "/",
-  "background_color": "#0F172A",
-  "theme_color": "#0F172A",
-  "display": "standalone",
-  "display_override": ["standalone", "fullscreen", "minimal-ui"],
-  "orientation": "portrait",
-  "categories": ["entertainment", "utilities"]
+  ]
 }

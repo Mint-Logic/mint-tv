@@ -1,4 +1,5 @@
-// Minimal Service Worker for PWA compliance
+const CACHE_NAME = 'mint-tv-v1';
+
 self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
@@ -8,5 +9,6 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Let browser handle network requests normally
+  // Respond directly from network
+  event.respondWith(fetch(event.request));
 });
