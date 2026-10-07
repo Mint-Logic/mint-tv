@@ -64,6 +64,7 @@ export function Header({ onOpenSearch, onOpenDiscover, onOpenProfile }) {
   />
 </svg>
 
+
         <h1 
           style={{ fontFamily: "'Orbitron', sans-serif" }} 
           className="text-lg font-bold tracking-normal text-white"
