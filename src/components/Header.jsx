@@ -50,8 +50,8 @@ export function Header({ onOpenSearch, onOpenDiscover, onOpenProfile }) {
   <rect 
     x="348" 
     y="188" 
-    width="18" 
-    height="18" 
+    width="20" 
+    height="20" 
     rx="3" 
     fill="#8CFA96" 
     filter="url(#mintDotGlow)"
@@ -60,7 +60,7 @@ export function Header({ onOpenSearch, onOpenDiscover, onOpenProfile }) {
   {/* Center Play Button */}
   <path 
     d="M236 226 L308 266 L236 306 Z" 
-    fill="#8CFA96" 
+    fill="#FFFFFF" 
   />
 </svg>
 

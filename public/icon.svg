@@ -12,9 +12,13 @@
       <stop offset="100%" stop-color="#8CFA96"/>
     </linearGradient>
 
-    <!-- Subtle Drop Shadow -->
-    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.5"/>
+{/* Outer Glow Filter for the Mint Square Dot */}
+    <filter id="mintDotGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
     </filter>
   </defs>
 
@@ -22,23 +26,29 @@
   <rect width="512" height="512" rx="112" fill="url(#bgGrad)"/>
 
   <!-- Subtle Mint Border Ring -->
-  <rect x="12" y="12" width="488" height="488" rx="100" fill="none" stroke="#8CFA96" stroke-opacity="0.15" stroke-width="6"/>
+  <rect x="12" y="12" width="488" height="488" rx="100" fill="none" stroke="#8CFA96" stroke-opacity="1" stroke-width="6"/>
 
-  <!-- TV Frame & Screen Group -->
-  <g filter="url(#shadow)">
-    <!-- TV Outer Display Screen -->
-    <rect x="116" y="166" width="280" height="210" rx="36" fill="#090D16" stroke="#334155" stroke-width="8"/>
+  <!-- Antennas -->
+  <path d="M196 166 L156 106" stroke="url(#mintGrad)" stroke-width="14" stroke-linecap="round"/>
+  <path d="M316 166 L356 106" stroke="url(#mintGrad)" stroke-width="14" stroke-linecap="round"/>
 
-    <!-- Glowing Play Button Symbol -->
-    <path d="M232 226 L308 271 L232 316 Z" fill="url(#mintGrad)"/>
+  <!-- TV Outer Frame Screen -->
+  <rect x="116" y="166" width="280" height="210" rx="36" fill="#090D16" stroke="#8CFA96" stroke-width="8"/>
 
-    <!-- Left Antenna -->
-    <path d="M196 166 L156 106" stroke="url(#mintGrad)" stroke-width="12" stroke-linecap="round"/>
+  {/* Glowing Mint Square Status Dot (MINT.LOGIC Style) */}
+  <rect 
+    x="348" 
+    y="188" 
+    width="20" 
+    height="20" 
+    rx="3" 
+    fill="#8CFA96" 
+    filter="url(#mintDotGlow)"
+  />
 
-    <!-- Right Antenna -->
-    <path d="M316 166 L356 106" stroke="url(#mintGrad)" stroke-width="12" stroke-linecap="round"/>
-
-    <!-- Live Status Dot -->
-    <circle cx="360" cy="196" r="6" fill="#8CFA96"/>
-  </g>
+  {/* Center Play Button */}
+  <path 
+    d="M236 226 L308 266 L236 306 Z" 
+    fill="#FFFFFF" 
+  />
 </svg>
