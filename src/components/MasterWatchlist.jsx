@@ -5,6 +5,10 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
   const [subTab, setSubTab] = useState('active'); // 'active' | 'archive'
   const [showsWithMeta, setShowsWithMeta] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // State for multi-selected genres and dropdown open status
+  const [selectedGenres, setSelectedGenres] = useState([]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     async function loadMetadata() {
@@ -16,6 +20,7 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
             ...show,
             network: meta?.network || 'Unknown Streamer',
             status: meta?.status || 'Active',
+            genres: meta?.genres || [],
           };
         })
       );
@@ -39,8 +44,34 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
     );
   }
 
-  const activeShows = showsWithMeta.filter((s) => !s.archived);
-  const archivedShows = showsWithMeta.filter((s) => s.archived);
+  // Extract all unique genres present across the user's current watchlist
+  const availableGenres = Array.from(
+    new Set(showsWithMeta.flatMap((s) => s.genres || []))
+  ).sort();
+
+  function toggleGenre(genre) {
+    setSelectedGenres((prev) =>
+      prev.includes(genre)
+        ? prev.filter((g) => g !== genre)
+        : [...prev, genre]
+    );
+  }
+
+  function clearGenres() {
+    setSelectedGenres([]);
+  }
+
+  // Filter shows by tab, then match selected genres (must contain AT LEAST ONE selected genre)
+  const filteredShows = showsWithMeta
+    .filter((s) => (subTab === 'active' ? !s.archived : s.archived))
+    .filter((s) => {
+      if (selectedGenres.length === 0) return true;
+      return selectedGenres.some((g) => s.genres?.includes(g));
+    })
+    .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+  const activeCount = showsWithMeta.filter((s) => !s.archived).length;
+  const archivedCount = showsWithMeta.filter((s) => s.archived).length;
 
   return (
     <div className="space-y-4">
@@ -54,7 +85,7 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
               : 'text-slate-400 hover:text-white'
           }`}
         >
-          Active Shows ({activeShows.length})
+          Active Shows ({activeCount})
         </button>
         <button
           onClick={() => setSubTab('archive')}
@@ -64,59 +95,115 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
               : 'text-slate-400 hover:text-white'
           }`}
         >
-          Archived Shows ({archivedShows.length})
+          Archived Shows ({archivedCount})
         </button>
       </div>
 
-      {/* ACTIVE SHOWS TAB */}
-      {subTab === 'active' && (
-        <div className="space-y-3">
-          {activeShows.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-800 py-12 px-4 text-center">
-              <p className="text-sm font-medium text-slate-400">No active shows in your library!</p>
-              <p className="mt-1 text-xs text-slate-500">
-                Tap "+ Add" above to start tracking new shows.
-              </p>
-            </div>
-          ) : (
-            activeShows.map((show) => (
-              <ShowCard
-                key={show.id}
-                show={show}
-                onSelectShow={onSelectShow}
-                onRemoveShow={onRemoveShow}
-                onToggleArchive={onToggleArchive}
-              />
-            ))
-          )}
-        </div>
-      )}
+      {/* Multi-Select Genre Dropdown */}
+      <div className="relative w-full space-y-2">
+        <button
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          className="flex w-full items-center justify-between rounded-xl border border-slate-800 bg-[#1E293B] px-3.5 py-2.5 text-xs font-semibold text-white transition-all hover:border-slate-700"
+        >
+          <span className="truncate">
+            {selectedGenres.length === 0
+              ? 'Filter by Genres (All)'
+              : `Genres (${selectedGenres.length} selected)`}
+          </span>
+          <span className="ml-2 text-slate-400">{isDropdownOpen ? '▲' : '▼'}</span>
+        </button>
 
-      {/* ARCHIVE VAULT TAB */}
-      {subTab === 'archive' && (
-        <div className="space-y-3">
-          {archivedShows.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-800 py-12 px-4 text-center">
-              <p className="text-sm font-medium text-slate-400">Your Archive Vault is empty!</p>
-              <p className="mt-1 text-xs text-slate-500">
-                Tap the 📦 icon on finished shows in your Watchlist to store them here.
-              </p>
+        {/* Dropdown Menu */}
+        {isDropdownOpen && (
+          <div className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-slate-800 bg-[#1E293B] p-2 shadow-2xl space-y-1">
+            <div className="flex justify-between items-center px-2 py-1 text-[10px] text-slate-400 border-b border-slate-800 pb-1.5 mb-1">
+              <span>Select Genres</span>
+              {selectedGenres.length > 0 && (
+                <button
+                  onClick={clearGenres}
+                  className="text-[#8CFA96] hover:underline font-bold"
+                >
+                  Clear All
+                </button>
+              )}
             </div>
-          ) : (
-            archivedShows.map((show) => (
-              <ShowCard
-                key={show.id}
-                show={show}
-                onSelectShow={onSelectShow}
-                onRemoveShow={onRemoveShow}
-                onToggleArchive={onToggleArchive}
-                onRewatchShow={onRewatchShow}
-                isArchived={true}
-              />
-            ))
-          )}
-        </div>
-      )}
+
+            {availableGenres.length === 0 ? (
+              <p className="p-2 text-center text-xs text-slate-500">No genre data available</p>
+            ) : (
+              availableGenres.map((genre) => {
+                const isSelected = selectedGenres.includes(genre);
+                return (
+                  <button
+                    key={genre}
+                    onClick={() => toggleGenre(genre)}
+                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-bold transition-all ${
+                      isSelected
+                        ? 'bg-[#8CFA96]/15 text-[#8CFA96]'
+                        : 'text-slate-300 hover:bg-slate-800'
+                    }`}
+                  >
+                    <span>{genre}</span>
+                    {isSelected && <span>✓</span>}
+                  </button>
+                );
+              })
+            )}
+          </div>
+        )}
+
+        {/* Selected Genre Pills Bar */}
+        {selectedGenres.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {selectedGenres.map((genre) => (
+              <span
+                key={genre}
+                className="inline-flex items-center space-x-1 rounded-md border border-[#8CFA96]/30 bg-[#8CFA96]/10 px-2 py-0.5 text-[10px] font-bold text-[#8CFA96]"
+              >
+                <span>{genre}</span>
+                <button
+                  onClick={() => toggleGenre(genre)}
+                  className="ml-1 text-slate-400 hover:text-white"
+                >
+                  ✕
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* SHOW LIST */}
+      <div className="space-y-3">
+        {filteredShows.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-slate-800 py-12 px-4 text-center">
+            <p className="text-sm font-medium text-slate-400">
+              {selectedGenres.length > 0
+                ? 'No shows match all selected genres'
+                : subTab === 'active'
+                ? 'No active shows in library'
+                : 'Archive Vault is empty'}
+            </p>
+            <p className="mt-1 text-xs text-slate-500">
+              {selectedGenres.length > 0
+                ? 'Try clearing or selecting different genres'
+                : 'Tap "+ Add" above to start tracking shows'}
+            </p>
+          </div>
+        ) : (
+          filteredShows.map((show) => (
+            <ShowCard
+              key={show.id}
+              show={show}
+              onSelectShow={onSelectShow}
+              onRemoveShow={onRemoveShow}
+              onToggleArchive={onToggleArchive}
+              onRewatchShow={onRewatchShow}
+              isArchived={subTab === 'archive'}
+            />
+          ))
+        )}
+      </div>
     </div>
   );
 }
@@ -129,7 +216,7 @@ function ShowCard({ show, onSelectShow, onRemoveShow, onToggleArchive, onRewatch
       onClick={() => onSelectShow(show.id)}
       className="relative flex items-center justify-between rounded-2xl border border-slate-800 bg-[#1E293B] p-3 shadow-md cursor-pointer hover:border-slate-700 transition-all overflow-hidden"
     >
-      <div className="flex items-center space-x-3.5 min-w-0 flex-1 pr-14">
+      <div className="flex items-center space-x-3.5 min-w-0 flex-1 pr-20">
         {posterUrl ? (
           <img
             src={posterUrl}
@@ -147,19 +234,21 @@ function ShowCard({ show, onSelectShow, onRemoveShow, onToggleArchive, onRewatch
             {show.name}
           </h3>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-wrap items-center gap-1.5">
             <span className="rounded bg-[#8CFA96]/15 border border-[#8CFA96]/30 px-2 py-0.5 text-[10px] font-extrabold text-[#8CFA96]">
               {show.network}
             </span>
-            <span className="text-[10px] text-slate-400 font-medium">
-              {show.status}
-            </span>
+            {show.genres?.[0] && (
+              <span className="rounded bg-slate-800 border border-slate-700 px-1.5 py-0.5 text-[9px] font-semibold text-slate-400">
+                {show.genres[0]}
+              </span>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="absolute top-2.5 right-2.5 flex items-center space-x-1.5">
+      {/* Clean SVG Action Buttons */}
+      <div className="absolute top-3 right-3 flex items-center space-x-1.5">
         {isArchived && onRewatchShow && (
           <button
             onClick={(e) => {
@@ -167,9 +256,13 @@ function ShowCard({ show, onSelectShow, onRemoveShow, onToggleArchive, onRewatch
               onRewatchShow(show.id);
             }}
             title="Start rewatching from S01E01"
-            className="rounded-md border border-[#8CFA96]/40 bg-[#8CFA96]/10 px-2 py-1 text-[10px] font-bold text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-900 transition-all"
+            aria-label="Rewatch show from season 1"
+            className="flex items-center space-x-1 rounded-md border border-[#8CFA96]/40 bg-[#8CFA96]/10 px-2 py-1 text-[10px] font-bold text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-900 transition-all"
           >
-            🔄 Rewatch
+            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span>Rewatch</span>
           </button>
         )}
 
@@ -179,9 +272,18 @@ function ShowCard({ show, onSelectShow, onRemoveShow, onToggleArchive, onRewatch
             onToggleArchive(show.id);
           }}
           title={isArchived ? "Restore to Active Watchlist" : "Move to Archive Vault"}
-          className="flex h-6 w-6 items-center justify-center rounded-full border border-slate-700 bg-slate-900/80 text-[10px] text-slate-300 hover:border-[#8CFA96] hover:text-[#8CFA96] transition-all"
+          aria-label={isArchived ? "Restore show to active" : "Archive show"}
+          className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-700 bg-slate-900/80 text-slate-300 hover:border-[#8CFA96] hover:text-[#8CFA96] transition-all"
         >
-          {isArchived ? '📤' : '📦'}
+          {isArchived ? (
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+            </svg>
+          ) : (
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v1a2 2 0 01-2 2M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+            </svg>
+          )}
         </button>
 
         <button
@@ -189,8 +291,9 @@ function ShowCard({ show, onSelectShow, onRemoveShow, onToggleArchive, onRewatch
             e.stopPropagation();
             onRemoveShow(show.id);
           }}
-          title="Remove show"
-          className="flex h-6 w-6 items-center justify-center rounded-full border border-slate-700 bg-slate-900/80 text-[10px] text-slate-400 hover:text-red-400 transition-all"
+          title="Remove show permanently"
+          aria-label="Remove show"
+          className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-700 bg-slate-900/80 text-xs text-slate-400 hover:border-red-500/50 hover:bg-red-500/20 hover:text-red-400 transition-all"
         >
           ✕
         </button>

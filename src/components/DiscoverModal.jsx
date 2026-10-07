@@ -10,11 +10,12 @@ const GENRES = [
   { id: 10759, name: 'Action & Adventure' },
 ];
 
-export function DiscoverModal({ isOpen, onClose, onAddShow }) {
+export function DiscoverModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
   const [selectedGenre, setSelectedGenre] = useState(10765); // Default Sci-Fi
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'returning' | 'ended'
   const [shows, setShows] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [addedShowIds, setAddedShowIds] = useState(new Set());
 
   useEffect(() => {
     if (!isOpen) return;
@@ -45,6 +46,27 @@ export function DiscoverModal({ isOpen, onClose, onAddShow }) {
 
   if (!isOpen) return null;
 
+  // Check if a show is in the main watchlist or added during this session
+  function isShowAdded(showId) {
+    const isInWatchlist = watchlist.some((s) => s.id === showId);
+    return isInWatchlist || addedShowIds.has(showId);
+  }
+
+  function handleAdd(show) {
+    onAddShow({
+      id: show.id,
+      name: show.name,
+      poster: show.poster_path,
+      backdrop: show.backdrop_path,
+      currentSeason: 1,
+      currentEpisode: 1,
+      completed: false,
+    });
+
+    // Mark as added locally so the modal stays open and updates the button
+    setAddedShowIds((prev) => new Set(prev).add(show.id));
+  }
+
   return (
     <div className="fixed inset-0 z-30 flex flex-col justify-end bg-slate-950/80 p-0 backdrop-blur-sm sm:justify-center sm:p-4">
       <div className="mx-auto flex max-h-[85vh] w-full max-w-md flex-col rounded-t-3xl border-t border-slate-800 bg-[#1E293B] p-5 shadow-2xl sm:rounded-2xl sm:border">
@@ -55,7 +77,12 @@ export function DiscoverModal({ isOpen, onClose, onAddShow }) {
             <h2 className="text-lg font-extrabold text-white">Show Finder</h2>
             <p className="text-xs text-slate-400">Jog your memory by status & genre</p>
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white">✕</button>
+          <button 
+            onClick={onClose} 
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white"
+          >
+            ✕
+          </button>
         </div>
 
         {/* Status Filter Toggle */}
@@ -74,7 +101,7 @@ export function DiscoverModal({ isOpen, onClose, onAddShow }) {
               statusFilter === 'returning' ? 'bg-slate-800 text-[#8CFA96]' : 'text-slate-400 hover:text-white'
             }`}
           >
-            🔴 On Air
+            On Air
           </button>
           <button
             onClick={() => setStatusFilter('ended')}
@@ -82,7 +109,7 @@ export function DiscoverModal({ isOpen, onClose, onAddShow }) {
               statusFilter === 'ended' ? 'bg-slate-800 text-[#8CFA96]' : 'text-slate-400 hover:text-white'
             }`}
           >
-            🏁 Ended
+            Ended
           </button>
         </div>
 
@@ -110,41 +137,45 @@ export function DiscoverModal({ isOpen, onClose, onAddShow }) {
           ) : shows.length === 0 ? (
             <p className="py-8 text-center text-xs text-slate-500">No shows matched these filters.</p>
           ) : (
-            shows.map((show) => (
-              <div key={show.id} className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900 p-2">
-                <div className="flex items-center space-x-3">
-                  {show.poster_path ? (
-                    <img src={`${IMAGE_BASE_URL}${show.poster_path}`} alt={show.name} className="h-16 w-12 rounded-lg object-cover" />
-                  ) : (
-                    <div className="flex h-16 w-12 items-center justify-center rounded-lg bg-slate-800 text-[10px] text-slate-500">No Image</div>
-                  )}
-                  <div className="max-w-[180px]">
-                    <div className="truncate text-sm font-bold text-white">{show.name}</div>
-                    <div className="text-xs text-slate-400">
-                      {show.first_air_date ? show.first_air_date.split('-')[0] : 'N/A'} • Rating: ★ {show.vote_average?.toFixed(1)}
+            shows.map((show) => {
+              const added = isShowAdded(show.id);
+
+              return (
+                <div key={show.id} className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900 p-2">
+                  <div className="flex items-center space-x-3 overflow-hidden pr-2">
+                    {show.poster_path ? (
+                      <img 
+                        src={`${IMAGE_BASE_URL}${show.poster_path}`} 
+                        alt={show.name} 
+                        className="h-16 w-12 shrink-0 rounded-lg object-cover" 
+                      />
+                    ) : (
+                      <div className="flex h-16 w-12 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-[10px] text-slate-500">
+                        No Image
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-bold text-white">{show.name}</div>
+                      <div className="text-xs text-slate-400">
+                        {show.first_air_date ? show.first_air_date.split('-')[0] : 'N/A'} • ★ {show.vote_average?.toFixed(1)}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <button
-                  onClick={() => {
-                    onAddShow({
-                      id: show.id,
-                      name: show.name,
-                      poster: show.poster_path,
-                      backdrop: show.backdrop_path,
-                      currentSeason: 1,
-                      currentEpisode: 1,
-                      completed: false,
-                    });
-                    onClose();
-                  }}
-                  className="rounded-lg bg-[#8CFA96] px-3 py-1.5 text-xs font-bold text-slate-900 hover:opacity-90"
-                >
-                  + Add
-                </button>
-              </div>
-            ))
+                  <button
+                    disabled={added}
+                    onClick={() => handleAdd(show)}
+                    className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+                      added
+                        ? 'bg-slate-800 text-slate-400 border border-slate-700 cursor-not-allowed'
+                        : 'bg-[#8CFA96] text-slate-900 hover:opacity-90'
+                    }`}
+                  >
+                    {added ? 'Added ✓' : '+ Add'}
+                  </button>
+                </div>
+              );
+            })
           )}
         </div>
       </div>

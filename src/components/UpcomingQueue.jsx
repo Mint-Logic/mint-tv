@@ -61,7 +61,7 @@ export function UpcomingQueue({ watchlist, onSelectShow, onRemoveShow }) {
 
   return (
     <div className="space-y-4">
-      {/* CORRECT HEADER FOR UPCOMING TAB */}
+      {/* HEADER FOR UPCOMING TAB */}
       <div className="flex justify-between items-center">
         <h2 className="text-xs font-bold text-amber-400 uppercase tracking-wider">
           Upcoming Releases ({upcomingShows.length})
@@ -99,11 +99,14 @@ export function UpcomingQueue({ watchlist, onSelectShow, onRemoveShow }) {
               </span>
 
               <button
+                type="button"
+                title="Remove show from watchlist"
+                aria-label="Remove show from watchlist"
                 onClick={(e) => {
                   e.stopPropagation();
                   onRemoveShow(show.id);
                 }}
-                className="absolute top-3 right-3 flex h-6 w-6 items-center justify-center rounded-full border border-slate-700 bg-slate-900/80 text-[10px] text-slate-400 hover:text-red-400"
+                className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full border border-slate-700 bg-slate-900/90 text-xs text-slate-400 hover:border-red-500/50 hover:bg-red-500/20 hover:text-red-400 transition-all"
               >
                 ✕
               </button>

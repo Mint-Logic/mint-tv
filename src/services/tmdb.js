@@ -1,6 +1,8 @@
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
+
 export const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+export const THUMB_BASE_URL = 'https://image.tmdb.org/t/p/w185';
 
 export async function searchShows(query) {
   if (!query) return [];
@@ -53,11 +55,11 @@ export async function getShowMetadata(showId) {
     if (!res.ok) return null;
     const data = await res.json();
     
-    // Extract network name (e.g., Netflix, HBO, Apple TV+)
     const network = data.networks?.[0]?.name || 'Unknown Streamer';
     const airTime = data.episode_run_time?.[0] ? `${data.episode_run_time[0]} mins` : 'TBA';
+    const genres = data.genres?.map((g) => g.name) || [];
     
-    return { network, airTime, status: data.status };
+    return { network, airTime, status: data.status, genres };
   } catch (err) {
     console.error('TMDB Metadata Error:', err);
     return null;

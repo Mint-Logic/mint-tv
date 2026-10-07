@@ -3,10 +3,24 @@ import { getShowDetails, IMAGE_BASE_URL } from '../services/tmdb';
 
 export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
   const [details, setDetails] = useState(null);
-  const [selectedSeason, setSelectedSeason] = useState(showData?.currentSeason || 1);
+  
+  // Restore last selected season for this show from localStorage, fallback to currentSeason or S1
+  const [selectedSeason, setSelectedSeason] = useState(() => {
+    const saved = localStorage.getItem(`mint_tv_season_${showId}`);
+    if (saved) return Number(saved);
+    return showData?.currentSeason || 1;
+  });
+
   const [episodes, setEpisodes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedEpisodeId, setExpandedEpisodeId] = useState(null);
+  const [isOverviewExpanded, setIsOverviewExpanded] = useState(false);
+
+  // Save season selection whenever it changes
+  function handleSeasonChange(seasonNumber) {
+    setSelectedSeason(seasonNumber);
+    localStorage.setItem(`mint_tv_season_${showId}`, seasonNumber);
+  }
 
   useEffect(() => {
     async function fetchFullShow() {
@@ -69,17 +83,27 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
       </button>
 
       {/* Hero Backdrop & Show Info */}
-      <div className="relative h-56 rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl">
+      <div 
+        onClick={() => setIsOverviewExpanded(!isOverviewExpanded)}
+        className="relative min-h-[14rem] rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl cursor-pointer"
+      >
         {backdropUrl && (
-          <img src={backdropUrl} alt={details.name} className="w-full h-full object-cover" />
+          <img src={backdropUrl} alt={details.name} className="absolute inset-0 w-full h-full object-cover" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/40 to-transparent"></div>
-        <div className="absolute bottom-4 left-4 right-4">
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#8CFA96] bg-slate-950/80 px-2 py-0.5 rounded border border-slate-800">
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/60 to-transparent"></div>
+        <div className="relative p-4 pt-20 flex flex-col justify-end min-h-[14rem]">
+          <span className="self-start text-[10px] font-extrabold uppercase tracking-widest text-[#8CFA96] bg-slate-950/80 px-2 py-0.5 rounded border border-slate-800">
             {details.status}
           </span>
           <h2 className="text-2xl font-black text-white mt-1 truncate">{details.name}</h2>
-          <p className="text-xs text-slate-300 line-clamp-2 mt-1">{details.overview}</p>
+          
+          <p className={`text-xs text-slate-300 mt-1 transition-all ${isOverviewExpanded ? '' : 'line-clamp-2'}`}>
+            {details.overview || 'No overview available.'}
+          </p>
+          
+          <span className="text-[10px] text-[#8CFA96] font-semibold mt-1">
+            {isOverviewExpanded ? 'Tap to collapse ▲' : 'Tap to expand overview ▼'}
+          </span>
         </div>
       </div>
 
@@ -90,7 +114,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
           .map((s) => (
             <button
               key={s.id}
-              onClick={() => setSelectedSeason(s.season_number)}
+              onClick={() => handleSeasonChange(s.season_number)}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
                 selectedSeason === s.season_number
                   ? 'bg-[#8CFA96] text-slate-900'
@@ -132,7 +156,6 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
                     <span className="text-xs font-extrabold text-[#8CFA96] shrink-0 mt-0.5">
                       E{String(ep.episode_number).padStart(2, '0')}
                     </span>
-                    {/* Toggles between single-line truncate and full line-wrapping when expanded */}
                     <span
                       className={`text-sm font-bold text-white min-w-0 ${
                         isExpanded ? 'whitespace-normal break-words' : 'truncate'
