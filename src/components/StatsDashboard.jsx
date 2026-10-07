@@ -1,12 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const GRADIENT_THEMES = [
-  { id: 'mint', name: 'Mint Slate', bg: 'from-emerald-500 to-emerald-900 border-[#8CFA96]', text: 'text-[#8CFA96]' },
-  { id: 'cyber', name: 'Cyber Blue', bg: 'from-cyan-500 to-cyan-900 border-cyan-400', text: 'text-cyan-300' },
-  { id: 'neon', name: 'Neon Purple', bg: 'from-purple-500 to-purple-900 border-purple-400', text: 'text-purple-300' },
-  { id: 'amber', name: 'Warm Amber', bg: 'from-amber-500 to-amber-900 border-amber-400', text: 'text-amber-300' },
-];
-
 const PRESET_TITLES = [
   'TV & Movie Collector',
   'Binge Architect',
@@ -28,9 +21,6 @@ export function StatsDashboard({ watchlist }) {
     return PRESET_TITLES.includes(savedTitle) ? savedTitle : 'Custom...';
   });
 
-  const [themeId, setThemeId] = useState(() => {
-    return localStorage.getItem('mint_tv_user_theme') || 'mint';
-  });
   const [customPhoto, setCustomPhoto] = useState(() => {
     return localStorage.getItem('mint_tv_user_photo') || '';
   });
@@ -49,13 +39,12 @@ export function StatsDashboard({ watchlist }) {
     try {
       localStorage.setItem('mint_tv_user_name', profileName);
       localStorage.setItem('mint_tv_user_title', profileTitle);
-      localStorage.setItem('mint_tv_user_theme', themeId);
       localStorage.setItem('mint_tv_user_photo', customPhoto);
       localStorage.setItem('mint_tv_photo_pos', JSON.stringify(photoPos));
     } catch (e) {
       console.warn('LocalStorage limit reached while saving photo settings', e);
     }
-  }, [profileName, profileTitle, themeId, customPhoto, photoPos]);
+  }, [profileName, profileTitle, customPhoto, photoPos]);
 
   const totalEpisodesWatched = watchlist.reduce(
     (acc, show) => acc + (show.currentEpisode || 1) - 1,
@@ -65,75 +54,74 @@ export function StatsDashboard({ watchlist }) {
   const days = Math.floor(totalMinutes / (24 * 60));
   const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
 
-// Scaled-up milestone thresholds with Trophy icon for Level 1
-const getLevelDetails = (episodes) => {
-  if (episodes >= 5000) {
+  // Scaled-up Exponential Level Thresholds with Clean SVGs
+  const getLevelDetails = (episodes) => {
+    if (episodes >= 5000) {
+      return {
+        level: 5,
+        title: 'LEGEND',
+        nextReq: 'MAX LEVEL',
+        progress: 100,
+        color: 'text-amber-300 border-amber-400/50 bg-amber-400/10',
+        badgeSvg: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+        ),
+      };
+    }
+    if (episodes >= 2500) {
+      return {
+        level: 4,
+        title: 'CULTIST',
+        nextReq: `${episodes}/5000 eps to Lvl 5`,
+        progress: Math.min(100, Math.round((episodes / 5000) * 100)),
+        color: 'text-purple-300 border-purple-400/50 bg-purple-400/10',
+        badgeSvg: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+        ),
+      };
+    }
+    if (episodes >= 1000) {
+      return {
+        level: 3,
+        title: 'AUTEUR',
+        nextReq: `${episodes}/2500 eps to Lvl 4`,
+        progress: Math.min(100, Math.round((episodes / 2500) * 100)),
+        color: 'text-cyan-300 border-cyan-400/50 bg-cyan-400/10',
+        badgeSvg: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+        ),
+      };
+    }
+    if (episodes >= 250) {
+      return {
+        level: 2,
+        title: 'MARATHONER',
+        nextReq: `${episodes}/1000 eps to Lvl 3`,
+        progress: Math.min(100, Math.round((episodes / 1000) * 100)),
+        color: 'text-[#8CFA96] border-[#8CFA96]/50 bg-[#8CFA96]/10',
+        badgeSvg: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        ),
+      };
+    }
     return {
-      level: 5,
-      title: 'LEGEND',
-      nextReq: 'MAX LEVEL',
-      progress: 100,
-      color: 'text-amber-300 border-amber-400/50 bg-amber-400/10',
+      level: 1,
+      title: 'NOVICE',
+      nextReq: `${episodes}/250 eps to Lvl 2`,
+      progress: Math.min(100, Math.round((episodes / 250) * 100)),
+      color: 'text-slate-300 border-slate-700 bg-slate-800/60',
       badgeSvg: (
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M12 15a6 6 0 006-6V3H6v6a6 6 0 006 6zm0 0v3m-4 3h8M6 5H4a2 2 0 00-2 2v1a3 3 0 033 3h1m12-6h2a2 2 0 012 2v1a3 3 0 01-3 3h-1"
+        />
       ),
     };
-  }
-  if (episodes >= 2500) {
-    return {
-      level: 4,
-      title: 'CULTIST',
-      nextReq: `${episodes}/5000 eps to Lvl 5`,
-      progress: Math.min(100, Math.round((episodes / 5000) * 100)),
-      color: 'text-purple-300 border-purple-400/50 bg-purple-400/10',
-      badgeSvg: (
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-      ),
-    };
-  }
-  if (episodes >= 1000) {
-    return {
-      level: 3,
-      title: 'AUTEUR',
-      nextReq: `${episodes}/2500 eps to Lvl 4`,
-      progress: Math.min(100, Math.round((episodes / 2500) * 100)),
-      color: 'text-cyan-300 border-cyan-400/50 bg-cyan-400/10',
-      badgeSvg: (
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-      ),
-    };
-  }
-  if (episodes >= 250) {
-    return {
-      level: 2,
-      title: 'MARATHONER',
-      nextReq: `${episodes}/1000 eps to Lvl 3`,
-      progress: Math.min(100, Math.round((episodes / 1000) * 100)),
-      color: 'text-[#8CFA96] border-[#8CFA96]/50 bg-[#8CFA96]/10',
-      badgeSvg: (
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-      ),
-    };
-  }
-  return {
-    level: 1,
-    title: 'NOVICE',
-    nextReq: `${episodes}/250 eps to Lvl 2`,
-    progress: Math.min(100, Math.round((episodes / 250) * 100)),
-    color: 'text-slate-300 border-slate-700 bg-slate-800/60',
-    badgeSvg: (
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-        d="M12 15a6 6 0 006-6V3H6v6a6 6 0 006 6zm0 0v3m-4 3h8M6 5H4a2 2 0 00-2 2v1a3 3 0 003 3h1m12-6h2a2 2 0 012 2v1a3 3 0 01-3 3h-1"
-      />
-    ),
   };
-};
 
   const levelInfo = getLevelDetails(totalEpisodesWatched);
-  const activeTheme = GRADIENT_THEMES.find((t) => t.id === themeId) || GRADIENT_THEMES[0];
 
   const initials = profileName
     .trim()
@@ -146,7 +134,12 @@ const getLevelDetails = (episodes) => {
   function handleTitleDropdownChange(e) {
     const value = e.target.value;
     setSelectedDropdownOption(value);
-    if (value !== 'Custom...') {
+
+    if (value === 'Custom...') {
+      if (PRESET_TITLES.includes(profileTitle)) {
+        setProfileTitle('');
+      }
+    } else {
       setProfileTitle(value);
     }
   }
@@ -212,62 +205,56 @@ const getLevelDetails = (episodes) => {
   }
 
   function handleExportData() {
-  const backupPayload = {
-    version: 1,
-    exportedAt: new Date().toISOString(),
-    profile: {
-      name: localStorage.getItem('mint_tv_user_name') || '',
-      title: localStorage.getItem('mint_tv_user_title') || '',
-      theme: localStorage.getItem('mint_tv_user_theme') || 'mint',
-      photo: localStorage.getItem('mint_tv_user_photo') || '',
-      photoPos: JSON.parse(localStorage.getItem('mint_tv_photo_pos') || '{"x":0,"y":0,"scale":1}'),
-    },
-    watchlist: watchlist,
-  };
-
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupPayload, null, 2));
-  const downloadAnchor = document.createElement('a');
-  downloadAnchor.setAttribute("href", dataStr);
-  downloadAnchor.setAttribute("download", `mint_tv_backup_${new Date().toISOString().split('T')[0]}.json`);
-  document.body.appendChild(downloadAnchor);
-  downloadAnchor.click();
-  downloadAnchor.remove();
-}
-
-function handleImportData(e) {
-  const fileReader = new FileReader();
-  if (e.target.files[0]) {
-    fileReader.readAsText(e.target.files[0], "UTF-8");
-    fileReader.onload = (event) => {
-      try {
-        const importedData = JSON.parse(event.target.result);
-
-        // Standardized payload format (watchlist + profile)
-        if (importedData.watchlist && Array.isArray(importedData.watchlist)) {
-          localStorage.setItem('mint_tv_shows', JSON.stringify(importedData.watchlist));
-          
-          if (importedData.profile) {
-            if (importedData.profile.name) localStorage.setItem('mint_tv_user_name', importedData.profile.name);
-            if (importedData.profile.title) localStorage.setItem('mint_tv_user_title', importedData.profile.title);
-            if (importedData.profile.theme) localStorage.setItem('mint_tv_user_theme', importedData.profile.theme);
-            if (importedData.profile.photo) localStorage.setItem('mint_tv_user_photo', importedData.profile.photo);
-            if (importedData.profile.photoPos) localStorage.setItem('mint_tv_photo_pos', JSON.stringify(importedData.profile.photoPos));
-          }
-          window.location.reload();
-        } 
-        // Backward compatibility for legacy backup files (watchlist array only)
-        else if (Array.isArray(importedData)) {
-          localStorage.setItem('mint_tv_shows', JSON.stringify(importedData));
-          window.location.reload();
-        } else {
-          alert('Invalid backup file format.');
-        }
-      } catch (err) {
-        alert('Error parsing JSON backup file.');
-      }
+    const backupPayload = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      profile: {
+        name: localStorage.getItem('mint_tv_user_name') || '',
+        title: localStorage.getItem('mint_tv_user_title') || '',
+        photo: localStorage.getItem('mint_tv_user_photo') || '',
+        photoPos: JSON.parse(localStorage.getItem('mint_tv_photo_pos') || '{"x":0,"y":0,"scale":1}'),
+      },
+      watchlist: watchlist,
     };
+
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupPayload, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `mint_tv_backup_${new Date().toISOString().split('T')[0]}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
   }
-}
+
+  function handleImportData(e) {
+    const fileReader = new FileReader();
+    if (e.target.files[0]) {
+      fileReader.readAsText(e.target.files[0], "UTF-8");
+      fileReader.onload = (event) => {
+        try {
+          const importedData = JSON.parse(event.target.result);
+
+          if (importedData.watchlist && Array.isArray(importedData.watchlist)) {
+            localStorage.setItem('mint_tv_shows', JSON.stringify(importedData.watchlist));
+            if (importedData.profile) {
+              if (importedData.profile.name) localStorage.setItem('mint_tv_user_name', importedData.profile.name);
+              if (importedData.profile.title) localStorage.setItem('mint_tv_user_title', importedData.profile.title);
+              if (importedData.profile.photo) localStorage.setItem('mint_tv_user_photo', importedData.profile.photo);
+              if (importedData.profile.photoPos) localStorage.setItem('mint_tv_photo_pos', JSON.stringify(importedData.profile.photoPos));
+            }
+            window.location.reload();
+          } else if (Array.isArray(importedData)) {
+            localStorage.setItem('mint_tv_shows', JSON.stringify(importedData));
+            window.location.reload();
+          } else {
+            alert('Invalid backup file format.');
+          }
+        } catch (err) {
+          alert('Error parsing JSON backup file.');
+        }
+      };
+    }
+  }
 
   return (
     <div className="space-y-4 relative">
@@ -295,7 +282,7 @@ function handleImportData(e) {
               className="absolute max-w-none max-h-none h-full w-auto pointer-events-none select-none transition-transform duration-75"
             />
           ) : (
-            <div className={`flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br text-[48px] font-black tracking-wider leading-none text-[#8CFA96] select-none ${activeTheme.bg}`}>
+            <div className="flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-emerald-900 border-[#8CFA96] text-[38px] font-black tracking-wider leading-none text-[#8CFA96] select-none">
               <span className="translate-x-[1px]">{initials}</span>
             </div>
           )}
@@ -306,14 +293,15 @@ function handleImportData(e) {
             <h2 className="text-lg font-bold text-white tracking-tight">{profileName}</h2>
             <p className="text-xs font-semibold text-slate-400">{profileTitle}</p>
 
+            {/* Subtle, understated edit button */}
             <button
               onClick={() => setIsEditing(true)}
-              className="mt-2.5 inline-flex items-center space-x-1.5 rounded-full border border-slate-700 bg-slate-900/80 px-3.5 py-1 text-[11px] font-bold text-[#8CFA96] hover:bg-slate-800 transition-all"
+              className="mt-1.5 inline-flex items-center space-x-1 rounded-full border border-slate-800 bg-slate-900/50 px-2.5 py-0.5 text-[10px] font-medium text-slate-400 hover:border-slate-700 hover:bg-slate-800 hover:text-slate-200 transition-all"
             >
-              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-2.5 w-2.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
-              <span>Edit Profile</span>
+              <span>Edit</span>
             </button>
           </div>
         ) : (
@@ -357,19 +345,20 @@ function handleImportData(e) {
               </select>
 
               {selectedDropdownOption === 'Custom...' && (
-                <div className="mt-2">
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="text-[9px] font-bold text-slate-400">Custom Title</label>
+                <div className="mt-2 space-y-1">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[9px] font-bold text-slate-400">Custom Title Text</label>
                     <span className="text-[9px] font-bold text-slate-500">
                       {profileTitle.length}/28
                     </span>
                   </div>
                   <input
                     type="text"
+                    autoFocus
                     maxLength={28}
-                    value={profileTitle}
+                    value={profileTitle === 'Custom...' ? '' : profileTitle}
                     onChange={(e) => setProfileTitle(e.target.value)}
-                    placeholder="Enter custom title..."
+                    placeholder="Enter your custom title..."
                     className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-bold text-white focus:border-[#8CFA96] focus:outline-none"
                   />
                 </div>
@@ -392,7 +381,7 @@ function handleImportData(e) {
               <div className="space-y-2 rounded-xl border border-slate-800 bg-slate-900/60 p-3">
                 <div className="flex justify-between items-center">
                   <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#8CFA96]">
-                    Drag photo above to position
+                    Drag photo to position
                   </span>
                   <button
                     onClick={() => setPhotoPos({ x: 0, y: 0, scale: 1 })}
@@ -431,27 +420,6 @@ function handleImportData(e) {
                 </button>
               </div>
             )}
-
-            {!customPhoto && (
-              <div>
-                <label className="text-[10px] font-bold text-slate-400 block mb-1.5">
-                  Avatar Theme
-                </label>
-                <div className="grid grid-cols-4 gap-2">
-                  {GRADIENT_THEMES.map((theme) => (
-                    <button
-                      key={theme.id}
-                      onClick={() => setThemeId(theme.id)}
-                      className={`h-9 rounded-xl border bg-gradient-to-br ${theme.bg} transition-all flex items-center justify-center font-bold text-xs ${
-                        themeId === theme.id ? 'ring-2 ring-white scale-105' : 'opacity-70'
-                      }`}
-                    >
-                      {initials}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>
@@ -459,36 +427,34 @@ function handleImportData(e) {
       {/* STATS CONTAINER WITH INTEGRATED TIER HEADER ROW */}
       <div className="-mx-3 sm:-mx-4 overflow-hidden rounded-2xl border border-slate-800 bg-[#1E293B] shadow-lg divide-y divide-slate-800/80">
         
-        {/* ROW 1: Integrated Badge SVG + Pill Title + Level + (i) Info Popover Button */}
-<div className="flex items-center justify-between px-4 py-3 bg-slate-900/50">
-  <div className="flex items-center space-x-2.5">
-    {/* SVG Level Icon */}
-    <div className={`flex h-7 w-7 items-center justify-center rounded-lg border ${levelInfo.color}`}>
-      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        {levelInfo.badgeSvg}
-      </svg>
-    </div>
+        {/* ROW 1: Integrated Badge SVG + Pill Title + Level + (i) Popover Button */}
+        <div className="flex items-center justify-between px-4 py-3 bg-slate-900/50">
+          <div className="flex items-center space-x-2.5">
+            <div className={`flex h-7 w-7 items-center justify-center rounded-lg border ${levelInfo.color}`}>
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {levelInfo.badgeSvg}
+              </svg>
+            </div>
 
-    {/* Level Title wrapped in a Pill Badge */}
-    <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-black tracking-widest uppercase ${levelInfo.color}`}>
-      {levelInfo.title}
-    </span>
-  </div>
+            {/* Pill-shaped badge around level title */}
+            <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-black tracking-widest uppercase ${levelInfo.color}`}>
+              {levelInfo.title}
+            </span>
+          </div>
 
-  {/* Level Number + Info Popover Trigger */}
-  <div className="flex items-center space-x-1.5">
-    <span className="text-xs font-extrabold text-slate-300">
-      Level {levelInfo.level}
-    </span>
-    <button
-      onClick={() => setShowLevelInfo(!showLevelInfo)}
-      title="View Leveling Details"
-      className="flex h-4 w-4 items-center justify-center rounded-full border border-slate-600 bg-slate-800 text-[10px] font-black text-slate-400 hover:border-[#8CFA96] hover:text-[#8CFA96] transition-all"
-    >
-      i
-    </button>
-  </div>
-</div>
+          <div className="flex items-center space-x-1.5">
+            <span className="text-xs font-bold text-slate-300">
+              Level {levelInfo.level}
+            </span>
+            <button
+              onClick={() => setShowLevelInfo(!showLevelInfo)}
+              title="View Leveling Details"
+              className="flex h-4 w-4 items-center justify-center rounded-full border border-slate-600 bg-slate-800 text-[10px] font-black text-slate-400 hover:border-[#8CFA96] hover:text-[#8CFA96] transition-all"
+            >
+              i
+            </button>
+          </div>
+        </div>
 
         {/* ROW 2: Episodes Watched */}
         <div className="flex items-center justify-between px-4 py-3 gap-2">
@@ -500,7 +466,7 @@ function handleImportData(e) {
             </div>
             <span className="text-xs font-bold text-slate-300 truncate">Episodes Watched</span>
           </div>
-          <span className="text-sm font-extrabold text-[#8CFA96] shrink-0 tracking-tight">{totalEpisodesWatched}</span>
+          <span className="text-sm font-bold text-[#8CFA96] shrink-0 tracking-tight">{totalEpisodesWatched}</span>
         </div>
 
         {/* ROW 3: Total Time Watched */}
@@ -513,7 +479,7 @@ function handleImportData(e) {
             </div>
             <span className="text-xs font-bold text-slate-300 truncate">Total Time Watched</span>
           </div>
-          <div className="text-sm font-extrabold text-[#8CFA96] shrink-0 tracking-tight whitespace-nowrap">
+          <div className="text-sm font-bold text-[#8CFA96] shrink-0 tracking-tight whitespace-nowrap">
             {days}d {hours}h
           </div>
         </div>
@@ -549,29 +515,29 @@ function handleImportData(e) {
             </div>
           </div>
 
-          {/* Level Threshold Breakdowns in the Info Popover */}
-<div className="space-y-1.5 pt-1 text-[11px] font-bold">
-  <div className="flex justify-between text-slate-400">
-    <span>Level 1: NOVICE</span>
-    <span>0 - 249 eps</span>
-  </div>
-  <div className="flex justify-between text-[#8CFA96]">
-    <span>Level 2: MARATHONER</span>
-    <span>250 - 999 eps</span>
-  </div>
-  <div className="flex justify-between text-cyan-300">
-    <span>Level 3: AUTEUR</span>
-    <span>1,000 - 2,499 eps</span>
-  </div>
-  <div className="flex justify-between text-purple-300">
-    <span>Level 4: CULTIST</span>
-    <span>2,500 - 4,999 eps</span>
-  </div>
-  <div className="flex justify-between text-amber-300">
-    <span>Level 5: LEGEND</span>
-    <span>5,000+ eps</span>
-  </div>
-</div>
+          {/* Level Threshold Breakdowns */}
+          <div className="space-y-1.5 pt-1 text-[11px] font-bold">
+            <div className="flex justify-between text-slate-400">
+              <span>Level 1: NOVICE</span>
+              <span>0 - 249 eps</span>
+            </div>
+            <div className="flex justify-between text-[#8CFA96]">
+              <span>Level 2: MARATHONER</span>
+              <span>250 - 999 eps</span>
+            </div>
+            <div className="flex justify-between text-cyan-300">
+              <span>Level 3: AUTEUR</span>
+              <span>1,000 - 2,499 eps</span>
+            </div>
+            <div className="flex justify-between text-purple-300">
+              <span>Level 4: CULTIST</span>
+              <span>2,500 - 4,999 eps</span>
+            </div>
+            <div className="flex justify-between text-amber-300">
+              <span>Level 5: LEGEND</span>
+              <span>5,000+ eps</span>
+            </div>
+          </div>
         </div>
       )}
 
