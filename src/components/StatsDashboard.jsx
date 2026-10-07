@@ -56,70 +56,65 @@ export function StatsDashboard({ watchlist }) {
 
   // Scaled-up Exponential Level Thresholds with Clean SVGs
   const getLevelDetails = (episodes) => {
-    if (episodes >= 5000) {
-      return {
-        level: 5,
-        title: 'LEGEND',
-        nextReq: 'MAX LEVEL',
-        progress: 100,
-        color: 'text-amber-300 border-amber-400/50 bg-amber-400/10',
-        badgeSvg: (
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-        ),
-      };
-    }
-    if (episodes >= 2500) {
-      return {
-        level: 4,
-        title: 'CULTIST',
-        nextReq: `${episodes}/5000 eps to Lvl 5`,
-        progress: Math.min(100, Math.round((episodes / 5000) * 100)),
-        color: 'text-purple-300 border-purple-400/50 bg-purple-400/10',
-        badgeSvg: (
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-        ),
-      };
-    }
-    if (episodes >= 1000) {
-      return {
-        level: 3,
-        title: 'AUTEUR',
-        nextReq: `${episodes}/2500 eps to Lvl 4`,
-        progress: Math.min(100, Math.round((episodes / 2500) * 100)),
-        color: 'text-cyan-300 border-cyan-400/50 bg-cyan-400/10',
-        badgeSvg: (
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-        ),
-      };
-    }
-    if (episodes >= 250) {
-      return {
-        level: 2,
-        title: 'MARATHONER',
-        nextReq: `${episodes}/1000 eps to Lvl 3`,
-        progress: Math.min(100, Math.round((episodes / 1000) * 100)),
-        color: 'text-[#8CFA96] border-[#8CFA96]/50 bg-[#8CFA96]/10',
-        badgeSvg: (
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-        ),
-      };
-    }
+  // Static Trophy SVG path used across all levels
+  const trophySvg = (
+    <path
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    strokeWidth="2"
+    d="M12 15a6 6 0 006-6V3H6v6a6 6 0 006 6zm0 0v3m-4 3h8M6 5H4a2 2 0 00-2 2v1a3 3 0 003 3h1m12-6h2a2 2 0 012 2v1a3 3 0 01-3 3h-1"
+  /> 
+  );
+
+  if (episodes >= 5000) {
     return {
-  level: 1,
-  title: 'NOVICE',
-  nextReq: `${episodes}/250 eps to Lvl 2`,
-  progress: Math.min(100, Math.round((episodes / 250) * 100)),
-  color: 'text-slate-300 border-slate-700 bg-slate-800/60',
-  badgeSvg: (
-  <path
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    strokeWidth="2"
-    d="M12 15a6 6 0 006-6V3H6v6a6 6 0 006 6zm0 0v3m-4 3h8M6 5H4a2 2 0 00-2 2v1a3 3 0 003 3h1m12-6h2a2 2 0 012 2v1a3 3 0 01-3 3h-1"
-  />
-  ),
-};
+      level: 5,
+      title: 'LEGEND',
+      nextReq: 'MAX LEVEL',
+      progress: 100,
+      color: 'text-amber-300 border-amber-400/50 bg-amber-400/10',
+      badgeSvg: trophySvg,
+    };
+  }
+  if (episodes >= 2500) {
+    return {
+      level: 4,
+      title: 'CULTIST',
+      nextReq: `${episodes}/5000 eps to Lvl 5`,
+      progress: Math.min(100, Math.round((episodes / 5000) * 100)),
+      color: 'text-purple-300 border-purple-400/50 bg-purple-400/10',
+      badgeSvg: trophySvg,
+    };
+  }
+  if (episodes >= 1000) {
+    return {
+      level: 3,
+      title: 'AUTEUR',
+      nextReq: `${episodes}/2500 eps to Lvl 4`,
+      progress: Math.min(100, Math.round((episodes / 2500) * 100)),
+      color: 'text-cyan-300 border-cyan-400/50 bg-cyan-400/10',
+      badgeSvg: trophySvg,
+    };
+  }
+  if (episodes >= 250) {
+    return {
+      level: 2,
+      title: 'MARATHONER',
+      nextReq: `${episodes}/1000 eps to Lvl 3`,
+      progress: Math.min(100, Math.round((episodes / 1000) * 100)),
+      color: 'text-[#8CFA96] border-[#8CFA96]/50 bg-[#8CFA96]/10',
+      badgeSvg: trophySvg,
+    };
+  }
+  return {
+    level: 1,
+    title: 'NOVICE',
+    nextReq: `${episodes}/250 eps to Lvl 2`,
+    progress: Math.min(100, Math.round((episodes / 250) * 100)),
+    color: 'text-slate-300 border-slate-700 bg-slate-800/60',
+    badgeSvg: trophySvg,
   };
+};
 
   const levelInfo = getLevelDetails(totalEpisodesWatched);
 
