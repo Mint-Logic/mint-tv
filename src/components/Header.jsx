@@ -66,7 +66,7 @@ export function Header({ onOpenSearch, onOpenDiscover, onOpenProfile }) {
 
         <h1 
           style={{ fontFamily: "'Orbitron', sans-serif" }} 
-          className="text-sm font-black tracking-normal text-white"
+          className="text-lg font-bold tracking-normal text-white"
         >
           Mint<span className="text-[#8CFA96]">TV</span>
         </h1>
