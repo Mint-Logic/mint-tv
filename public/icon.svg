@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Dark Slate Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+
+    <!-- Glowing Mint Accent Gradient -->
+    <linearGradient id="mintGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A7FCB0"/>
+      <stop offset="100%" stop-color="#8CFA96"/>
+    </linearGradient>
+
+    <!-- Subtle Drop Shadow -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle Base / Background -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)"/>
+
+  <!-- Subtle Mint Border Ring -->
+  <rect x="12" y="12" width="488" height="488" rx="100" fill="none" stroke="#8CFA96" stroke-opacity="0.15" stroke-width="6"/>
+
+  <!-- TV Frame & Screen Group -->
+  <g filter="url(#shadow)">
+    <!-- TV Outer Display Screen -->
+    <rect x="116" y="166" width="280" height="210" rx="36" fill="#090D16" stroke="#334155" stroke-width="8"/>
+
+    <!-- Glowing Play Button Symbol -->
+    <path d="M232 226 L308 271 L232 316 Z" fill="url(#mintGrad)"/>
+
+    <!-- Left Antenna -->
+    <path d="M196 166 L156 106" stroke="url(#mintGrad)" stroke-width="12" stroke-linecap="round"/>
+
+    <!-- Right Antenna -->
+    <path d="M316 166 L356 106" stroke="url(#mintGrad)" stroke-width="12" stroke-linecap="round"/>
+
+    <!-- Live Status Dot -->
+    <circle cx="360" cy="196" r="6" fill="#8CFA96"/>
+  </g>
+</svg>
