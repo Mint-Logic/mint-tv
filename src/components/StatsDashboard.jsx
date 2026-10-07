@@ -9,7 +9,7 @@ const GRADIENT_THEMES = [
 
 export function StatsDashboard({ watchlist }) {
   const [profileName, setProfileName] = useState(() => {
-    return localStorage.getItem('mint_tv_user_name') || 'Momo Rodriguez';
+    return localStorage.getItem('mint_tv_user_name') || 'Peace Toes';
   });
   const [themeId, setThemeId] = useState(() => {
     return localStorage.getItem('mint_tv_user_theme') || 'mint';
@@ -87,16 +87,16 @@ export function StatsDashboard({ watchlist }) {
       {/* Profile Card Container */}
       <div className="rounded-2xl border border-slate-800 bg-[#1E293B] p-5 shadow-xl">
         <div className="flex flex-col items-center text-center">
-          {/* Avatar Ring with Fine-Tuned Letter Spacing */}
-<div className="relative mb-3 h-24 w-24 overflow-hidden rounded-full border-2 border-[#8CFA96] shadow-lg shadow-[#8CFA96]/10">
-  {customPhoto ? (
-    <img src={customPhoto} alt="Profile" className="h-full w-full object-cover" />
-  ) : (
-    <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br text-4xl font-black tracking-wider leading-none pl-0.5 ${activeTheme.bg} ${activeTheme.text}`}>
-      {initials}
-    </div>
-  )}
-</div>
+          {/* Avatar Ring */}
+          <div className="relative mb-3 h-24 w-24 overflow-hidden rounded-full border-2 border-[#8CFA96] shadow-lg shadow-[#8CFA96]/10">
+            {customPhoto ? (
+              <img src={customPhoto} alt="Profile" className="h-full w-full object-cover" />
+            ) : (
+              <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br text-4xl font-black tracking-wider leading-none pl-0.5 ${activeTheme.bg} ${activeTheme.text}`}>
+                {initials}
+              </div>
+            )}
+          </div>
 
           {!isEditing ? (
             <div className="space-y-1">
@@ -183,20 +183,46 @@ export function StatsDashboard({ watchlist }) {
         </div>
       </div>
 
-      {/* Balanced Metric Cards */}
+      {/* REFINED METRICS SECTION */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-800 bg-[#1E293B] p-3.5 text-center shadow-md">
-          <span className="text-xl font-extrabold text-[#8CFA96]">{totalEpisodesWatched}</span>
-          <span className="mt-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            Episodes Watched
-          </span>
+        {/* Episodes Watched Card */}
+        <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-[#1E293B] p-4 shadow-md transition-all hover:border-slate-700">
+          <div className="flex items-center space-x-2.5 mb-2">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#8CFA96]/30 bg-[#8CFA96]/10 text-[#8CFA96]">
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+              Episodes
+            </span>
+          </div>
+
+          <div className="flex items-baseline space-x-1.5">
+            <span className="text-2xl font-black text-white tracking-tight">{totalEpisodesWatched}</span>
+            <span className="text-[10px] font-bold text-[#8CFA96] uppercase">episodes</span>
+          </div>
         </div>
 
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-800 bg-[#1E293B] p-3.5 text-center shadow-md">
-          <span className="text-xl font-extrabold text-[#8CFA96] tracking-tight">{days}d {hours}h</span>
-          <span className="mt-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            Time Watched
-          </span>
+        {/* Watch Time Card */}
+        <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-[#1E293B] p-4 shadow-md transition-all hover:border-slate-700">
+          <div className="flex items-center space-x-2.5 mb-2">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#8CFA96]/30 bg-[#8CFA96]/10 text-[#8CFA96]">
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+              Time Watched
+            </span>
+          </div>
+
+          <div className="flex items-baseline space-x-1">
+            <span className="text-2xl font-black text-white tracking-tight">{days}</span>
+            <span className="text-[10px] font-bold text-[#8CFA96] mr-1">days</span>
+            <span className="text-2xl font-black text-white tracking-tight">{hours}</span>
+            <span className="text-[10px] font-bold text-[#8CFA96]">hrs</span>
+          </div>
         </div>
       </div>
 
