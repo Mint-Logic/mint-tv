@@ -23,71 +23,46 @@ export function Header({ onOpenSearch, onOpenDiscover, onOpenProfile }) {
     <header className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-800/80 bg-[#0F172A]/90 px-3.5 py-2.5 backdrop-blur-md">
       {/* Brand Logo with Custom TV App Icon SVG & Orbitron Font */}
       <div className="flex items-center space-x-1.5">
-        <svg 
-          viewBox="0 0 512 512" 
-          className="h-7 w-7 shrink-0" 
-          fill="none"
-        >
-          {/* Outer App Frame Tile */}
-          <rect 
-            x="12" 
-            y="12" 
-            width="488" 
-            height="488" 
-            rx="110" 
-            fill="#0D1527" 
-            stroke="#1E2B3E" 
-            strokeWidth="24" 
-          />
-          
-          {/* Left Antenna */}
-          <line 
-            x1="150" 
-            y1="100" 
-            x2="202" 
-            y2="162" 
-            stroke="#8CFA96" 
-            strokeWidth="22" 
-            strokeLinecap="round" 
-          />
-          
-          {/* Right Antenna */}
-          <line 
-            x1="362" 
-            y1="100" 
-            x2="310" 
-            y2="162" 
-            stroke="#8CFA96" 
-            strokeWidth="22" 
-            strokeLinecap="round" 
-          />
+       <svg viewBox="0 0 512 512" className="h-8 w-8 shrink-0 drop-shadow-[0_0_8px_rgba(140,250,150,0.25)]" fill="none">
 
-          {/* TV Body Frame */}
-          <rect 
-            x="112" 
-            y="162" 
-            width="288" 
-            height="208" 
-            rx="42" 
-            fill="#080D1A" 
-            stroke="#25354C" 
-            strokeWidth="16" 
-          />
+        <defs>
+    {/* Outer Glow Filter for the Mint Square Dot */}
+    <filter id="mintDotGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
 
-          {/* Status Light Dot */}
-          <circle 
-            cx="358" 
-            cy="196" 
-            r="8" 
-            fill="#8CFA96" 
-          />
+  {/* Outer Frame - Bright Mint Stroke */}
+  <rect x="16" y="16" width="480" height="480" rx="110" fill="#1E293B" stroke="#8CFA96" strokeWidth="20" />
+  
+  {/* Antennae */}
+  <line x1="150" y1="100" x2="202" y2="162" stroke="#8CFA96" strokeWidth="26" strokeLinecap="round" />
+  <line x1="362" y1="100" x2="310" y2="162" stroke="#8CFA96" strokeWidth="26" strokeLinecap="round" />
 
-          {/* Play Triangle */}
-          <path 
-            d="M236 226 L308 266 L236 306 Z" 
-            fill="#8CFA96" 
-          />
-        </svg>
+  {/* Inner TV Body */}
+  <rect x="112" y="162" width="288" height="208" rx="42" fill="#0F172A" stroke="#8CFA96" strokeWidth="18" />
+
+  {/* Glowing Mint Square Status Dot (MINT.LOGIC Style) */}
+  <rect 
+    x="348" 
+    y="188" 
+    width="18" 
+    height="18" 
+    rx="3" 
+    fill="#8CFA96" 
+    filter="url(#mintDotGlow)"
+  />
+
+  {/* Center Play Button */}
+  <path 
+    d="M236 226 L308 266 L236 306 Z" 
+    fill="#8CFA96" 
+  />
+</svg>
 
         <h1 
           style={{ fontFamily: "'Orbitron', sans-serif" }} 
