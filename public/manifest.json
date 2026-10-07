@@ -7,17 +7,17 @@
     {
       "src": "/icon.svg",
       "type": "image/svg+xml",
-      "sizes": "512x512 192x192 64x64 32x32",
+      "sizes": "512x512 192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon.svg",
+      "src": "/icon-192.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any"
     },
     {
-      "src": "/icon.svg",
+      "src": "/icon-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any"
@@ -27,5 +27,7 @@
   "background_color": "#0F172A",
   "theme_color": "#0F172A",
   "display": "standalone",
-  "orientation": "portrait"
+  "display_override": ["standalone", "fullscreen", "minimal-ui"],
+  "orientation": "portrait",
+  "categories": ["entertainment", "utilities"]
 }
