@@ -6,6 +6,7 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [addedShowIds, setAddedShowIds] = useState(new Set());
+  const [expandedShowId, setExpandedShowId] = useState(null);
 
   // Debounced search effect
   useEffect(() => {
@@ -72,7 +73,7 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
           </button>
         </div>
 
-        {/* Input Box - Sticky at top of modal */}
+        {/* Input Box */}
         <div className="relative mb-3 w-full shrink-0">
           <input
             type="text"
@@ -101,43 +102,64 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
           )}
           {!loading && results.map((show) => {
             const added = isShowAdded(show.id);
+            const isExpanded = expandedShowId === show.id;
 
             return (
               <div 
                 key={show.id} 
-                className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900 p-2"
+                className="rounded-xl border border-slate-800 bg-slate-900 p-2 transition-all overflow-hidden"
               >
-                <div className="flex items-center space-x-3 overflow-hidden pr-2">
-                  {show.poster_path ? (
-                    <img 
-                      src={`${IMAGE_BASE_URL}${show.poster_path}`} 
-                      alt={show.name} 
-                      className="h-14 w-10 shrink-0 rounded-lg object-cover" 
-                    />
-                  ) : (
-                    <div className="flex h-14 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-[9px] text-slate-500">
-                      No Poster
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    <div className="truncate text-xs font-bold text-white">{show.name}</div>
-                    <div className="text-[10px] text-slate-400">
-                      {show.first_air_date ? show.first_air_date.split('-')[0] : 'N/A'}
+                <div className="flex items-center justify-between">
+                  {/* Tappable Card Header to Expand Overview */}
+                  <div 
+                    onClick={() => setExpandedShowId(isExpanded ? null : show.id)}
+                    className="flex items-center space-x-3 overflow-hidden pr-2 flex-1 cursor-pointer"
+                  >
+                    {show.poster_path ? (
+                      <img 
+                        src={`${IMAGE_BASE_URL}${show.poster_path}`} 
+                        alt={show.name} 
+                        className="h-14 w-10 shrink-0 rounded-lg object-cover" 
+                      />
+                    ) : (
+                      <div className="flex h-14 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-[9px] text-slate-500">
+                        No Poster
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <div className="truncate text-xs font-bold text-white">{show.name}</div>
+                      <div className="text-[10px] text-slate-400">
+                        {show.first_air_date ? show.first_air_date.split('-')[0] : 'N/A'}
+                      </div>
+                      <span className="text-[9px] font-semibold text-[#8CFA96]/80 block mt-0.5">
+                        {isExpanded ? 'Tap to hide overview ▲' : 'Tap for overview ▼'}
+                      </span>
                     </div>
                   </div>
+
+                  {/* Add Button */}
+                  <button
+                    disabled={added}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAdd(show);
+                    }}
+                    className={`shrink-0 rounded-lg px-2.5 py-1.5 text-xs font-bold transition-all ${
+                      added
+                        ? 'bg-slate-800 text-slate-400 border border-slate-700 cursor-not-allowed'
+                        : 'bg-[#8CFA96] text-slate-900 hover:opacity-90'
+                    }`}
+                  >
+                    {added ? 'Added ✓' : '+ Add'}
+                  </button>
                 </div>
 
-                <button
-                  disabled={added}
-                  onClick={() => handleAdd(show)}
-                  className={`shrink-0 rounded-lg px-2.5 py-1.5 text-xs font-bold transition-all ${
-                    added
-                      ? 'bg-slate-800 text-slate-400 border border-slate-700 cursor-not-allowed'
-                      : 'bg-[#8CFA96] text-slate-900 hover:opacity-90'
-                  }`}
-                >
-                  {added ? 'Added ✓' : '+ Add'}
-                </button>
+                {/* Expanded Overview Drawer */}
+                {isExpanded && (
+                  <div className="mt-2.5 pt-2.5 border-t border-slate-800 text-xs text-slate-300 leading-relaxed bg-slate-950/40 p-2.5 rounded-lg">
+                    {show.overview || 'No overview available for this show.'}
+                  </div>
+                )}
               </div>
             );
           })}
