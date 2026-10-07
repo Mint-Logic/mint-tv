@@ -53,18 +53,18 @@ export function Header({ onOpenSearch, onOpenDiscover, onOpenProfile }) {
         </button>
 
         {/* Scaled-down Profile Avatar Button */}
-        <button
-          onClick={onOpenProfile}
-          title="User Profile & Stats"
-          aria-label="User profile and stats"
-          className="relative flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#8CFA96]/50 bg-slate-900 text-[10px] font-black text-[#8CFA96] shadow-sm hover:border-[#8CFA96] transition-all ml-1"
-        >
-          {customPhoto ? (
-            <img src={customPhoto} alt="Profile" className="h-full w-full object-cover" />
-          ) : (
-            <span className="leading-none">{initials}</span>
-          )}
-        </button>
+<button
+  onClick={onOpenProfile}
+  title="User Profile & Stats"
+  aria-label="User profile and stats"
+  className="relative flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#8CFA96]/50 bg-slate-900 text-[12px] font-black text-[#8CFA96] shadow-sm hover:border-[#8CFA96] transition-all ml-1"
+>
+  {customPhoto ? (
+    <img src={customPhoto} alt="Profile" className="h-full w-full object-cover" />
+  ) : (
+    <span className="leading-none">{initials}</span>
+  )}
+</button>
       </div>
     </header>
   );

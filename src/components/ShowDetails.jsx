@@ -64,11 +64,29 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
   const currentSeason = showData?.currentSeason || 1;
   const currentEpisode = showData?.currentEpisode || 1;
 
+  // Determine if every episode in the current season is watched
+  const areAllSeasonEpisodesWatched =
+    episodes.length > 0 &&
+    (currentSeason > selectedSeason ||
+      (currentSeason === selectedSeason && currentEpisode > episodes.length));
+
   function toggleEpisodeWatched(epNumber, isWatched) {
     if (isWatched) {
       onUpdateEpisode(showId, selectedSeason, epNumber);
     } else {
       onUpdateEpisode(showId, selectedSeason, epNumber + 1);
+    }
+  }
+
+  function handleToggleAllSeasonEpisodes() {
+    if (episodes.length === 0) return;
+
+    if (areAllSeasonEpisodesWatched) {
+      // Reset to episode 1 of current season
+      onUpdateEpisode(showId, selectedSeason, 1);
+    } else {
+      // Mark all episodes watched in this season
+      onUpdateEpisode(showId, selectedSeason, episodes.length + 1);
     }
   }
 
@@ -128,11 +146,23 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
 
       {/* Episode Checklist */}
       <div className="space-y-3">
-        <div className="flex justify-between items-center">
+        {/* Section Header with Dynamic Toggle Action */}
+        <div className="flex justify-between items-center px-1">
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
             Season {selectedSeason} Episodes ({episodes.length})
           </h3>
-          <span className="text-[10px] text-slate-500">Tap row for synopsis</span>
+          <button
+            onClick={handleToggleAllSeasonEpisodes}
+            className={`text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+              areAllSeasonEpisodesWatched
+                ? 'text-red-400 hover:text-red-300'
+                : 'text-[#8CFA96] hover:text-white'
+            }`}
+          >
+            {areAllSeasonEpisodesWatched
+              ? 'Mark All Episodes Unwatched'
+              : 'Mark All Episodes Watched'}
+          </button>
         </div>
 
         {episodes.map((ep) => {
