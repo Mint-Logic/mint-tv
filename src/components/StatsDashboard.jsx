@@ -87,12 +87,12 @@ export function StatsDashboard({ watchlist }) {
       {/* Profile Card Container */}
       <div className="rounded-2xl border border-slate-800 bg-[#1E293B] p-5 shadow-xl">
         <div className="flex flex-col items-center text-center">
-         {/* Avatar Ring with Scaled-Up Initials & Increased Letter Spacing */}
+          {/* Avatar Ring with Fine-Tuned Letter Spacing */}
 <div className="relative mb-3 h-24 w-24 overflow-hidden rounded-full border-2 border-[#8CFA96] shadow-lg shadow-[#8CFA96]/10">
   {customPhoto ? (
     <img src={customPhoto} alt="Profile" className="h-full w-full object-cover" />
   ) : (
-    <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br text-4xl font-black tracking-widest leading-none pl-0.2 ${activeTheme.bg} ${activeTheme.text}`}>
+    <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br text-4xl font-black tracking-wider leading-none pl-0.5 ${activeTheme.bg} ${activeTheme.text}`}>
       {initials}
     </div>
   )}
