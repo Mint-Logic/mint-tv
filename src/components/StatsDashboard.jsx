@@ -183,46 +183,44 @@ export function StatsDashboard({ watchlist }) {
         </div>
       </div>
 
-      {/* REFINED METRICS SECTION */}
-      <div className="grid grid-cols-2 gap-3">
-        {/* Episodes Watched Card */}
-        <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-[#1E293B] p-4 shadow-md transition-all hover:border-slate-700">
-          <div className="flex items-center space-x-2.5 mb-2">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#8CFA96]/30 bg-[#8CFA96]/10 text-[#8CFA96]">
-              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {/* SINGLE HORIZONTAL STATS BAR */}
+      <div className="rounded-2xl border border-slate-800 bg-[#1E293B] p-4 shadow-md">
+        <div className="grid grid-cols-2 divide-x divide-slate-800">
+          
+          {/* Episodes Watched */}
+          <div className="flex items-center space-x-3 pr-2">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#8CFA96]/30 bg-[#8CFA96]/10 text-[#8CFA96]">
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
               </svg>
             </div>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-              Episodes
-            </span>
+            <div className="min-w-0">
+              <div className="text-base font-black text-white leading-tight truncate">
+                {totalEpisodesWatched}
+              </div>
+              <div className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400 truncate">
+                Episodes
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-baseline space-x-1.5">
-            <span className="text-2xl font-black text-white tracking-tight">{totalEpisodesWatched}</span>
-            <span className="text-[10px] font-bold text-[#8CFA96] uppercase">episodes</span>
-          </div>
-        </div>
-
-        {/* Watch Time Card */}
-        <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-[#1E293B] p-4 shadow-md transition-all hover:border-slate-700">
-          <div className="flex items-center space-x-2.5 mb-2">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#8CFA96]/30 bg-[#8CFA96]/10 text-[#8CFA96]">
-              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {/* Time Watched */}
+          <div className="flex items-center space-x-3 pl-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#8CFA96]/30 bg-[#8CFA96]/10 text-[#8CFA96]">
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-              Time Watched
-            </span>
+            <div className="min-w-0">
+              <div className="text-base font-black text-white leading-tight truncate">
+                {days}<span className="text-xs font-bold text-[#8CFA96]">d</span> {hours}<span className="text-xs font-bold text-[#8CFA96]">h</span>
+              </div>
+              <div className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400 truncate">
+                Time Watched
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-baseline space-x-1">
-            <span className="text-2xl font-black text-white tracking-tight">{days}</span>
-            <span className="text-[10px] font-bold text-[#8CFA96] mr-1">days</span>
-            <span className="text-2xl font-black text-white tracking-tight">{hours}</span>
-            <span className="text-[10px] font-bold text-[#8CFA96]">hrs</span>
-          </div>
         </div>
       </div>
 
