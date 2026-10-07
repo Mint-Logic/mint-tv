@@ -18,7 +18,6 @@ export function StatsDashboard({ watchlist }) {
     return localStorage.getItem('mint_tv_user_photo') || '';
   });
   
-  // Position & Zoom state for profile photo
   const [photoPos, setPhotoPos] = useState(() => {
     const saved = localStorage.getItem('mint_tv_photo_pos');
     return saved ? JSON.parse(saved) : { x: 0, y: 0, scale: 1 };
@@ -29,10 +28,14 @@ export function StatsDashboard({ watchlist }) {
   const dragStart = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    localStorage.setItem('mint_tv_user_name', profileName);
-    localStorage.setItem('mint_tv_user_theme', themeId);
-    localStorage.setItem('mint_tv_user_photo', customPhoto);
-    localStorage.setItem('mint_tv_photo_pos', JSON.stringify(photoPos));
+    try {
+      localStorage.setItem('mint_tv_user_name', profileName);
+      localStorage.setItem('mint_tv_user_theme', themeId);
+      localStorage.setItem('mint_tv_user_photo', customPhoto);
+      localStorage.setItem('mint_tv_photo_pos', JSON.stringify(photoPos));
+    } catch (e) {
+      console.warn('LocalStorage limit reached while saving photo settings', e);
+    }
   }, [profileName, themeId, customPhoto, photoPos]);
 
   const totalEpisodesWatched = watchlist.reduce(
@@ -55,17 +58,41 @@ export function StatsDashboard({ watchlist }) {
 
   function handlePhotoUpload(e) {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setCustomPhoto(reader.result);
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_DIM = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > MAX_DIM || height > MAX_DIM) {
+          if (width > height) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          } else {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        setCustomPhoto(compressedDataUrl);
         setPhotoPos({ x: 0, y: 0, scale: 1 });
       };
-      reader.readAsDataURL(file);
-    }
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 
-  // Pointer/Touch handlers for repositioning
   function handlePointerDown(e) {
     if (!customPhoto || !isEditing) return;
     setIsDragging(true);
@@ -123,7 +150,7 @@ export function StatsDashboard({ watchlist }) {
     <div className="space-y-5">
       {/* PROFILE HEADER HERO */}
       <div className="flex flex-col items-center text-center pt-2 pb-1">
-        {/* Interactive Avatar Ring */}
+        {/* Avatar Ring */}
         <div
           onMouseDown={handlePointerDown}
           onMouseMove={handlePointerMove}
@@ -142,7 +169,7 @@ export function StatsDashboard({ watchlist }) {
               style={{
                 transform: `translate(${photoPos.x}px, ${photoPos.y}px) scale(${photoPos.scale})`,
               }}
-              className="h-full w-full object-cover transition-transform duration-75 pointer-events-none select-none"
+              className="absolute max-w-none max-h-none h-full w-auto pointer-events-none select-none transition-transform duration-75"
             />
           ) : (
             <div className={`flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br text-[38px] font-black tracking-wider leading-none text-[#8CFA96] select-none ${activeTheme.bg}`}>
@@ -202,7 +229,6 @@ export function StatsDashboard({ watchlist }) {
               />
             </div>
 
-            {/* Photo Drag & Reposition Controls */}
             {customPhoto && (
               <div className="space-y-2 rounded-xl border border-slate-800 bg-slate-900/60 p-3">
                 <div className="flex justify-between items-center">
@@ -224,7 +250,7 @@ export function StatsDashboard({ watchlist }) {
                   </div>
                   <input
                     type="range"
-                    min="1"
+                    min="0.3"
                     max="3"
                     step="0.05"
                     value={photoPos.scale}
@@ -236,7 +262,10 @@ export function StatsDashboard({ watchlist }) {
                 </div>
 
                 <button
-                  onClick={() => setCustomPhoto('')}
+                  onClick={() => {
+                    setCustomPhoto('');
+                    localStorage.removeItem('mint_tv_user_photo');
+                  }}
                   className="text-[10px] text-red-400 underline font-semibold block pt-1"
                 >
                   Remove picture
