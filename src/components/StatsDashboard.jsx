@@ -105,20 +105,20 @@ export function StatsDashboard({ watchlist }) {
       };
     }
     return {
-      level: 1,
-      title: 'NOVICE',
-      nextReq: `${episodes}/250 eps to Lvl 2`,
-      progress: Math.min(100, Math.round((episodes / 250) * 100)),
-      color: 'text-slate-300 border-slate-700 bg-slate-800/60',
-      badgeSvg: (
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          d="M12 15a6 6 0 006-6V3H6v6a6 6 0 006 6zm0 0v3m-4 3h8M6 5H4a2 2 0 00-2 2v1a3 3 0 033 3h1m12-6h2a2 2 0 012 2v1a3 3 0 01-3 3h-1"
-        />
-      ),
-    };
+  level: 1,
+  title: 'NOVICE',
+  nextReq: `${episodes}/250 eps to Lvl 2`,
+  progress: Math.min(100, Math.round((episodes / 250) * 100)),
+  color: 'text-slate-300 border-slate-700 bg-slate-800/60',
+  badgeSvg: (
+  <path
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    strokeWidth="2"
+    d="M12 15a6 6 0 006-6V3H6v6a6 6 0 006 6zm0 0v3m-4 3h8M6 5H4a2 2 0 00-2 2v1a3 3 0 003 3h1m12-6h2a2 2 0 012 2v1a3 3 0 01-3 3h-1"
+  />
+  ),
+};
   };
 
   const levelInfo = getLevelDetails(totalEpisodesWatched);
