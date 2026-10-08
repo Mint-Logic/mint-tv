@@ -6,7 +6,6 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
   const [showsWithMeta, setShowsWithMeta] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // State for multi-selected genres and dropdown open status
   const [selectedGenres, setSelectedGenres] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -44,7 +43,6 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
     );
   }
 
-  // Extract all unique genres present across the user's current watchlist
   const availableGenres = Array.from(
     new Set(showsWithMeta.flatMap((s) => s.genres || []))
   ).sort();
@@ -61,7 +59,6 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
     setSelectedGenres([]);
   }
 
-  // Filter shows by tab, then match selected genres (must contain AT LEAST ONE selected genre)
   const filteredShows = showsWithMeta
     .filter((s) => (subTab === 'active' ? !s.archived : s.archived))
     .filter((s) => {
@@ -113,7 +110,6 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
           <span className="ml-2 text-slate-400">{isDropdownOpen ? '▲' : '▼'}</span>
         </button>
 
-        {/* Dropdown Menu */}
         {isDropdownOpen && (
           <div className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-slate-800 bg-[#1E293B] p-2 shadow-2xl space-y-1">
             <div className="flex justify-between items-center px-2 py-1 text-[10px] text-slate-400 border-b border-slate-800 pb-1.5 mb-1">
@@ -152,7 +148,6 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
           </div>
         )}
 
-        {/* Selected Genre Pills Bar */}
         {selectedGenres.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-1">
             {selectedGenres.map((genre) => (
@@ -214,32 +209,47 @@ function ShowCard({ show, onSelectShow, onRemoveShow, onToggleArchive, onRewatch
   return (
     <div
       onClick={() => onSelectShow(show.id)}
-      className="relative flex items-center justify-between rounded-2xl border border-slate-800 bg-[#1E293B] p-3 shadow-md cursor-pointer hover:border-slate-700 transition-all overflow-hidden"
+      className="flex items-center justify-between gap-3 rounded-2xl border border-slate-800 bg-[#1E293B] p-2.5 shadow-md cursor-pointer hover:border-slate-700 transition-all overflow-hidden"
     >
-      <div className="flex items-center space-x-3.5 min-w-0 flex-1 pr-20">
+      <div className="flex items-center space-x-3 w-0 flex-1">
         {posterUrl ? (
           <img
             src={posterUrl}
             alt={show.name}
-            className="h-16 w-12 rounded-lg object-cover shrink-0 bg-slate-900 shadow"
+            className="h-14 w-10 rounded-lg object-cover shrink-0 bg-slate-900 shadow"
           />
         ) : (
-          <div className="h-16 w-12 rounded-lg bg-slate-900 shrink-0 flex items-center justify-center text-[10px] text-slate-600">
-            No Poster
+          <div className="h-14 w-10 rounded-lg bg-slate-900 shrink-0 flex items-center justify-center text-[9px] text-slate-600">
+            No Image
           </div>
         )}
 
-        <div className="min-w-0 flex-1 space-y-1">
-          <h3 className="text-sm font-extrabold text-white truncate leading-snug">
+        <div className="w-0 flex-1 space-y-1">
+          <h3 
+            className="text-xs font-extrabold text-white leading-snug"
+            style={{
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              wordBreak: 'break-word',
+              whiteSpace: 'normal'
+            }}
+          >
             {show.name}
           </h3>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="rounded bg-[#8CFA96]/15 border border-[#8CFA96]/30 px-2 py-0.5 text-[10px] font-extrabold text-[#8CFA96]">
+            <span className="rounded bg-[#8CFA96]/15 border border-[#8CFA96]/30 px-1.5 py-0.2 text-[9px] font-extrabold uppercase text-[#8CFA96] shrink-0">
               {show.network}
             </span>
+            {show.isRewatching && (
+              <span className="rounded bg-amber-400/15 border border-amber-400/30 px-1.5 py-0.2 text-[9px] font-extrabold uppercase text-amber-400 shrink-0">
+                Rewatching
+              </span>
+            )}
             {show.genres?.[0] && (
-              <span className="rounded bg-slate-800 border border-slate-700 px-1.5 py-0.5 text-[9px] font-semibold text-slate-400">
+              <span className="rounded bg-slate-800 border border-slate-700 px-1.5 py-0.2 text-[9px] font-semibold text-slate-400 shrink-0">
                 {show.genres[0]}
               </span>
             )}
@@ -247,22 +257,21 @@ function ShowCard({ show, onSelectShow, onRemoveShow, onToggleArchive, onRewatch
         </div>
       </div>
 
-      {/* Clean SVG Action Buttons */}
-      <div className="absolute top-3 right-3 flex items-center space-x-1.5">
+      {/* Compact Action Buttons */}
+      <div className="flex items-center space-x-1.5 shrink-0 self-center pl-1 border-l border-slate-800/80">
         {isArchived && onRewatchShow && (
           <button
             onClick={(e) => {
               e.stopPropagation();
               onRewatchShow(show.id);
             }}
-            title="Start rewatching from S01E01"
-            aria-label="Rewatch show from season 1"
-            className="flex items-center space-x-1 rounded-md border border-[#8CFA96]/40 bg-[#8CFA96]/10 px-2 py-1 text-[10px] font-bold text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-900 transition-all"
+            title="Rewatch from S01E01"
+            className="flex items-center space-x-1 rounded-lg border border-[#8CFA96]/40 bg-[#8CFA96]/10 px-2 py-1.5 text-[10px] font-bold text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-900 transition-all active:scale-95"
           >
             <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            <span>Rewatch</span>
+            <span className="hidden xs:inline">Rewatch</span>
           </button>
         )}
 
@@ -272,15 +281,14 @@ function ShowCard({ show, onSelectShow, onRemoveShow, onToggleArchive, onRewatch
             onToggleArchive(show.id);
           }}
           title={isArchived ? "Restore to Active Watchlist" : "Move to Archive Vault"}
-          aria-label={isArchived ? "Restore show to active" : "Archive show"}
-          className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-700 bg-slate-900/80 text-slate-300 hover:border-[#8CFA96] hover:text-[#8CFA96] transition-all"
+          className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-700 bg-slate-900/80 text-slate-300 hover:border-[#8CFA96] hover:text-[#8CFA96] transition-all active:scale-90"
         >
           {isArchived ? (
-            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
             </svg>
           ) : (
-            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v1a2 2 0 01-2 2M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
             </svg>
           )}
@@ -292,8 +300,7 @@ function ShowCard({ show, onSelectShow, onRemoveShow, onToggleArchive, onRewatch
             onRemoveShow(show.id);
           }}
           title="Remove show permanently"
-          aria-label="Remove show"
-          className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-700 bg-slate-900/80 text-xs text-slate-400 hover:border-red-500/50 hover:bg-red-500/20 hover:text-red-400 transition-all"
+          className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-700 bg-slate-900/80 text-[10px] text-slate-400 hover:border-red-500/50 hover:bg-red-500/20 hover:text-red-400 transition-all active:scale-90"
         >
           ✕
         </button>
