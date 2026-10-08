@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.vercel.mint_tv.twa",
+        "sha256_cert_fingerprints": ["F3:C3:95:2C:06:94:C0:40:29:3B:B3:06:9D:8F:2D:05:54:BF:D6:70:E4:CD:81:EB:1D:C5:BC:85:41:21:46:D3"]
+      }
+    }]
