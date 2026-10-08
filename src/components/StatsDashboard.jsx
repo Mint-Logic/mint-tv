@@ -339,7 +339,7 @@ export function StatsDashboard({ watchlist }) {
           onTouchStart={handlePointerDown}
           onTouchMove={handlePointerMove}
           onTouchEnd={handlePointerUp}
-          className={`relative mb-3 flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[#8CFA96] bg-slate-900 shadow-xl shadow-[#8CFA96]/15 ${
+          className={`relative mb-2 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[#8CFA96] bg-slate-900 shadow-xl shadow-[#8CFA96]/15 ${
             isEditing && customPhoto ? 'cursor-grab active:cursor-grabbing ring-2 ring-[#8CFA96]/50' : ''
           }`}
         >
@@ -771,7 +771,7 @@ export function StatsDashboard({ watchlist }) {
         <div className="grid grid-cols-2 divide-x divide-slate-800/80">
           <button
             onClick={handleExportData}
-            className="flex items-center justify-center space-x-2 p-2.5 text-xs font-bold text-slate-300 hover:bg-slate-800/50 hover:text-[#8CFA96] transition-all"
+            className="flex items-center justify-center space-x-2 p-2.5 text-[11px] font-bold text-slate-300 hover:bg-slate-800/50 hover:text-[#8CFA96] transition-all"
           >
             <svg className="h-3.5 w-3.5 text-[#8CFA96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -779,7 +779,7 @@ export function StatsDashboard({ watchlist }) {
             <span>Export Backup</span>
           </button>
 
-          <label className="flex items-center justify-center space-x-2 p-2.5 text-xs font-bold text-slate-300 hover:bg-slate-800/50 hover:text-[#8CFA96] transition-all cursor-pointer">
+          <label className="flex items-center justify-center space-x-2 p-2.5 text-[11px] font-bold text-slate-300 hover:bg-slate-800/50 hover:text-[#8CFA96] transition-all cursor-pointer">
             <svg className="h-3.5 w-3.5 text-[#8CFA96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
             </svg>
