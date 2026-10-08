@@ -18,10 +18,35 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
     return saved ? JSON.parse(saved) : [];
   });
 
+  // Sync Watch Later & Disliked IDs to LocalStorage
   useEffect(() => {
     localStorage.setItem('mint_tv_watch_later', JSON.stringify(watchLater));
     localStorage.setItem('mint_tv_disliked_ids', JSON.stringify(dislikedIds));
   }, [watchLater, dislikedIds]);
+
+  // HYDRATE MISSING NETWORKS FOR WATCH LATER ITEMS
+  useEffect(() => {
+    async function hydrateWatchLaterNetworks() {
+      const needsHydration = watchLater.some((s) => !s.network);
+      if (!needsHydration) return;
+
+      const updated = await Promise.all(
+        watchLater.map(async (show) => {
+          if (show.network) return show;
+          const meta = await getShowMetadata(show.id);
+          return {
+            ...show,
+            network: meta?.network || null,
+          };
+        })
+      );
+      setWatchLater(updated);
+    }
+
+    if (watchLater.length > 0) {
+      hydrateWatchLaterNetworks();
+    }
+  }, [watchLater.length]);
 
   async function fetchDiscoverFeed(isLoadMore = false) {
     if (!isLoadMore) setLoading(true);
@@ -80,7 +105,6 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
 
       const itemsToHydrate = isLoadMore ? filtered : filtered.slice(0, 10);
 
-      // Hydrate network information for each show
       const hydratedShows = await Promise.all(
         itemsToHydrate.map(async (show) => {
           const meta = await getShowMetadata(show.id);
@@ -362,6 +386,12 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
                         </h4>
                         <div className="flex items-center space-x-1.5 text-[10px] text-slate-400 mt-0.5 flex-wrap gap-y-1">
                           <span className="text-amber-400 font-bold">★ {show.vote_average?.toFixed(1) || 'N/A'}</span>
+                          {show.first_air_date && (
+                            <>
+                              <span>•</span>
+                              <span>{show.first_air_date.split('-')[0]}</span>
+                            </>
+                          )}
                           {show.network && (
                             <>
                               <span>•</span>
