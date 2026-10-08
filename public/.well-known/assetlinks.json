@@ -3,6 +3,6 @@
       "target": {
         "namespace": "android_app",
         "package_name": "app.vercel.mint_tv.twa",
-        "sha256_cert_fingerprints": ["F3:C3:95:2C:6:94:C0:40:29:3B:B3:6:9D:8F:2D:5:54:BF:D6:70:E4:CD:81:EB:1D:C5:BC:85:41:21:46:D3"]
+        "sha256_cert_fingerprints": ["83:2B:4D:6:1:85:C4:A:8D:60:CC:EE:2E:88:B3:5D:5F:11:D9:7C:D2:77:C:60:77:20:33:CC:51:5F:1A:F5"]
       }
     }]
