@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { IMAGE_BASE_URL } from '../services/tmdb';
+import { IMAGE_BASE_URL, getShowMetadata } from '../services/tmdb';
 
 export function RecommendationsTab({ watchlist, onAddShow }) {
   const [subTab, setSubTab] = useState('feed');
@@ -78,11 +78,24 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
         });
       }
 
+      const itemsToHydrate = isLoadMore ? filtered : filtered.slice(0, 10);
+
+      // Hydrate network information for each show
+      const hydratedShows = await Promise.all(
+        itemsToHydrate.map(async (show) => {
+          const meta = await getShowMetadata(show.id);
+          return {
+            ...show,
+            network: meta?.network || null,
+          };
+        })
+      );
+
       if (isLoadMore) {
-        setFeedShows((prev) => [...prev, ...filtered]);
+        setFeedShows((prev) => [...prev, ...hydratedShows]);
         setPage(targetPage);
       } else {
-        setFeedShows(filtered.slice(0, 10));
+        setFeedShows(hydratedShows);
         setPage(1);
       }
     } catch (err) {
@@ -197,10 +210,18 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
                           >
                             {show.name}
                           </h3>
-                          <div className="flex items-center space-x-1.5 text-[10px] text-slate-400 mt-0.5">
+                          <div className="flex items-center space-x-1.5 text-[10px] text-slate-400 mt-0.5 flex-wrap gap-y-1">
                             <span className="text-amber-400 font-bold">★ {show.vote_average?.toFixed(1) || 'N/A'}</span>
                             <span>•</span>
                             <span>{show.first_air_date ? show.first_air_date.split('-')[0] : 'N/A'}</span>
+                            {show.network && (
+                              <>
+                                <span>•</span>
+                                <span className="rounded bg-slate-800 px-1.5 py-0.2 text-[9px] font-extrabold uppercase text-slate-300 border border-slate-700/80">
+                                  {show.network}
+                                </span>
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -339,7 +360,17 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
                         >
                           {show.name}
                         </h4>
-                        <p className="text-[10px] text-amber-400 font-bold mt-0.5">★ {show.vote_average?.toFixed(1) || 'N/A'}</p>
+                        <div className="flex items-center space-x-1.5 text-[10px] text-slate-400 mt-0.5 flex-wrap gap-y-1">
+                          <span className="text-amber-400 font-bold">★ {show.vote_average?.toFixed(1) || 'N/A'}</span>
+                          {show.network && (
+                            <>
+                              <span>•</span>
+                              <span className="rounded bg-slate-800 px-1.5 py-0.2 text-[9px] font-extrabold uppercase text-slate-300 border border-slate-700/80">
+                                {show.network}
+                              </span>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
 
