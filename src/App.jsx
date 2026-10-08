@@ -217,7 +217,7 @@ function handleRewatchShow(id) {
           <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2l2.4 4.8 5.3.8-3.8 3.7.9 5.3-4.8-2.5-4.8 2.5.9-5.3-3.8-3.7 5.3-.8L12 2z" />
           </svg>
-          <span className="mt-1 text-[10px] font-bold">Suggested</span>
+          <span className="mt-1 text-[10px] font-bold">For You</span>
         </button>
       </nav>
     </div>

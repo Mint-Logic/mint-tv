@@ -4,7 +4,6 @@ import { getShowDetails, IMAGE_BASE_URL } from '../services/tmdb';
 export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
   const [details, setDetails] = useState(null);
   
-  // Restore last selected season for this show from localStorage, fallback to currentSeason or S1
   const [selectedSeason, setSelectedSeason] = useState(() => {
     const saved = localStorage.getItem(`mint_tv_season_${showId}`);
     if (saved) return Number(saved);
@@ -15,8 +14,8 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
   const [loading, setLoading] = useState(true);
   const [expandedEpisodeId, setExpandedEpisodeId] = useState(null);
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(false);
+  const [showGestureInfo, setShowGestureInfo] = useState(false);
 
-  // Save season selection whenever it changes
   function handleSeasonChange(seasonNumber) {
     setSelectedSeason(seasonNumber);
     localStorage.setItem(`mint_tv_season_${showId}`, seasonNumber);
@@ -64,12 +63,6 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
   const currentSeason = showData?.currentSeason || 1;
   const currentEpisode = showData?.currentEpisode || 1;
 
-  // Determine if every episode in the current season is watched
-  const areAllSeasonEpisodesWatched =
-    episodes.length > 0 &&
-    (currentSeason > selectedSeason ||
-      (currentSeason === selectedSeason && currentEpisode > episodes.length));
-
   function toggleEpisodeWatched(epNumber, isWatched) {
     if (isWatched) {
       onUpdateEpisode(showId, selectedSeason, epNumber);
@@ -78,16 +71,14 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
     }
   }
 
-  function handleToggleAllSeasonEpisodes() {
+  function handleMarkSeasonWatched() {
     if (episodes.length === 0) return;
+    onUpdateEpisode(showId, selectedSeason, episodes.length + 1);
+  }
 
-    if (areAllSeasonEpisodesWatched) {
-      // Reset to episode 1 of current season
-      onUpdateEpisode(showId, selectedSeason, 1);
-    } else {
-      // Mark all episodes watched in this season
-      onUpdateEpisode(showId, selectedSeason, episodes.length + 1);
-    }
+  function handleMarkSeasonUnwatched() {
+    if (episodes.length === 0) return;
+    onUpdateEpisode(showId, selectedSeason, 1);
   }
 
   return (
@@ -110,9 +101,17 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/60 to-transparent"></div>
         <div className="relative p-4 pt-20 flex flex-col justify-end min-h-[14rem]">
-          <span className="self-start text-[10px] font-extrabold uppercase tracking-widest text-[#8CFA96] bg-slate-950/80 px-2 py-0.5 rounded border border-slate-800">
-            {details.status}
-          </span>
+          <div className="flex items-center space-x-2">
+            <span className="self-start text-[9px] font-extrabold uppercase tracking-wider text-[#8CFA96] bg-slate-950/80 px-1.5 py-0.5 rounded border border-slate-800">
+              {details.status}
+            </span>
+            {details.networks && details.networks.length > 0 && (
+              <span className="self-start text-[9px] font-extrabold uppercase tracking-wider text-slate-300 bg-slate-800/80 px-1.5 py-0.5 rounded border border-slate-700">
+                {details.networks[0].name}
+              </span>
+            )}
+          </div>
+
           <h2 className="text-2xl font-black text-white mt-1 truncate">{details.name}</h2>
           
           <p className={`text-xs text-slate-300 mt-1 transition-all ${isOverviewExpanded ? '' : 'line-clamp-2'}`}>
@@ -120,7 +119,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
           </p>
           
           <span className="text-[10px] text-[#8CFA96] font-semibold mt-1">
-            {isOverviewExpanded ? 'Tap to collapse ▲' : 'Tap to expand overview ▼'}
+            {isOverviewExpanded ? 'Less ▲' : 'More ▼'}
           </span>
         </div>
       </div>
@@ -146,26 +145,41 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
 
       {/* Episode Checklist */}
       <div className="space-y-3">
-        {/* Section Header with Dynamic Toggle Action */}
-        <div className="flex justify-between items-center px-1">
+        {/* Header Row with Compact Info Hint */}
+        <div className="flex justify-between items-center px-1 relative">
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
             Season {selectedSeason} Episodes ({episodes.length})
           </h3>
+
           <button
-            onClick={handleToggleAllSeasonEpisodes}
-            className={`text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
-              areAllSeasonEpisodesWatched
-                ? 'text-red-400 hover:text-red-300'
-                : 'text-[#8CFA96] hover:text-white'
-            }`}
+            onClick={() => setShowGestureInfo(!showGestureInfo)}
+            className="flex h-5 w-5 items-center justify-center rounded-full border border-slate-700 bg-slate-900 text-[10px] font-black text-slate-400 hover:border-[#8CFA96] hover:text-[#8CFA96] transition-all"
+            title="Shortcut Info"
           >
-            {areAllSeasonEpisodesWatched
-              ? 'Mark All Episodes Unwatched'
-              : 'Mark All Episodes Watched'}
+            i
           </button>
+
+          {/* Updated Info Popover Toast */}
+          {showGestureInfo && (
+            <div className="absolute right-0 top-7 w-64 rounded-xl border border-slate-700 bg-slate-900 p-3 shadow-2xl z-20 text-[11px] text-slate-300 space-y-1.5">
+              <div className="flex justify-between items-center font-bold text-[#8CFA96]">
+                <span>Season Shortcuts</span>
+                <button onClick={() => setShowGestureInfo(false)} className="text-slate-400 hover:text-white">✕</button>
+              </div>
+              <p className="text-slate-400 leading-snug">
+                <strong className="text-white">Tap Finale card</strong> to mark all episodes in this season as watched.
+              </p>
+              <p className="text-slate-400 leading-snug">
+                <strong className="text-white">Tap Episode 1 card</strong> to mark all episodes in this season as unwatched.
+              </p>
+              
+            </div>
+          )}
         </div>
 
-        {episodes.map((ep) => {
+        {episodes.map((ep, index) => {
+          const isFirstEpisode = index === 0;
+          const isLastEpisode = index === episodes.length - 1;
           const isWatched =
             currentSeason > selectedSeason ||
             (currentSeason === selectedSeason && currentEpisode > ep.episode_number);
@@ -174,13 +188,27 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
           return (
             <div
               key={ep.id}
-              className="bg-[#1E293B] border border-slate-800 rounded-xl p-3 shadow-md transition-all overflow-hidden"
+              onClick={() => {
+                if (isFirstEpisode) {
+                  handleMarkSeasonUnwatched();
+                } else if (isLastEpisode) {
+                  handleMarkSeasonWatched();
+                }
+              }}
+              className={`bg-[#1E293B] border border-slate-800 rounded-xl p-3 shadow-md transition-all overflow-hidden ${
+                isFirstEpisode || isLastEpisode ? 'active:scale-[0.99] cursor-pointer' : ''
+              }`}
             >
               <div className="flex justify-between items-start space-x-3 min-w-0">
                 {/* Episode Text Info */}
                 <div
-                  onClick={() => setExpandedEpisodeId(isExpanded ? null : ep.id)}
-                  className="flex-1 min-w-0 cursor-pointer"
+                  onClick={(e) => {
+                    // For middle episodes, tapping toggles the synopsis drawer
+                    if (!isFirstEpisode && !isLastEpisode) {
+                      setExpandedEpisodeId(isExpanded ? null : ep.id);
+                    }
+                  }}
+                  className="flex-1 min-w-0"
                 >
                   <div className="flex items-start space-x-2 min-w-0">
                     <span className="text-xs font-extrabold text-[#8CFA96] shrink-0 mt-0.5">
@@ -193,6 +221,16 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
                     >
                       {ep.name}
                     </span>
+                    {isFirstEpisode && (
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-900/80 px-1.5 py-0.5 rounded border border-slate-800 shrink-0">
+                        Premiere
+                      </span>
+                    )}
+                    {isLastEpisode && (
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-900/80 px-1.5 py-0.5 rounded border border-slate-800 shrink-0">
+                        Finale
+                      </span>
+                    )}
                   </div>
                   {!isExpanded && (
                     <p className="text-xs text-slate-400 line-clamp-1 mt-0.5 truncate">
@@ -201,7 +239,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
                   )}
                 </div>
 
-                {/* Watched Toggle Button */}
+                {/* Individual Watched Checkmark */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();

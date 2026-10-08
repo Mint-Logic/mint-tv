@@ -132,7 +132,7 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
                         {show.first_air_date ? show.first_air_date.split('-')[0] : 'N/A'}
                       </div>
                       <span className="text-[9px] font-semibold text-[#8CFA96]/80 block mt-0.5">
-                        {isExpanded ? 'Tap to hide overview ▲' : 'Tap for overview ▼'}
+                        {isExpanded ? 'Hide overview ▲' : 'Show overview ▼'}
                       </span>
                     </div>
                   </div>

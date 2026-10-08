@@ -127,16 +127,19 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
                   >
                     <div className="absolute inset-0 bg-gradient-to-t from-[#1E293B] via-transparent to-transparent"></div>
 
-                    {/* Season/Episode Badge + Network Badge */}
-                    <div className="absolute top-3 left-3 flex items-center space-x-1.5">
-                      <span className="rounded-md border border-slate-700 bg-slate-900/90 px-2.5 py-1 text-xs font-extrabold text-[#8CFA96] backdrop-blur-md">
+                    {/* Season/Episode Badge (Green Accent) + Streamer Tag (Neutral Slate) Stacked Below */}
+                    <div className="absolute top-3 left-3 flex flex-col items-start space-y-1 z-10">
+                      <span className="rounded-md border border-slate-700 bg-slate-900/90 px-2.5 py-1 text-xs font-extrabold text-[#8CFA96] backdrop-blur-md shadow-md">
                         S{String(season).padStart(2, '0')} • E{String(episode).padStart(2, '0')}
                       </span>
-                      <span className="rounded-md border border-slate-700/80 bg-slate-900/80 px-2 py-1 text-[10px] font-bold text-slate-300 backdrop-blur-md">
-                        {show.network}
-                      </span>
+                      {show.network && (
+                        <span className="rounded-md border border-slate-700/80 bg-slate-900/90 px-2 py-0.5 text-[10px] font-extrabold uppercase text-slate-300 backdrop-blur-md shadow-md">
+                          {show.network}
+                        </span>
+                      )}
                     </div>
 
+                    {/* Remove Action */}
                     <button
                       type="button"
                       title="Remove show from watchlist"
@@ -145,7 +148,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
                         e.stopPropagation();
                         onRemoveShow(show.id);
                       }}
-                      className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full border border-slate-700 bg-slate-900/90 text-slate-400 hover:border-red-500/50 hover:bg-red-500/20 hover:text-red-400 transition-all"
+                      className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full border border-slate-700 bg-slate-900/90 text-slate-400 hover:border-red-500/50 hover:bg-red-500/20 hover:text-red-400 transition-all z-10"
                     >
                       <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -153,6 +156,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
                     </button>
                   </div>
 
+                  {/* Details Bottom Row */}
                   <div className="flex items-center justify-between p-3">
                     <div className="min-w-0 flex-1 pr-3">
                       <div className="text-xs font-semibold text-slate-400 truncate">{show.name}</div>
