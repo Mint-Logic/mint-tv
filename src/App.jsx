@@ -5,7 +5,6 @@ import { WatchlistGrid } from './components/WatchlistGrid';
 import { UpcomingQueue } from './components/UpcomingQueue';
 import { MasterWatchlist } from './components/MasterWatchlist';
 import { ShowDetails } from './components/ShowDetails';
-import { DiscoverModal } from './components/DiscoverModal';
 import { StatsDashboard } from './components/StatsDashboard';
 import { RecommendationsTab } from './components/RecommendationsTab';
 
@@ -13,7 +12,6 @@ export default function App() {
   const [selectedShowId, setSelectedShowId] = useState(null);
   const [activeTab, setActiveTab] = useState('ready');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isDiscoverOpen, setIsDiscoverOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [watchlist, setWatchlist] = useState(() => {
     return JSON.parse(localStorage.getItem('mint_tv_shows') || '[]');
@@ -44,41 +42,33 @@ export default function App() {
     );
   }
 
-  // Add inside App component:
-function handleToggleArchive(id) {
-  setWatchlist(
-    watchlist.map((show) => {
-      if (show.id === id) {
-        return { ...show, archived: !show.archived };
-      }
-      return show;
-    })
-  );
-}
+  function handleToggleArchive(id) {
+    setWatchlist(
+      watchlist.map((show) => {
+        if (show.id === id) {
+          return { ...show, archived: !show.archived };
+        }
+        return show;
+      })
+    );
+  }
 
-function handleRewatchShow(id) {
-  setWatchlist(
-    watchlist.map((show) => {
-      if (show.id === id) {
-        return { ...show, currentSeason: 1, currentEpisode: 1, archived: false };
-      }
-      return show;
-    })
-  );
-}
+  function handleRewatchShow(id) {
+    setWatchlist(
+      watchlist.map((show) => {
+        if (show.id === id) {
+          return { ...show, currentSeason: 1, currentEpisode: 1, archived: false };
+        }
+        return show;
+      })
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0F172A] pb-24 text-white font-sans select-none">
       <Header 
         onOpenSearch={() => setIsSearchOpen(true)} 
-        onOpenDiscover={() => setIsDiscoverOpen(true)} 
         onOpenProfile={() => setIsProfileOpen(true)}
-      />
-
-      <DiscoverModal 
-        isOpen={isDiscoverOpen} 
-        onClose={() => setIsDiscoverOpen(false)} 
-        onAddShow={handleAddShow} 
       />
 
       {/* Profile / Stats Overlay Modal */}
@@ -119,7 +109,6 @@ function handleRewatchShow(id) {
           />
         ) : (
           <>
-            {/* TAB 1: READY TO WATCH */}
             {activeTab === 'ready' && (
               <WatchlistGrid
                 watchlist={watchlist}
@@ -129,7 +118,6 @@ function handleRewatchShow(id) {
               />
             )}
 
-            {/* TAB 2: UPCOMING */}
             {activeTab === 'upcoming' && (
               <UpcomingQueue
                 watchlist={watchlist}
@@ -138,18 +126,16 @@ function handleRewatchShow(id) {
               />
             )}
 
-            {/* TAB 3: WATCHLIST DIRECTORY */}
             {activeTab === 'watchlist' && (
-  <MasterWatchlist
-    watchlist={watchlist}
-    onSelectShow={(id) => setSelectedShowId(id)}
-    onRemoveShow={handleRemoveShow}
-    onToggleArchive={handleToggleArchive}
-    onRewatchShow={handleRewatchShow}
-  />
-)}
+              <MasterWatchlist
+                watchlist={watchlist}
+                onSelectShow={(id) => setSelectedShowId(id)}
+                onRemoveShow={handleRemoveShow}
+                onToggleArchive={handleToggleArchive}
+                onRewatchShow={handleRewatchShow}
+              />
+            )}
 
-            {/* TAB 4: SUGGESTED / RECOMMENDED */}
             {activeTab === 'recommended' && (
               <RecommendationsTab
                 watchlist={watchlist}
@@ -164,7 +150,6 @@ function handleRewatchShow(id) {
 
       {/* 4-Tab Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-20 mx-auto flex max-w-md justify-around border-t border-slate-800 bg-[#1E293B]/95 px-4 py-3 backdrop-blur-md">
-        {/* Ready Tab */}
         <button
           onClick={() => {
             setSelectedShowId(null);
@@ -178,7 +163,6 @@ function handleRewatchShow(id) {
           <span className="mt-1 text-[10px] font-bold">Ready</span>
         </button>
 
-        {/* Upcoming Tab */}
         <button
           onClick={() => {
             setSelectedShowId(null);
@@ -192,7 +176,6 @@ function handleRewatchShow(id) {
           <span className="mt-1 text-[10px] font-bold">Upcoming</span>
         </button>
 
-        {/* Watchlist Directory Tab */}
         <button
           onClick={() => {
             setSelectedShowId(null);
@@ -206,7 +189,6 @@ function handleRewatchShow(id) {
           <span className="mt-1 text-[10px] font-bold">Watchlist</span>
         </button>
 
-        {/* Suggested Tab */}
         <button
           onClick={() => {
             setSelectedShowId(null);

@@ -41,10 +41,10 @@ export async function getNextEpisodeInfo(showId, seasonNumber, episodeNumber) {
     const res = await fetch(
       `${BASE_URL}/tv/${showId}/season/${seasonNumber}/episode/${episodeNumber}?api_key=${API_KEY}`
     );
-    if (!res.ok) return null;
+    if (!res.ok) return null; // Returns null silently on 404
     return await res.json();
   } catch (err) {
-    console.error('TMDB Next Episode Error:', err);
+    // Silently return null when episode doesn't exist
     return null;
   }
 }
@@ -59,7 +59,15 @@ export async function getShowMetadata(showId) {
     const airTime = data.episode_run_time?.[0] ? `${data.episode_run_time[0]} mins` : 'TBA';
     const genres = data.genres?.map((g) => g.name) || [];
     
-    return { network, airTime, status: data.status, genres };
+    return { 
+      network, 
+      airTime, 
+      status: data.status, 
+      genres,
+      numberOfSeasons: data.number_of_seasons || 1,
+      numberOfEpisodes: data.number_of_episodes || 0,
+      isEnded: data.status === 'Ended' || data.status === 'Canceled',
+    };
   } catch (err) {
     console.error('TMDB Metadata Error:', err);
     return null;
@@ -85,6 +93,17 @@ export async function getSeasonInfo(showId, seasonNumber) {
     return await res.json();
   } catch (err) {
     console.error('TMDB Season Error:', err);
+    return null;
+  }
+}
+
+export async function getShowExternalIds(showId) {
+  try {
+    const res = await fetch(`${BASE_URL}/tv/${showId}/external_ids?api_key=${API_KEY}`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    console.error('TMDB External IDs Error:', err);
     return null;
   }
 }

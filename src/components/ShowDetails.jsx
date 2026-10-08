@@ -7,7 +7,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
   const [selectedSeason, setSelectedSeason] = useState(() => {
     const saved = localStorage.getItem(`mint_tv_season_${showId}`);
     if (saved) return Number(saved);
-    return showData?.currentSeason || 1;
+    return showData?.currentSeason || null;
   });
 
   const [episodes, setEpisodes] = useState([]);
@@ -28,9 +28,14 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
       setDetails(data);
 
       if (data) {
+        const targetSeason = selectedSeason || showData?.currentSeason || data.number_of_seasons || 1;
+        if (!selectedSeason) {
+          setSelectedSeason(targetSeason);
+        }
+
         const apiKey = import.meta.env.VITE_TMDB_API_KEY;
         const res = await fetch(
-          `https://api.themoviedb.org/3/tv/${showId}/season/${selectedSeason}?api_key=${apiKey}`
+          `https://api.themoviedb.org/3/tv/${showId}/season/${targetSeason}?api_key=${apiKey}`
         );
         const seasonData = await res.json();
         setEpisodes(seasonData.episodes || []);
@@ -93,9 +98,9 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
 
       {/* Hero Backdrop & Show Info */}
       <div 
-  onClick={() => setIsOverviewExpanded(!isOverviewExpanded)}
-  className="relative z-0 min-h-[14rem] rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl cursor-pointer"
->
+        onClick={() => setIsOverviewExpanded(!isOverviewExpanded)}
+        className="relative z-0 min-h-[14rem] rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl cursor-pointer"
+      >
         {backdropUrl && (
           <img src={backdropUrl} alt={details.name} className="absolute inset-0 w-full h-full object-cover" />
         )}
@@ -125,27 +130,26 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
       </div>
 
       {/* Season Selection Tabs */}
-      <div className="flex space-x-2 overflow-x-auto pb-2 border-b border-slate-800">
-        {details.seasons
-          ?.filter((s) => s.season_number > 0)
-          .map((s) => (
-            <button
-              key={s.id}
-              onClick={() => handleSeasonChange(s.season_number)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
-                selectedSeason === s.season_number
-                  ? 'bg-[#8CFA96] text-slate-900'
-                  : 'bg-slate-800 text-slate-400 hover:text-white'
-              }`}
-            >
-              Season {s.season_number}
-            </button>
-          ))}
-      </div>
+<div className="flex space-x-2 overflow-x-auto pb-2 border-b border-slate-800 scrollbar-none touch-pan-x my-2">
+  {details.seasons
+    ?.filter((s) => s.season_number > 0)
+    .map((s) => (
+      <button
+        key={s.id}
+        onClick={() => handleSeasonChange(s.season_number)}
+        className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
+          selectedSeason === s.season_number
+            ? 'bg-[#8CFA96] text-slate-900 shadow-sm'
+            : 'bg-slate-800 text-slate-400 hover:text-white'
+        }`}
+      >
+        Season {s.season_number}
+      </button>
+    ))}
+</div>
 
       {/* Episode Checklist */}
       <div className="space-y-3">
-        {/* Header Row with Compact Info Hint */}
         <div className="flex justify-between items-center px-1 relative">
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
             Season {selectedSeason} Episodes ({episodes.length})
@@ -159,7 +163,6 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
             i
           </button>
 
-          {/* Updated Info Popover Toast */}
           {showGestureInfo && (
             <div className="absolute right-0 top-7 w-64 rounded-xl border border-slate-700 bg-slate-900 p-3 shadow-2xl z-20 text-[11px] text-slate-300 space-y-1.5">
               <div className="flex justify-between items-center font-bold text-[#8CFA96]">
@@ -172,7 +175,6 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
               <p className="text-slate-400 leading-snug">
                 <strong className="text-white">Tap Episode 1 card</strong> to mark all episodes in this season as unwatched.
               </p>
-              
             </div>
           )}
         </div>
@@ -200,10 +202,8 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
               }`}
             >
               <div className="flex justify-between items-start space-x-3 min-w-0">
-                {/* Episode Text Info */}
                 <div
-                  onClick={(e) => {
-                    // For middle episodes, tapping toggles the synopsis drawer
+                  onClick={() => {
                     if (!isFirstEpisode && !isLastEpisode) {
                       setExpandedEpisodeId(isExpanded ? null : ep.id);
                     }
@@ -239,7 +239,6 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
                   )}
                 </div>
 
-                {/* Individual Watched Checkmark */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -261,7 +260,6 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
                 </button>
               </div>
 
-              {/* Expanded Synopsis Drawer */}
               {isExpanded && (
                 <div className="mt-3 pt-3 border-t border-slate-800 text-xs text-slate-300 leading-relaxed bg-slate-900/60 p-3 rounded-lg break-words">
                   <div className="font-semibold text-[#8CFA96] mb-1">

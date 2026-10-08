@@ -1,50 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import { searchShows, IMAGE_BASE_URL } from '../services/tmdb';
 
-export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
+export function SearchModal({ isOpen, onClose, onAddShow }) {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+  const [trendingShows, setTrendingShows] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [addedShowIds, setAddedShowIds] = useState(new Set());
   const [expandedShowId, setExpandedShowId] = useState(null);
 
-  // Debounced search effect
+  // Fetch trending recommendations when opened
+  useEffect(() => {
+    if (!isOpen) return;
+
+    async function fetchPopular() {
+      setLoading(true);
+      const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+      try {
+        const res = await fetch(
+          `https://api.themoviedb.org/3/tv/popular?api_key=${apiKey}&language=en-US&page=1`
+        );
+        const data = await res.json();
+        setTrendingShows(data.results || []);
+      } catch (err) {
+        console.error('Error fetching trending shows:', err);
+      }
+      setLoading(false);
+    }
+
+    fetchPopular();
+  }, [isOpen]);
+
+  // Live search query handling
   useEffect(() => {
     if (!query.trim()) {
-      setResults([]);
-      setLoading(false);
+      setSearchResults([]);
       return;
     }
 
-    setLoading(true);
-
     const timer = setTimeout(async () => {
-      try {
-        const res = await searchShows(query);
-        setResults(res.slice(0, 10));
-      } catch (err) {
-        console.error('Search error:', err);
-      } finally {
-        setLoading(false);
-      }
-    }, 350);
+      setLoading(true);
+      const results = await searchShows(query);
+      setSearchResults(results);
+      setLoading(false);
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [query]);
 
   if (!isOpen) return null;
 
-  function clearQuery() {
-    setQuery('');
-    setResults([]);
-  }
-
-  function isShowAdded(showId) {
-    const isInWatchlist = watchlist.some((s) => s.id === showId);
-    return isInWatchlist || addedShowIds.has(showId);
-  }
-
-  function handleAdd(show) {
+  function handleSelectShow(show) {
     onAddShow({
       id: show.id,
       name: show.name,
@@ -54,115 +59,154 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
       currentEpisode: 1,
       completed: false,
     });
-
-    setAddedShowIds((prev) => new Set(prev).add(show.id));
+    setQuery('');
+    onClose();
   }
 
+  const showsToDisplay = query.trim() ? searchResults : trendingShows;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/80 p-3 pt-6 backdrop-blur-sm sm:p-4 sm:pt-12">
-      <div className="flex max-h-[80vh] w-full max-w-md flex-col rounded-2xl border border-slate-800 bg-[#1E293B] p-4 shadow-2xl">
-        
-        {/* Header */}
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-base font-extrabold text-white">Search TMDB</h2>
-          <button 
-            onClick={onClose} 
-            className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-800 text-xs text-slate-400 hover:bg-slate-700 hover:text-white"
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
+      <div className="relative w-full max-w-md rounded-2xl border border-slate-800 bg-[#1E293B] p-5 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+        {/* Header Bar */}
+        <div className="flex justify-between items-center border-b border-slate-800 pb-3 shrink-0">
+          <h2 className="text-sm font-extrabold text-white uppercase tracking-wider">
+            {query.trim() ? 'Search Results' : 'Trending & Popular'}
+          </h2>
+          <button
+            onClick={() => {
+              setQuery('');
+              onClose();
+            }}
+            className="text-slate-400 hover:text-white text-xs font-bold p-1"
           >
-            ✕
+            ✕ Close
           </button>
         </div>
 
         {/* Input Box */}
-        <div className="relative mb-3 w-full shrink-0">
+        <div className="shrink-0">
           <input
             type="text"
             value={query}
-            autoFocus
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Type show title (e.g., Severance, Breaking Bad)..."
-            className="w-full rounded-xl border border-slate-700 bg-slate-900 pl-3.5 pr-9 py-2.5 text-xs text-white placeholder-slate-500 focus:border-[#8CFA96] focus:outline-none"
+            placeholder="Search TV shows..."
+            autoFocus
+            className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-[#8CFA96] focus:outline-none"
           />
-          {query && (
-            <button
-              onClick={clearQuery}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-white"
-              title="Clear search"
-            >
-              ✕
-            </button>
-          )}
         </div>
 
-        {/* Scrollable Results Area */}
-        <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
-          {loading && <p className="py-6 text-center text-xs text-slate-500">Searching TMDB...</p>}
-          {!loading && results.length === 0 && query.trim() && (
-            <p className="py-6 text-center text-xs text-slate-500">No shows found.</p>
-          )}
-          {!loading && results.map((show) => {
-            const added = isShowAdded(show.id);
-            const isExpanded = expandedShowId === show.id;
+        {/* Shows Feed List */}
+        <div className="overflow-y-auto space-y-2.5 flex-1 pr-1">
+          {loading ? (
+            <div className="py-12 text-center text-xs font-bold text-slate-500 animate-pulse">
+              {query.trim() ? 'Searching TMDB...' : 'Fetching trending shows...'}
+            </div>
+          ) : showsToDisplay.length === 0 ? (
+            <div className="py-12 text-center text-xs text-slate-500">
+              {query.trim() ? 'No shows found matching your query.' : 'No recommendations available.'}
+            </div>
+          ) : (
+            showsToDisplay.map((show) => {
+              const posterUrl = show.poster_path ? `${IMAGE_BASE_URL}${show.poster_path}` : '';
+              const backdropUrl = show.backdrop_path ? `${IMAGE_BASE_URL}${show.backdrop_path}` : '';
+              const isExpanded = expandedShowId === show.id;
 
-            return (
-              <div 
-                key={show.id} 
-                className="rounded-xl border border-slate-800 bg-slate-900 p-2 transition-all overflow-hidden"
-              >
-                <div className="flex items-center justify-between">
-                  {/* Tappable Card Header to Expand Overview */}
-                  <div 
+              const imdbSearchUrl = `https://www.imdb.com/find?q=${encodeURIComponent(show.name)}`;
+              const rtSearchUrl = `https://www.rottentomatoes.com/search?search=${encodeURIComponent(show.name)}`;
+
+              return (
+                <div
+                  key={show.id}
+                  className="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden transition-all"
+                >
+                  <div
                     onClick={() => setExpandedShowId(isExpanded ? null : show.id)}
-                    className="flex items-center space-x-3 overflow-hidden pr-2 flex-1 cursor-pointer"
+                    className="flex items-center justify-between p-2.5 cursor-pointer select-none"
                   >
-                    {show.poster_path ? (
-                      <img 
-                        src={`${IMAGE_BASE_URL}${show.poster_path}`} 
-                        alt={show.name} 
-                        className="h-14 w-10 shrink-0 rounded-lg object-cover" 
-                      />
-                    ) : (
-                      <div className="flex h-14 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-[9px] text-slate-500">
-                        No Poster
+                    <div className="flex items-center space-x-3 min-w-0 flex-1 pr-2">
+                      {posterUrl ? (
+                        <img
+                          src={posterUrl}
+                          alt={show.name}
+                          className="h-12 w-8 rounded object-cover shrink-0 bg-slate-950"
+                        />
+                      ) : (
+                        <div className="h-12 w-8 rounded bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600">
+                          N/A
+                        </div>
+                      )}
+
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-xs font-bold text-white truncate">{show.name}</h3>
+                        <div className="flex items-center space-x-2 text-[10px] text-slate-400 mt-0.5">
+                          <span className="text-amber-400 font-bold">★ {show.vote_average?.toFixed(1) || 'N/A'}</span>
+                          <span>•</span>
+                          <span>{show.first_air_date ? show.first_air_date.split('-')[0] : 'N/A'}</span>
+                        </div>
                       </div>
-                    )}
-                    <div className="min-w-0">
-                      <div className="truncate text-xs font-bold text-white">{show.name}</div>
-                      <div className="text-[10px] text-slate-400">
-                        {show.first_air_date ? show.first_air_date.split('-')[0] : 'N/A'}
-                      </div>
-                      <span className="text-[9px] font-semibold text-[#8CFA96]/80 block mt-0.5">
-                        {isExpanded ? 'Hide overview ▲' : 'Show overview ▼'}
-                      </span>
                     </div>
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelectShow(show);
+                      }}
+                      className="p-2 bg-[#8CFA96] text-slate-950 font-extrabold rounded-lg text-xs hover:opacity-90 transition-all shrink-0 active:scale-95 flex items-center space-x-1"
+                      title="Add to Watchlist"
+                    >
+                      <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" />
+                      </svg>
+                      <span>Add</span>
+                    </button>
                   </div>
 
-                  {/* Add Button */}
-                  <button
-                    disabled={added}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAdd(show);
-                    }}
-                    className={`shrink-0 rounded-lg px-2.5 py-1.5 text-xs font-bold transition-all ${
-                      added
-                        ? 'bg-slate-800 text-slate-400 border border-slate-700 cursor-not-allowed'
-                        : 'bg-[#8CFA96] text-slate-900 hover:opacity-90'
-                    }`}
-                  >
-                    {added ? 'Added ✓' : '+ Add'}
-                  </button>
+                  {isExpanded && (
+                    <div className="border-t border-slate-800/80 bg-slate-950/80 p-3 space-y-2.5 animate-in fade-in">
+                      {backdropUrl && (
+                        <div className="relative h-28 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-900">
+                          <img src={backdropUrl} alt={show.name} className="h-full w-full object-cover" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
+                        </div>
+                      )}
+
+                      <p className="text-[11px] text-slate-300 leading-relaxed">
+                        {show.overview || 'No synopsis available for this title.'}
+                      </p>
+
+                      <div className="flex items-center justify-between border-t border-slate-800/80 pt-2">
+                        <div className="flex space-x-1.5">
+                          <a
+                            href={imdbSearchUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-[9px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 px-2 py-0.5 rounded border border-amber-400/30 transition-all"
+                          >
+                            IMDb ↗
+                          </a>
+                          <a
+                            href={rtSearchUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-[9px] font-black uppercase tracking-wider text-red-400 bg-red-500/10 hover:bg-red-500/20 px-2 py-0.5 rounded border border-red-500/30 transition-all"
+                          >
+                            Rotten Tomatoes ↗
+                          </a>
+                        </div>
+
+                        <span className="text-[10px] text-slate-400">
+                          Aired: {show.first_air_date || 'N/A'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
-
-                {/* Expanded Overview Drawer */}
-                {isExpanded && (
-                  <div className="mt-2.5 pt-2.5 border-t border-slate-800 text-xs text-slate-300 leading-relaxed bg-slate-950/40 p-2.5 rounded-lg">
-                    {show.overview || 'No overview available for this show.'}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       </div>
     </div>

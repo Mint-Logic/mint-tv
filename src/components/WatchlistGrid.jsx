@@ -16,16 +16,50 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
 
       const hydrated = await Promise.all(
         unarchivedWatchlist.map(async (show) => {
-          const season = show.currentSeason || 1;
-          const episode = show.currentEpisode || 1;
+          let season = show.currentSeason || 1;
+          let episode = show.currentEpisode || 1;
 
-          const [seasonData, meta] = await Promise.all([
+          let [seasonData, meta] = await Promise.all([
             getSeasonInfo(show.id, season),
             getShowMetadata(show.id),
           ]);
 
-          const totalEpisodes = seasonData?.episodes?.length || 0;
-          const isSeasonCompleted = totalEpisodes > 0 && episode > totalEpisodes;
+          let totalSeasonEpisodes = seasonData?.episodes?.length || 0;
+          let isSeasonCompleted = totalSeasonEpisodes > 0 && episode > totalSeasonEpisodes;
+
+          // AUTO-ADVANCE TO NEXT SEASON:
+          // If current season is completed but more seasons exist, advance season & reset episode to 1
+          if (isSeasonCompleted && meta && season < meta.numberOfSeasons) {
+            season = season + 1;
+            episode = 1;
+
+            // Persist updated season and episode to localStorage and watchlist state
+            const updatedWatchlist = watchlist.map((s) =>
+              s.id === show.id ? { ...s, currentSeason: season, currentEpisode: episode } : s
+            );
+            localStorage.setItem('mint_tv_shows', JSON.stringify(updatedWatchlist));
+
+            // Fetch newly advanced season details
+            seasonData = await getSeasonInfo(show.id, season);
+            totalSeasonEpisodes = seasonData?.episodes?.length || 0;
+            isSeasonCompleted = false;
+          }
+
+          const isFinalSeason = meta ? season >= meta.numberOfSeasons : false;
+
+          // Remaining unwatched episodes after/including current
+          const remainingCount = Math.max(0, totalSeasonEpisodes - episode);
+
+          // AUTO-ARCHIVE CONDITION (Only triggers when final season is completed)
+          const shouldAutoArchive = Boolean(
+            meta?.isEnded && isFinalSeason && isSeasonCompleted
+          );
+
+          if (shouldAutoArchive && !show.archived) {
+            show.archived = true;
+            const updated = watchlist.map((s) => (s.id === show.id ? { ...s, archived: true } : s));
+            localStorage.setItem('mint_tv_shows', JSON.stringify(updated));
+          }
 
           let epData = null;
           let isAired = false;
@@ -38,17 +72,24 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
 
           return {
             ...show,
+            currentSeason: season,
+            currentEpisode: episode,
             network: meta?.network || 'Unknown Streamer',
             airDate: epData?.air_date || null,
             isAired,
             isCompleted: isSeasonCompleted,
+            shouldAutoArchive,
+            remainingCount,
+            totalSeasonEpisodes,
             episodeName: epData?.name || `Episode ${episode}`,
           };
         })
       );
 
-      setAiredQueue(hydrated.filter((s) => s.isAired && !s.isCompleted));
-      setCompletedQueue(hydrated.filter((s) => s.isCompleted));
+      const activeHydrated = hydrated.filter((s) => !s.shouldAutoArchive);
+
+      setAiredQueue(activeHydrated.filter((s) => s.isAired && !s.isCompleted));
+      setCompletedQueue(activeHydrated.filter((s) => s.isCompleted));
       setLoading(false);
     }
 
@@ -127,7 +168,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
                   >
                     <div className="absolute inset-0 bg-gradient-to-t from-[#1E293B] via-transparent to-transparent"></div>
 
-                    {/* Season/Episode Badge (Green Accent) + Streamer Tag (Neutral Slate) Stacked Below */}
+                    {/* Season/Episode Badge */}
                     <div className="absolute top-3 left-3 flex flex-col items-start space-y-1 z-10">
                       <span className="rounded-md border border-slate-700 bg-slate-900/90 px-2.5 py-1 text-xs font-extrabold text-[#8CFA96] backdrop-blur-md shadow-md">
                         S{String(season).padStart(2, '0')} • E{String(episode).padStart(2, '0')}
@@ -156,11 +197,18 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
                     </button>
                   </div>
 
-                  {/* Details Bottom Row */}
+                  {/* Details Bottom Row with Remaining Unwatched Episodes Badge */}
                   <div className="flex items-center justify-between p-3">
                     <div className="min-w-0 flex-1 pr-3">
-                      <div className="text-xs font-semibold text-slate-400 truncate">{show.name}</div>
-                      <div className="mt-0.5 text-sm font-bold text-white truncate">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xs font-extrabold text-slate-300 truncate">{show.name}</span>
+                        {show.remainingCount > 0 && (
+                          <span className="rounded-full bg-[#8CFA96]/15 border border-[#8CFA96]/40 px-1.5 py-0.2 text-[9px] font-black text-[#8CFA96] shrink-0">
+                            +{show.remainingCount}
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-0.5 text-xs font-bold text-white truncate">
                         E{episode}: {show.episodeName}
                       </div>
                     </div>
@@ -196,9 +244,9 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
         <div className="space-y-3">
           {completedQueue.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-800 py-12 px-4 text-center">
-              <p className="text-sm font-medium text-slate-400">No completed shows here yet!</p>
+              <p className="text-sm font-medium text-slate-400">No completed active shows!</p>
               <p className="mt-1 text-xs text-slate-500">
-                Shows move here automatically once you've finished all available episodes in a season.
+                Shows in ongoing series move here automatically when caught up. Ended series auto-archive to your Vault.
               </p>
             </div>
           ) : (

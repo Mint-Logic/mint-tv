@@ -42,7 +42,6 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
     try {
       let url = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=${targetPage}&vote_count.gte=30`;
 
-      // FIX: Use pipe "|" for OR logic across liked genres instead of comma "," (AND logic)
       if (likedGenres.length > 0) {
         url += `&with_genres=${likedGenres.join('|')}`;
       }
@@ -54,7 +53,6 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
       let data = await res.json();
       let rawResults = data.results || [];
 
-      // Fallback query if genre query returns zero results
       if (rawResults.length === 0 && likedGenres.length > 0) {
         const fallbackUrl = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=${targetPage}&vote_count.gte=30`;
         res = await fetch(fallbackUrl);
@@ -163,10 +161,15 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
             <>
               {feedShows.map((show) => {
                 const posterUrl = show.poster_path ? `${IMAGE_BASE_URL}${show.poster_path}` : '';
+                const backdropUrl = show.backdrop_path ? `${IMAGE_BASE_URL}${show.backdrop_path}` : '';
                 const isExpanded = expandedShowId === show.id;
 
+                const imdbSearchUrl = `https://www.imdb.com/find?q=${encodeURIComponent(show.name)}`;
+                const rtSearchUrl = `https://www.rottentomatoes.com/search?search=${encodeURIComponent(show.name)}`;
+
                 return (
-                  <div key={show.id} className="rounded-xl border border-slate-800 bg-[#1E293B] overflow-hidden">
+                  <div key={show.id} className="rounded-xl border border-slate-800 bg-[#1E293B] overflow-hidden transition-all">
+                    {/* Compact Summary Header */}
                     <div
                       onClick={() => setExpandedShowId(isExpanded ? null : show.id)}
                       className="flex items-center justify-between p-2 cursor-pointer select-none"
@@ -190,14 +193,15 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
                         </div>
                       </div>
 
-                      <div className="flex items-center space-x-1 shrink-0">
+                      {/* Spaced-Out Touch Action Buttons */}
+                      <div className="flex items-center space-x-3 shrink-0 pl-1">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleSaveWatchLater(show);
                           }}
                           title="Save to Watch Later"
-                          className="p-1.5 text-[#8CFA96] hover:bg-[#8CFA96]/10 rounded transition-all active:scale-90"
+                          className="p-2 bg-slate-900/80 border border-slate-700/60 text-[#8CFA96] hover:bg-[#8CFA96]/15 hover:border-[#8CFA96]/40 rounded-lg transition-all active:scale-90"
                         >
                           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
@@ -210,7 +214,7 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
                             handleBlacklist(show.id);
                           }}
                           title="Dismiss"
-                          className="p-1.5 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 rounded transition-all active:scale-90"
+                          className="p-2 bg-slate-900/80 border border-slate-700/60 text-red-400/80 hover:text-red-400 hover:bg-red-500/15 hover:border-red-500/40 rounded-lg transition-all active:scale-90"
                         >
                           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -219,9 +223,46 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
                       </div>
                     </div>
 
+                    {/* Rich Expanded Drawer with Banner & External Links */}
                     {isExpanded && (
-                      <div className="border-t border-slate-800 bg-slate-900/60 p-2.5 text-[11px] text-slate-300 leading-snug">
-                        {show.overview || 'No synopsis provided.'}
+                      <div className="border-t border-slate-800 bg-slate-900/80 p-3 space-y-2.5 animate-in fade-in">
+                        {backdropUrl && (
+                          <div className="relative h-32 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-950">
+                            <img src={backdropUrl} alt={show.name} className="h-full w-full object-cover" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
+                          </div>
+                        )}
+
+                        <p className="text-[11px] text-slate-300 leading-relaxed">
+                          {show.overview || 'No overview available for this title.'}
+                        </p>
+
+                        <div className="flex items-center justify-between border-t border-slate-800/80 pt-2">
+                          <div className="flex space-x-1.5">
+                            <a
+                              href={imdbSearchUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="text-[9px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 px-2 py-0.5 rounded border border-amber-400/30 transition-all"
+                            >
+                              IMDb ↗
+                            </a>
+                            <a
+                              href={rtSearchUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="text-[9px] font-black uppercase tracking-wider text-red-400 bg-red-500/10 hover:bg-red-500/20 px-2 py-0.5 rounded border border-red-500/30 transition-all"
+                            >
+                              Rotten Tomatoes ↗
+                            </a>
+                          </div>
+
+                          <div className="text-[10px] text-slate-400">
+                            First Aired: {show.first_air_date || 'N/A'}
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -265,7 +306,7 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-1 shrink-0">
+                  <div className="flex items-center space-x-2 shrink-0">
                     <button
                       onClick={() => handlePromoteToWatchlist(show)}
                       className="p-1.5 bg-[#8CFA96] text-slate-950 font-bold rounded text-xs hover:opacity-90 transition-all active:scale-95"
