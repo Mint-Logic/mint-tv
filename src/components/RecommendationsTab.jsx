@@ -40,14 +40,27 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
     const targetPage = isLoadMore ? page + 1 : 1;
 
     try {
-      let url = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=${targetPage}&vote_count.gte=50`;
+      let url = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=${targetPage}&vote_count.gte=30`;
 
-      if (likedGenres.length > 0) url += `&with_genres=${likedGenres.join(',')}`;
-      if (mutedGenres.length > 0) url += `&without_genres=${mutedGenres.join(',')}`;
+      // FIX: Use pipe "|" for OR logic across liked genres instead of comma "," (AND logic)
+      if (likedGenres.length > 0) {
+        url += `&with_genres=${likedGenres.join('|')}`;
+      }
+      if (mutedGenres.length > 0) {
+        url += `&without_genres=${mutedGenres.join(',')}`;
+      }
 
-      const res = await fetch(url);
-      const data = await res.json();
-      const rawResults = data.results || [];
+      let res = await fetch(url);
+      let data = await res.json();
+      let rawResults = data.results || [];
+
+      // Fallback query if genre query returns zero results
+      if (rawResults.length === 0 && likedGenres.length > 0) {
+        const fallbackUrl = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=${targetPage}&vote_count.gte=30`;
+        res = await fetch(fallbackUrl);
+        data = await res.json();
+        rawResults = data.results || [];
+      }
 
       const filtered = rawResults.filter((show) => {
         if (activeWatchlistIds.has(show.id) || watchLaterIds.has(show.id) || blacklistedIds.has(show.id)) return false;
@@ -114,7 +127,7 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
   return (
     <div className="space-y-3">
       {/* TIGHT SEGMENTED TAB HEADER */}
-      <div className="flex rounded-lg border border-slate-800 bg-[#1E293B] p-0.5 text-[11px] font-bold">
+      <div className="flex rounded-lg border border-slate-800 bg-[#1E293B] p-0.5 text-xs font-bold">
         <button
           onClick={() => setSubTab('feed')}
           className={`flex-1 rounded py-1 transition-all ${
@@ -177,9 +190,7 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
                         </div>
                       </div>
 
-                      {/* COMPACT ACTIONS */}
                       <div className="flex items-center space-x-1 shrink-0">
-                        {/* Bookmark / Save Icon */}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -193,7 +204,6 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
                           </svg>
                         </button>
 
-                        {/* Muted Red Dismiss Icon */}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -265,7 +275,6 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" />
                       </svg>
                     </button>
-                    {/* Muted Red Remove Icon */}
                     <button
                       onClick={() => handleRemoveFromWatchLater(show.id)}
                       title="Remove"
