@@ -122,27 +122,36 @@ export function SearchModal({ isOpen, onClose, onAddShow }) {
                 >
                   <div
                     onClick={() => setExpandedShowId(isExpanded ? null : show.id)}
-                    className="flex items-center justify-between p-2.5 cursor-pointer select-none"
+                    className="flex items-start justify-between p-2.5 cursor-pointer select-none gap-2.5"
                   >
-                    <div className="flex items-center space-x-3 min-w-0 flex-1 pr-2">
+                    <div className="flex items-start space-x-3 min-w-0 flex-1">
                       {posterUrl ? (
                         <img
                           src={posterUrl}
                           alt={show.name}
-                          className="h-12 w-8 rounded object-cover shrink-0 bg-slate-950"
+                          className="h-12 w-8 rounded object-cover shrink-0 bg-slate-950 mt-0.5"
                         />
                       ) : (
-                        <div className="h-12 w-8 rounded bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600">
+                        <div className="h-12 w-8 rounded bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600 mt-0.5">
                           N/A
                         </div>
                       )}
 
                       <div className="min-w-0 flex-1">
-                        {/* Allowed 2-line wrap instead of 1-line truncation */}
-                        <h3 className="text-xs font-bold text-white line-clamp-2 break-words leading-snug">
+                        <h3 
+                          className="text-xs font-bold text-white leading-snug"
+                          style={{
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            wordBreak: 'break-word',
+                            whiteSpace: 'normal'
+                          }}
+                        >
                           {show.name}
                         </h3>
-                        <div className="flex items-center space-x-2 text-[10px] text-slate-400 mt-0.5">
+                        <div className="flex items-center space-x-2 text-[10px] text-slate-400 mt-1">
                           <span className="text-amber-400 font-bold">★ {show.vote_average?.toFixed(1) || 'N/A'}</span>
                           <span>•</span>
                           <span>{show.first_air_date ? show.first_air_date.split('-')[0] : 'N/A'}</span>
@@ -155,7 +164,7 @@ export function SearchModal({ isOpen, onClose, onAddShow }) {
                         e.stopPropagation();
                         handleSelectShow(show);
                       }}
-                      className="p-2 bg-[#8CFA96] text-slate-950 font-extrabold rounded-lg text-xs hover:opacity-90 transition-all shrink-0 active:scale-95 flex items-center space-x-1"
+                      className="p-2 bg-[#8CFA96] text-slate-950 font-extrabold rounded-lg text-xs hover:opacity-90 transition-all shrink-0 active:scale-95 flex items-center space-x-1 self-center"
                       title="Add to Watchlist"
                     >
                       <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,8 +177,7 @@ export function SearchModal({ isOpen, onClose, onAddShow }) {
                   {/* Expanded Drawer Details */}
                   {isExpanded && (
                     <div className="border-t border-slate-800/80 bg-slate-950/80 p-3 space-y-2.5 animate-in fade-in">
-                      {/* Full title displayed inside expanded card */}
-                      <h4 className="text-xs font-black text-[#8CFA96]">
+                      <h4 className="text-xs font-black text-[#8CFA96] break-words">
                         {show.name}
                       </h4>
 
