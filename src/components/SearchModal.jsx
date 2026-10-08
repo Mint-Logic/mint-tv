@@ -138,7 +138,10 @@ export function SearchModal({ isOpen, onClose, onAddShow }) {
                       )}
 
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-xs font-bold text-white truncate">{show.name}</h3>
+                        {/* Allowed 2-line wrap instead of 1-line truncation */}
+                        <h3 className="text-xs font-bold text-white line-clamp-2 break-words leading-snug">
+                          {show.name}
+                        </h3>
                         <div className="flex items-center space-x-2 text-[10px] text-slate-400 mt-0.5">
                           <span className="text-amber-400 font-bold">★ {show.vote_average?.toFixed(1) || 'N/A'}</span>
                           <span>•</span>
@@ -162,8 +165,14 @@ export function SearchModal({ isOpen, onClose, onAddShow }) {
                     </button>
                   </div>
 
+                  {/* Expanded Drawer Details */}
                   {isExpanded && (
                     <div className="border-t border-slate-800/80 bg-slate-950/80 p-3 space-y-2.5 animate-in fade-in">
+                      {/* Full title displayed inside expanded card */}
+                      <h4 className="text-xs font-black text-[#8CFA96]">
+                        {show.name}
+                      </h4>
+
                       {backdropUrl && (
                         <div className="relative h-28 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-900">
                           <img src={backdropUrl} alt={show.name} className="h-full w-full object-cover" />
