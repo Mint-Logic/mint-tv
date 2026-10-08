@@ -20,7 +20,7 @@ export function Header({ onOpenSearch, onOpenDiscover, onOpenProfile }) {
     .join('') || 'TV';
 
   return (
-    <header className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-800/80 bg-[#0F172A]/90 px-3.5 py-2.5 backdrop-blur-md">
+    <header className="sticky top-0 z-50 flex items-center justify-between border-b border-slate-800 bg-[#0F172A] px-3.5 py-2.5 backdrop-blur-md">
       {/* Brand Logo with Custom TV App Icon SVG & Orbitron Font */}
       <div className="flex items-center space-x-1.5">
        <svg viewBox="0 0 512 512" className="h-8 w-8 shrink-0 drop-shadow-[0_0_8px_rgba(140,250,150,0.25)]" fill="none">

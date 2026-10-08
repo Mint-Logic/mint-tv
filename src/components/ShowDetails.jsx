@@ -93,9 +93,9 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
 
       {/* Hero Backdrop & Show Info */}
       <div 
-        onClick={() => setIsOverviewExpanded(!isOverviewExpanded)}
-        className="relative min-h-[14rem] rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl cursor-pointer"
-      >
+  onClick={() => setIsOverviewExpanded(!isOverviewExpanded)}
+  className="relative z-0 min-h-[14rem] rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl cursor-pointer"
+>
         {backdropUrl && (
           <img src={backdropUrl} alt={details.name} className="absolute inset-0 w-full h-full object-cover" />
         )}
