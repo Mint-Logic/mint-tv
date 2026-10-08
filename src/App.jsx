@@ -21,6 +21,29 @@ export default function App() {
     localStorage.setItem('mint_tv_shows', JSON.stringify(watchlist));
   }, [watchlist]);
 
+  // Android System Back Navigation Integration
+  useEffect(() => {
+    if (selectedShowId || isSearchOpen || isProfileOpen) {
+      window.history.pushState({ appState: 'subview' }, '');
+    }
+
+    const handlePopState = () => {
+      if (selectedShowId) {
+        setSelectedShowId(null);
+      } else if (isSearchOpen) {
+        setIsSearchOpen(false);
+      } else if (isProfileOpen) {
+        setIsProfileOpen(false);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [selectedShowId, isSearchOpen, isProfileOpen]);
+
   function handleAddShow(show) {
     if (!watchlist.some((s) => s.id === show.id)) {
       setWatchlist([...watchlist, show]);
@@ -149,7 +172,7 @@ export default function App() {
       <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} onAddShow={handleAddShow} />
 
       {/* 4-Tab Bottom Navigation with Safe Area Extension */}
-<nav className="fixed bottom-0 left-0 right-0 z-20 mx-auto flex max-w-md justify-around border-t border-slate-800 bg-[#1E293B] px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-md">
+      <nav className="fixed bottom-0 left-0 right-0 z-20 mx-auto flex max-w-md justify-around border-t border-slate-800 bg-[#1E293B] px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-md">
         <button
           onClick={() => {
             setSelectedShowId(null);

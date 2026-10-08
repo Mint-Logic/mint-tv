@@ -130,23 +130,23 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
       </div>
 
       {/* Season Selection Tabs */}
-<div className="flex space-x-2 overflow-x-auto pb-2 border-b border-slate-800 scrollbar-none touch-pan-x my-2">
-  {details.seasons
-    ?.filter((s) => s.season_number > 0)
-    .map((s) => (
-      <button
-        key={s.id}
-        onClick={() => handleSeasonChange(s.season_number)}
-        className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
-          selectedSeason === s.season_number
-            ? 'bg-[#8CFA96] text-slate-900 shadow-sm'
-            : 'bg-slate-800 text-slate-400 hover:text-white'
-        }`}
-      >
-        Season {s.season_number}
-      </button>
-    ))}
-</div>
+      <div className="flex space-x-2 overflow-x-auto pb-2 border-b border-slate-800 scrollbar-none touch-pan-x my-2">
+        {details.seasons
+          ?.filter((s) => s.season_number > 0)
+          .map((s) => (
+            <button
+              key={s.id}
+              onClick={() => handleSeasonChange(s.season_number)}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
+                selectedSeason === s.season_number
+                  ? 'bg-[#8CFA96] text-slate-900 shadow-sm'
+                  : 'bg-slate-800 text-slate-400 hover:text-white'
+              }`}
+            >
+              Season {s.season_number}
+            </button>
+          ))}
+      </div>
 
       {/* Episode Checklist */}
       <div className="space-y-3">
@@ -170,10 +170,10 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
                 <button onClick={() => setShowGestureInfo(false)} className="text-slate-400 hover:text-white">✕</button>
               </div>
               <p className="text-slate-400 leading-snug">
-                <strong className="text-white">Tap Finale card</strong> to mark all episodes in this season as watched.
+                <strong className="text-white">Tap 'Finale' Badge</strong> to mark all episodes in this season as watched.
               </p>
               <p className="text-slate-400 leading-snug">
-                <strong className="text-white">Tap Episode 1 card</strong> to mark all episodes in this season as unwatched.
+                <strong className="text-white">Tap 'Premiere' Badge</strong> to mark all episodes in this season as unwatched.
               </p>
             </div>
           )}
@@ -190,28 +190,16 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
           return (
             <div
               key={ep.id}
-              onClick={() => {
-                if (isFirstEpisode) {
-                  handleMarkSeasonUnwatched();
-                } else if (isLastEpisode) {
-                  handleMarkSeasonWatched();
-                }
-              }}
-              className={`bg-[#1E293B] border border-slate-800 rounded-xl p-3 shadow-md transition-all overflow-hidden ${
-                isFirstEpisode || isLastEpisode ? 'active:scale-[0.99] cursor-pointer' : ''
-              }`}
+              className="bg-[#1E293B] border border-slate-800 rounded-xl p-3 shadow-md transition-all overflow-hidden"
             >
               <div className="flex justify-between items-start space-x-3 min-w-0">
+                {/* Clicking anywhere on this block toggles synopsis expansion for ALL episodes */}
                 <div
-                  onClick={() => {
-                    if (!isFirstEpisode && !isLastEpisode) {
-                      setExpandedEpisodeId(isExpanded ? null : ep.id);
-                    }
-                  }}
-                  className="flex-1 min-w-0"
+                  onClick={() => setExpandedEpisodeId(isExpanded ? null : ep.id)}
+                  className="flex-1 min-w-0 cursor-pointer select-none"
                 >
-                  <div className="flex items-start space-x-2 min-w-0">
-                    <span className="text-xs font-extrabold text-[#8CFA96] shrink-0 mt-0.5">
+                  <div className="flex items-center space-x-2 min-w-0 flex-wrap gap-y-1">
+                    <span className="text-xs font-extrabold text-[#8CFA96] shrink-0">
                       E{String(ep.episode_number).padStart(2, '0')}
                     </span>
                     <span
@@ -221,17 +209,38 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
                     >
                       {ep.name}
                     </span>
+
+                    {/* Premiere badge triggers Unwatch Season */}
                     {isFirstEpisode && (
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-900/80 px-1.5 py-0.5 rounded border border-slate-800 shrink-0">
-                        Premiere
-                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMarkSeasonUnwatched();
+                        }}
+                        title="Click to reset season as unwatched"
+                        className="text-[9px] font-black text-slate-300 uppercase tracking-widest bg-slate-800/90 hover:bg-red-500/20 hover:text-red-400 px-1.5 py-0.5 rounded border border-slate-700 shrink-0 transition-all active:scale-95"
+                      >
+                        Premiere ↺
+                      </button>
                     )}
+
+                    {/* Finale badge triggers Watch All Season */}
                     {isLastEpisode && (
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-900/80 px-1.5 py-0.5 rounded border border-slate-800 shrink-0">
-                        Finale
-                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMarkSeasonWatched();
+                        }}
+                        title="Click to mark entire season watched"
+                        className="text-[9px] font-black text-[#8CFA96] uppercase tracking-widest bg-[#8CFA96]/10 hover:bg-[#8CFA96]/20 px-1.5 py-0.5 rounded border border-[#8CFA96]/30 shrink-0 transition-all active:scale-95"
+                      >
+                        Finale ✓
+                      </button>
                     )}
                   </div>
+
                   {!isExpanded && (
                     <p className="text-xs text-slate-400 line-clamp-1 mt-0.5 truncate">
                       {ep.overview || 'No overview available.'}
