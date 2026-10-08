@@ -1,9 +1,9 @@
 {
-  "id": "mint-tv-app",
-  "short_name": "Mint TV",
+  "id": "/",
   "name": "Mint TV Tracker",
+  "short_name": "MintTV",
   "description": "Mobile-first TV show tracker and release calendar",
-  "start_url": "/?mode=pwa",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
@@ -19,6 +19,12 @@
       "purpose": "any"
     },
     {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
       "src": "/icon-512.png",
       "type": "image/png",
       "sizes": "512x512",
@@ -29,11 +35,6 @@
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "maskable"
-    },
-    {
-      "src": "/icon.svg",
-      "type": "image/svg+xml",
-      "sizes": "512x512"
     }
   ]
 }
