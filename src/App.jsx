@@ -83,7 +83,7 @@ function handleRewatchShow(id) {
 
       {/* Profile / Stats Overlay Modal */}
       {isProfileOpen && (
-        <div className="fixed inset-0 z-30 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
           <div className="relative w-full max-w-md rounded-2xl border border-slate-800 bg-[#1E293B] p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center border-b border-slate-800 pb-3">
               <h2 className="text-sm font-extrabold text-white uppercase tracking-wider">User Stats</h2>
