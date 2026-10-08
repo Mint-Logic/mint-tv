@@ -329,7 +329,7 @@ export function StatsDashboard({ watchlist }) {
   );
 
   return (
-    <div className="space-y-4 relative">
+    <div className="space-y-1.5 relative">
       {/* PROFILE HEADER HERO */}
       <div className="flex flex-col items-center text-center pt-1 pb-1">
         <div
