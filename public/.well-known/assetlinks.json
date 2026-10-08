@@ -1,8 +1,12 @@
-[{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "app.vercel.mint_tv.twa",
-        "sha256_cert_fingerprints": ["83:2B:4D:6:1:85:C4:A:8D:60:CC:EE:2E:88:B3:5D:5F:11:D9:7C:D2:77:C:60:77:20:33:CC:51:5F:1A:F5"]
-      }
-    }]
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.vercel.mint_tv.twa",
+      "sha256_cert_fingerprints": [
+        "83:2B:4D:06:01:85:C4:0A:8D:60:CC:EE:2E:88:B3:5D:5F:11:D9:7C:D2:77:0C:60:77:20:33:CC:51:5F:1A:F5"
+      ]
+    }
+  }
+]
