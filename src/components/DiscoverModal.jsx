@@ -79,25 +79,37 @@ export function DiscoverModal({ isOpen, onClose, onAddShow }) {
                   {/* Card Header Row */}
                   <div
                     onClick={() => setExpandedShowId(isExpanded ? null : show.id)}
-                    className="flex items-center justify-between p-2.5 cursor-pointer select-none"
+                    className="flex items-start justify-between p-2.5 cursor-pointer select-none gap-2"
                   >
-                    <div className="flex items-center space-x-3 min-w-0 flex-1 pr-2">
+                    <div className="flex items-start space-x-3 w-0 flex-1">
                       {posterUrl ? (
                         <img
                           src={posterUrl}
                           alt={show.name}
-                          className="h-12 w-8 rounded object-cover shrink-0 bg-slate-950"
+                          className="h-12 w-8 rounded object-cover shrink-0 bg-slate-950 mt-0.5"
                         />
                       ) : (
-                        <div className="h-12 w-8 rounded bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600">
+                        <div className="h-12 w-8 rounded bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600 mt-0.5">
                           N/A
                         </div>
                       )}
 
-                      <div className="min-w-0 flex-1">
-                        <h3 className="text-xs font-bold text-white truncate">{show.name}</h3>
+                      <div className="w-0 flex-1">
+                        <h3 
+                          className="text-xs font-bold text-white leading-snug"
+                          style={{
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            wordBreak: 'break-word',
+                            whiteSpace: 'normal'
+                          }}
+                        >
+                          {show.name}
+                        </h3>
                         <div className="flex items-center space-x-2 text-[10px] text-slate-400 mt-0.5">
-                          <span className="text-amber-400 font-bold">★ {show.vote_average?.toFixed(1)}</span>
+                          <span className="text-amber-400 font-bold">★ {show.vote_average?.toFixed(1) || 'N/A'}</span>
                           <span>•</span>
                           <span>{show.first_air_date ? show.first_air_date.split('-')[0] : 'N/A'}</span>
                         </div>
@@ -109,7 +121,7 @@ export function DiscoverModal({ isOpen, onClose, onAddShow }) {
                         e.stopPropagation();
                         handleSelectShow(show);
                       }}
-                      className="p-1.5 bg-[#8CFA96] text-slate-950 font-bold rounded-lg text-xs hover:opacity-90 transition-all shrink-0 active:scale-95"
+                      className="p-1.5 bg-[#8CFA96] text-slate-950 font-bold rounded-lg text-xs hover:opacity-90 transition-all shrink-0 active:scale-95 self-center"
                       title="Add to Watchlist"
                     >
                       <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,9 +130,13 @@ export function DiscoverModal({ isOpen, onClose, onAddShow }) {
                     </button>
                   </div>
 
-                  {/* Expanded Tray with Image, Synopsis, IMDb & RT links */}
+                  {/* Expanded Tray */}
                   {isExpanded && (
                     <div className="border-t border-slate-800/80 bg-slate-950/80 p-3 space-y-2.5 animate-in fade-in">
+                      <h4 className="text-xs font-black text-[#8CFA96] break-words">
+                        {show.name}
+                      </h4>
+
                       {backdropUrl && (
                         <div className="relative h-28 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-900">
                           <img src={backdropUrl} alt={show.name} className="h-full w-full object-cover" />

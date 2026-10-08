@@ -172,36 +172,48 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
                     {/* Compact Summary Header */}
                     <div
                       onClick={() => setExpandedShowId(isExpanded ? null : show.id)}
-                      className="flex items-center justify-between p-2 cursor-pointer select-none"
+                      className="flex items-start justify-between p-2 cursor-pointer select-none gap-2"
                     >
-                      <div className="flex items-center space-x-2.5 min-w-0 flex-1 pr-2">
+                      <div className="flex items-start space-x-2.5 w-0 flex-1">
                         {posterUrl ? (
-                          <img src={posterUrl} alt={show.name} className="h-10 w-7 rounded object-cover shrink-0 bg-slate-900" />
+                          <img src={posterUrl} alt={show.name} className="h-10 w-7 rounded object-cover shrink-0 bg-slate-900 mt-0.5" />
                         ) : (
-                          <div className="h-10 w-7 rounded bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600">
+                          <div className="h-10 w-7 rounded bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600 mt-0.5">
                             N/A
                           </div>
                         )}
 
-                        <div className="min-w-0 flex-1">
-                          <h3 className="text-xs font-bold text-white truncate">{show.name}</h3>
+                        <div className="w-0 flex-1">
+                          <h3 
+                            className="text-xs font-bold text-white leading-snug"
+                            style={{
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                              wordBreak: 'break-word',
+                              whiteSpace: 'normal'
+                            }}
+                          >
+                            {show.name}
+                          </h3>
                           <div className="flex items-center space-x-1.5 text-[10px] text-slate-400 mt-0.5">
-                            <span className="text-amber-400 font-bold">★ {show.vote_average?.toFixed(1)}</span>
+                            <span className="text-amber-400 font-bold">★ {show.vote_average?.toFixed(1) || 'N/A'}</span>
                             <span>•</span>
                             <span>{show.first_air_date ? show.first_air_date.split('-')[0] : 'N/A'}</span>
                           </div>
                         </div>
                       </div>
 
-                      {/* Spaced-Out Touch Action Buttons */}
-                      <div className="flex items-center space-x-3 shrink-0 pl-1">
+                      {/* Touch Action Buttons */}
+                      <div className="flex items-center space-x-2 shrink-0 self-center">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleSaveWatchLater(show);
                           }}
                           title="Save to Watch Later"
-                          className="p-2 bg-slate-900/80 border border-slate-700/60 text-[#8CFA96] hover:bg-[#8CFA96]/15 hover:border-[#8CFA96]/40 rounded-lg transition-all active:scale-90"
+                          className="p-1.5 bg-slate-900/80 border border-slate-700/60 text-[#8CFA96] hover:bg-[#8CFA96]/15 hover:border-[#8CFA96]/40 rounded-lg transition-all active:scale-90"
                         >
                           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
@@ -214,7 +226,7 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
                             handleBlacklist(show.id);
                           }}
                           title="Dismiss"
-                          className="p-2 bg-slate-900/80 border border-slate-700/60 text-red-400/80 hover:text-red-400 hover:bg-red-500/15 hover:border-red-500/40 rounded-lg transition-all active:scale-90"
+                          className="p-1.5 bg-slate-900/80 border border-slate-700/60 text-red-400/80 hover:text-red-400 hover:bg-red-500/15 hover:border-red-500/40 rounded-lg transition-all active:scale-90"
                         >
                           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -223,9 +235,13 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
                       </div>
                     </div>
 
-                    {/* Rich Expanded Drawer with Banner & External Links */}
+                    {/* Rich Expanded Drawer */}
                     {isExpanded && (
                       <div className="border-t border-slate-800 bg-slate-900/80 p-3 space-y-2.5 animate-in fade-in">
+                        <h4 className="text-xs font-black text-[#8CFA96] break-words">
+                          {show.name}
+                        </h4>
+
                         {backdropUrl && (
                           <div className="relative h-32 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-950">
                             <img src={backdropUrl} alt={show.name} className="h-full w-full object-cover" />
@@ -237,33 +253,32 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
                           {show.overview || 'No overview available for this title.'}
                         </p>
 
-                        {/* Replace the expanded drawer footer row around line 170 */}
-<div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-800/80 pt-2.5">
-  <div className="flex items-center space-x-2 shrink-0">
-    <a
-      href={imdbSearchUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      onClick={(e) => e.stopPropagation()}
-      className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 px-2 py-1 rounded border border-amber-400/30 transition-all shrink-0"
-    >
-      IMDb ↗
-    </a>
-    <a
-      href={rtSearchUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      onClick={(e) => e.stopPropagation()}
-      className="text-[10px] font-black uppercase tracking-wider text-red-400 bg-red-500/10 hover:bg-red-500/20 px-2 py-1 rounded border border-red-500/30 transition-all shrink-0"
-    >
-      Rotten Tomatoes ↗
-    </a>
-  </div>
+                        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-800/80 pt-2.5">
+                          <div className="flex items-center space-x-2 shrink-0">
+                            <a
+                              href={imdbSearchUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 px-2 py-1 rounded border border-amber-400/30 transition-all shrink-0"
+                            >
+                              IMDb ↗
+                            </a>
+                            <a
+                              href={rtSearchUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="text-[10px] font-black uppercase tracking-wider text-red-400 bg-red-500/10 hover:bg-red-500/20 px-2 py-1 rounded border border-red-500/30 transition-all shrink-0"
+                            >
+                              Rotten Tomatoes ↗
+                            </a>
+                          </div>
 
-  <span className="text-[10px] text-slate-400 font-medium shrink-0">
-    Aired: {show.first_air_date || 'N/A'}
-  </span>
-</div>
+                          <span className="text-[10px] text-slate-400 font-medium shrink-0">
+                            Aired: {show.first_air_date || 'N/A'}
+                          </span>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -290,43 +305,118 @@ export function RecommendationsTab({ watchlist, onAddShow }) {
           ) : (
             watchLater.map((show) => {
               const posterUrl = show.poster_path ? `${IMAGE_BASE_URL}${show.poster_path}` : '';
+              const backdropUrl = show.backdrop_path ? `${IMAGE_BASE_URL}${show.backdrop_path}` : '';
+              const isExpanded = expandedShowId === show.id;
+
+              const imdbSearchUrl = `https://www.imdb.com/find?q=${encodeURIComponent(show.name)}`;
+              const rtSearchUrl = `https://www.rottentomatoes.com/search?search=${encodeURIComponent(show.name)}`;
 
               return (
-                <div key={show.id} className="flex items-center justify-between rounded-xl border border-slate-800 bg-[#1E293B] p-2">
-                  <div className="flex items-center space-x-2.5 min-w-0 flex-1 pr-2">
-                    {posterUrl ? (
-                      <img src={posterUrl} alt={show.name} className="h-10 w-7 rounded object-cover shrink-0 bg-slate-900" />
-                    ) : (
-                      <div className="h-10 w-7 rounded bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600">
-                        N/A
+                <div key={show.id} className="rounded-xl border border-slate-800 bg-[#1E293B] overflow-hidden transition-all">
+                  <div
+                    onClick={() => setExpandedShowId(isExpanded ? null : show.id)}
+                    className="flex items-start justify-between p-2 cursor-pointer select-none gap-2"
+                  >
+                    <div className="flex items-start space-x-2.5 w-0 flex-1">
+                      {posterUrl ? (
+                        <img src={posterUrl} alt={show.name} className="h-10 w-7 rounded object-cover shrink-0 bg-slate-900 mt-0.5" />
+                      ) : (
+                        <div className="h-10 w-7 rounded bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600 mt-0.5">
+                          N/A
+                        </div>
+                      )}
+                      <div className="w-0 flex-1">
+                        <h4 
+                          className="text-xs font-bold text-white leading-snug"
+                          style={{
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            wordBreak: 'break-word',
+                            whiteSpace: 'normal'
+                          }}
+                        >
+                          {show.name}
+                        </h4>
+                        <p className="text-[10px] text-amber-400 font-bold mt-0.5">★ {show.vote_average?.toFixed(1) || 'N/A'}</p>
                       </div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <h4 className="text-xs font-bold text-white truncate">{show.name}</h4>
-                      <p className="text-[10px] text-amber-400 font-bold">★ {show.vote_average?.toFixed(1)}</p>
+                    </div>
+
+                    <div className="flex items-center space-x-2 shrink-0 self-center">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePromoteToWatchlist(show);
+                        }}
+                        className="p-1.5 bg-[#8CFA96] text-slate-950 font-bold rounded text-xs hover:opacity-90 transition-all active:scale-95"
+                        title="Add to Watchlist"
+                      >
+                        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveFromWatchLater(show.id);
+                        }}
+                        title="Remove"
+                        className="p-1.5 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 rounded transition-all active:scale-95"
+                      >
+                        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-2 shrink-0">
-                    <button
-                      onClick={() => handlePromoteToWatchlist(show)}
-                      className="p-1.5 bg-[#8CFA96] text-slate-950 font-bold rounded text-xs hover:opacity-90 transition-all active:scale-95"
-                      title="Add to Watchlist"
-                    >
-                      <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => handleRemoveFromWatchLater(show.id)}
-                      title="Remove"
-                      className="p-1.5 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 rounded transition-all active:scale-95"
-                    >
-                      <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
+                  {/* Expanded Drawer for Watch Later */}
+                  {isExpanded && (
+                    <div className="border-t border-slate-800 bg-slate-900/80 p-3 space-y-2.5 animate-in fade-in">
+                      <h4 className="text-xs font-black text-[#8CFA96] break-words">
+                        {show.name}
+                      </h4>
+
+                      {backdropUrl && (
+                        <div className="relative h-32 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-950">
+                          <img src={backdropUrl} alt={show.name} className="h-full w-full object-cover" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
+                        </div>
+                      )}
+
+                      <p className="text-[11px] text-slate-300 leading-relaxed">
+                        {show.overview || 'No overview available for this title.'}
+                      </p>
+
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-800/80 pt-2.5">
+                        <div className="flex items-center space-x-2 shrink-0">
+                          <a
+                            href={imdbSearchUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 px-2 py-1 rounded border border-amber-400/30 transition-all shrink-0"
+                          >
+                            IMDb ↗
+                          </a>
+                          <a
+                            href={rtSearchUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-[10px] font-black uppercase tracking-wider text-red-400 bg-red-500/10 hover:bg-red-500/20 px-2 py-1 rounded border border-red-500/30 transition-all shrink-0"
+                          >
+                            Rotten Tomatoes ↗
+                          </a>
+                        </div>
+
+                        <span className="text-[10px] text-slate-400 font-medium shrink-0">
+                          Aired: {show.first_air_date || 'N/A'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })
