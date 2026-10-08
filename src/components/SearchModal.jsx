@@ -124,7 +124,7 @@ export function SearchModal({ isOpen, onClose, onAddShow }) {
                     onClick={() => setExpandedShowId(isExpanded ? null : show.id)}
                     className="flex items-start justify-between p-2.5 cursor-pointer select-none gap-2.5"
                   >
-                    <div className="flex items-start space-x-3 min-w-0 flex-1">
+                    <div className="flex items-start space-x-3 w-full min-w-0 flex-1">
                       {posterUrl ? (
                         <img
                           src={posterUrl}
@@ -137,7 +137,8 @@ export function SearchModal({ isOpen, onClose, onAddShow }) {
                         </div>
                       )}
 
-                      <div className="min-w-0 flex-1">
+                      {/* CHANGED: Used w-0 flex-1 instead of min-w-0 flex-1 */}
+                      <div className="w-0 flex-1">
                         <h3 
                           className="text-xs font-bold text-white leading-snug"
                           style={{
