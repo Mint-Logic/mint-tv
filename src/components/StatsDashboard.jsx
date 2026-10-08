@@ -329,7 +329,7 @@ export function StatsDashboard({ watchlist }) {
   );
 
   return (
-    <div className="space-y-1.5 relative">
+    <div className="space-y-1 relative">
       {/* PROFILE HEADER HERO */}
       <div className="flex flex-col items-center text-center pt-1 pb-1">
         <div
@@ -339,7 +339,7 @@ export function StatsDashboard({ watchlist }) {
           onTouchStart={handlePointerDown}
           onTouchMove={handlePointerMove}
           onTouchEnd={handlePointerUp}
-          className={`relative mb-2 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[#8CFA96] bg-slate-900 shadow-xl shadow-[#8CFA96]/15 ${
+          className={`relative mb-1 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[#8CFA96] bg-slate-900 shadow-xl shadow-[#8CFA96]/15 ${
             isEditing && customPhoto ? 'cursor-grab active:cursor-grabbing ring-2 ring-[#8CFA96]/50' : ''
           }`}
         >
