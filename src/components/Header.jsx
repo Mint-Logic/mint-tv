@@ -27,7 +27,7 @@ export function Header({ onOpenSearch, onOpenProfile }) {
         <img 
           src={mintTvLogo} 
           alt="Mint TV" 
-          className="h-9 w-auto max-w-[160px] object-contain drop-shadow-[0_0_8px_rgba(140,250,150,0.25)]"
+          className="h-8 w-auto max-w-[160px] object-contain drop-shadow-[0_0_8px_rgba(140,250,150,0.25)]"
         />
       </div>
 
