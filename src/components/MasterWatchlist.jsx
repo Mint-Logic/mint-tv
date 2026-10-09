@@ -200,7 +200,7 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
             <button
               key={letter}
               onClick={() => scrollToLetter(letter)}
-              className="flex h-[18px] w-6 items-center justify-center text-[10px] font-bold text-white drop-shadow-md hover:text-[#8CFA96] transition-all active:scale-110"
+              className="flex h-3.5 w-4 items-center justify-center text-[8px] font-black text-slate-400 hover:text-[#8CFA96] transition-all active:scale-95"
             >
               {letter}
             </button>
