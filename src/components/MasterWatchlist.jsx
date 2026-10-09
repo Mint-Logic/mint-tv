@@ -195,7 +195,7 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
 
       {/* Floating Vertical Full Alphabet Side Index */}
       {filteredShows.length > 0 && (
-        <div className="fixed right-1 bottom-24 z-40 flex flex-col items-center justify-center">
+        <div className="fixed right-1 bottom-14 z-40 flex flex-col items-center justify-center">
           {FULL_ALPHABET.map((letter) => (
             <button
               key={letter}
