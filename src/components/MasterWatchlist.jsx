@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { IMAGE_BASE_URL, getShowMetadata } from '../services/tmdb';
 
 export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggleArchive, onRewatchShow }) {
-  const [subTab, setSubTab] = useState('active');
+  const [subTab, setSubTab] = useState('active'); // 'active' | 'archive'
   const [showsWithMeta, setShowsWithMeta] = useState([]);
   const [loading, setLoading] = useState(true);
   
@@ -28,16 +28,17 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
         watchlist.map(async (show, index) => {
           const meta = await getShowMetadata(show.id);
           
-          // Safely catch the date whether the API returns snake_case or your service returns camelCase
+          // Bulletproof fallbacks for dates and completed status
           const airDate = meta?.first_air_date || meta?.firstAirDate || show.first_air_date;
+          const isActuallyEnded = meta?.isEnded || meta?.status === 'Ended' || meta?.status === 'Canceled' || false;
           
           return {
             ...show,
-            originalIndex: index,
+            originalIndex: index, // Preserves the order they were added to the watchlist
             network: meta?.network || 'Unknown Streamer',
-            isEnded: meta?.isEnded || false,
+            isEnded: isActuallyEnded,
             numberOfEpisodes: meta?.numberOfEpisodes || 0,
-            firstAirDate: airDate ? airDate : '9999-12-31', // Fallback only if the date is entirely missing
+            firstAirDate: airDate ? airDate : '9999-12-31', 
           };
         })
       );
@@ -101,6 +102,7 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
   function scrollToLetter(targetLetter) {
     const startIndex = FULL_ALPHABET.indexOf(targetLetter);
     
+    // Look forward for the closest existing letter
     for (let i = startIndex; i < FULL_ALPHABET.length; i++) {
       const el = document.getElementById(`letter-${FULL_ALPHABET[i]}`);
       if (el) {
@@ -109,6 +111,7 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
       }
     }
     
+    // If no letters ahead, look backward
     for (let i = startIndex - 1; i >= 0; i--) {
       const el = document.getElementById(`letter-${FULL_ALPHABET[i]}`);
       if (el) {
@@ -121,6 +124,7 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
   const activeCount = showsWithMeta.filter((s) => !s.archived).length;
   const archivedCount = showsWithMeta.filter((s) => s.archived).length;
   
+  // Only show the side index and right-padding if we are sorting alphabetically
   const showAlphabetIndex = processedShows.length > 0 && ['az', 'completed'].includes(sortMode);
 
   return (
@@ -209,7 +213,7 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
             </p>
             <p className="mt-1 text-xs text-slate-500">
               {sortMode === 'completed'
-                ? 'Change your filter to see ongoing shows'
+                ? 'Check your Archive tab for completed shows'
                 : 'Tap "+ Add" above to start tracking shows'}
             </p>
           </div>
