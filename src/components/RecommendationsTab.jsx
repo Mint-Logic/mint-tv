@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { IMAGE_BASE_URL, getShowMetadata } from '../services/tmdb';
+import cosmicKittyIcon from '../assets/cosmic-kitty-icon.png';
 
 export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToAttic }) {
   const [subTab, setSubTab] = useState('feed'); // 'feed' | 'watchlater'
@@ -241,24 +242,25 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                           </div>
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                        <div className="flex items-center gap-2 mt-2">
                           <button
                             onClick={(e) => { e.stopPropagation(); handleSaveWatchLater(show); }}
-                            className="flex items-center rounded border border-[#8CFA96]/30 bg-[#8CFA96]/10 px-1.5 py-0.5 text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-900 transition-all active:scale-95"
+                            className="flex items-center rounded border border-[#8CFA96]/30 bg-[#8CFA96]/10 px-2 py-1 text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-900 transition-all active:scale-95"
                           >
                             <span className="text-[8px] font-black uppercase tracking-tight">Watch Later</span>
                           </button>
 
                           <button
                             onClick={(e) => { e.stopPropagation(); handleSaveAttic(show); }}
-                            className="flex items-center rounded border border-purple-400/30 bg-purple-400/10 px-1.5 py-0.5 text-purple-400 hover:bg-purple-400 hover:text-slate-900 transition-all active:scale-95"
+                            className="p-0.5 rounded-lg hover:opacity-80 transition-all active:scale-95"
+                            title="Move to Cosmic Kitty"
                           >
-                            <span className="text-[8px] font-black uppercase tracking-tight">Cosmic Kitty</span>
+                            <img src={cosmicKittyIcon} alt="Cosmic Kitty" className="h-5 w-5 rounded object-cover" />
                           </button>
 
                           <button
                             onClick={(e) => { e.stopPropagation(); handleBlacklist(show.id); }}
-                            className="flex items-center rounded border border-red-900/30 bg-red-950/20 px-1.5 py-0.5 text-red-700 hover:bg-red-900/40 hover:text-red-600 transition-all active:scale-95"
+                            className="flex items-center rounded border border-red-900/30 bg-red-950/20 px-2 py-1 text-red-700 hover:bg-red-900/40 hover:text-red-600 transition-all active:scale-95"
                           >
                             <span className="text-[8px] font-black uppercase tracking-tight">Hide</span>
                           </button>
@@ -339,16 +341,16 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-1.5 mt-3">
-                        <button onClick={(e) => { e.stopPropagation(); handlePromoteToWatchlist(show); }} className="flex items-center rounded border border-[#8CFA96]/30 bg-[#8CFA96]/10 px-1.5 py-0.5 text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-900 transition-all active:scale-95">
+                      <div className="flex items-center gap-2 mt-3">
+                        <button onClick={(e) => { e.stopPropagation(); handlePromoteToWatchlist(show); }} className="flex items-center rounded border border-[#8CFA96]/30 bg-[#8CFA96]/10 px-2 py-1 text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-900 transition-all active:scale-95">
                           <span className="text-[8px] font-black uppercase tracking-tight">Watchlist</span>
                         </button>
 
-                        <button onClick={(e) => { e.stopPropagation(); handleMoveWLtoAttic(show); }} className="flex items-center rounded border border-purple-400/30 bg-purple-400/10 px-1.5 py-0.5 text-purple-400 hover:bg-purple-400 hover:text-slate-900 transition-all active:scale-95">
-                          <span className="text-[8px] font-black uppercase tracking-tight">Cosmic Kitty</span>
+                        <button onClick={(e) => { e.stopPropagation(); handleMoveWLtoAttic(show); }} className="p-0.5 rounded-lg hover:opacity-80 transition-all active:scale-95" title="Move to Cosmic Kitty">
+                          <img src={cosmicKittyIcon} alt="Cosmic Kitty" className="h-5 w-5 rounded object-cover" />
                         </button>
 
-                        <button onClick={(e) => { e.stopPropagation(); setWatchLater(prev => prev.filter(s => s.id !== show.id)); }} className="flex items-center rounded border border-red-900/30 bg-red-950/20 px-1.5 py-0.5 text-red-700 hover:bg-red-900/40 hover:text-red-600 transition-all active:scale-95">
+                        <button onClick={(e) => { e.stopPropagation(); setWatchLater(prev => prev.filter(s => s.id !== show.id)); }} className="flex items-center rounded border border-red-900/30 bg-red-950/20 px-2 py-1 text-red-700 hover:bg-red-900/40 hover:text-red-600 transition-all active:scale-95">
                           <span className="text-[8px] font-black uppercase tracking-tight">Drop</span>
                         </button>
                       </div>

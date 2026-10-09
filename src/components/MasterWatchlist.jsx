@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { IMAGE_BASE_URL, getShowMetadata } from '../services/tmdb';
+import cosmicKittyIcon from '../assets/cosmic-kitty-icon.png';
 
 export function MasterWatchlist({ 
   watchlist, 
@@ -168,11 +169,12 @@ export function MasterWatchlist({
           </button>
           <button
             onClick={() => setSubTab('attic')}
-            className={`flex-1 py-2 rounded-lg transition-all ${
-              subTab === 'attic' ? 'bg-slate-800 text-purple-400 shadow-sm' : 'text-slate-400 hover:text-white'
+            className={`flex-1 py-2 rounded-lg transition-all flex items-center justify-center space-x-1.5 ${
+              subTab === 'attic' ? 'bg-slate-800 text-[#8CFA96] shadow-sm' : 'text-slate-400 hover:text-white'
             }`}
           >
-            Cosmic Kitty ({atticWithMeta.length})
+            <img src={cosmicKittyIcon} alt="" className="h-4 w-4 rounded-sm object-cover" />
+            <span>Cosmic Kitty ({atticWithMeta.length})</span>
           </button>
         </div>
 
@@ -368,9 +370,9 @@ function ShowCard({
               onMoveToAttic(show);
             }}
             title="Move to Cosmic Kitty"
-            className="flex items-center space-x-1 rounded-lg border border-purple-400/30 bg-purple-400/10 px-2 py-1.5 text-[10px] font-bold text-purple-400 hover:bg-purple-400 hover:text-slate-900 transition-all active:scale-95"
+            className="flex items-center justify-center p-1 rounded-lg hover:opacity-80 transition-all active:scale-95"
           >
-            <span className="text-[9px] font-extrabold uppercase">Send to Kitty</span>
+            <img src={cosmicKittyIcon} alt="Send to Cosmic Kitty" className="h-6 w-6 rounded object-cover" />
           </button>
         )}
 
