@@ -96,9 +96,9 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
   const archivedCount = showsWithMeta.filter((s) => s.archived).length;
 
   return (
-    <div className={`space-y-3 ${filteredShows.length > 0 ? 'pr-5' : ''}`}>
+    <div className={`space-y-2 ${filteredShows.length > 0 ? 'pr-5' : ''}`}>
       {/* Sub-Tab Toggle Bar */}
-      <div className="flex rounded-xl border border-slate-800 bg-[#1E293B] p-1 text-xs font-bold">
+      <div className="flex rounded-xl border border-slate-800 bg-[#1E293B] p-0 text-xs font-bold">
         <button
           onClick={() => setSubTab('active')}
           className={`flex-1 rounded-lg py-2 transition-all ${
@@ -195,12 +195,12 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
 
       {/* Floating Vertical Full Alphabet Side Index */}
       {filteredShows.length > 0 && (
-        <div className="fixed right-2 bottom-14 z-40 flex flex-col items-center justify-center">
+        <div className="fixed right-2 bottom-15 z-40 flex flex-col items-center justify-center">
           {FULL_ALPHABET.map((letter) => (
             <button
               key={letter}
               onClick={() => scrollToLetter(letter)}
-              className="flex h-3.5 w-4 items-center justify-center text-[8px] font-black text-slate-400 hover:text-[#8CFA96] transition-all active:scale-95"
+              className="flex h-4.5 w-4 items-center justify-center text-[8px] font-black text-slate-400 hover:text-[#8CFA96] transition-all active:scale-95"
             >
               {letter}
             </button>
