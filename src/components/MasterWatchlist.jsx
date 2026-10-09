@@ -195,13 +195,12 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
 
       {/* Floating Vertical Full Alphabet Side Index */}
       {filteredShows.length > 0 && (
-        <div className="fixed right-1.5 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center justify-center bg-slate-950/60 py-2 px-1 rounded-full backdrop-blur-md border border-slate-800/50 shadow-2xl">
+        <div className="fixed right-1.5 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center justify-center bg-slate-950/60 py-1.5 px-0.5 rounded-full backdrop-blur-md border border-slate-800/50 shadow-2xl">
           {FULL_ALPHABET.map((letter) => (
             <button
               key={letter}
               onClick={() => scrollToLetter(letter)}
-              // Expanded to h-5 w-5 for larger touch targets, increased font size to 9px
-              className="flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-black text-slate-400 hover:bg-[#8CFA96]/20 hover:text-[#8CFA96] transition-all active:scale-95"
+              className="flex h-3.5 w-4 items-center justify-center text-[8px] font-black text-slate-400 hover:text-[#8CFA96] transition-all active:scale-95"
             >
               {letter}
             </button>
