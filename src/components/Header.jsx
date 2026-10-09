@@ -6,10 +6,18 @@ export function Header({ onOpenSearch, onOpenProfile }) {
   const [customPhoto, setCustomPhoto] = useState('');
 
   useEffect(() => {
-    const savedName = localStorage.getItem('mint_tv_user_name') || 'TV Collector';
-    const savedPhoto = localStorage.getItem('mint_tv_user_photo') || '';
-    setProfileName(savedName);
-    setCustomPhoto(savedPhoto);
+    const loadProfile = () => {
+      const savedName = localStorage.getItem('mint_tv_user_name') || 'TV Collector';
+      const savedPhoto = localStorage.getItem('mint_tv_user_photo') || '';
+      setProfileName(savedName);
+      setCustomPhoto(savedPhoto);
+    };
+
+    loadProfile(); // Initial load
+
+    // Listen for the custom update event
+    window.addEventListener('mint_tv_profile_update', loadProfile);
+    return () => window.removeEventListener('mint_tv_profile_update', loadProfile);
   }, []);
 
   const initials = profileName

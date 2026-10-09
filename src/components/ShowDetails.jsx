@@ -142,27 +142,29 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
         </div>
       </div>
 
-      {/* Season Selection Tabs with Active Ref */}
-      <div className="flex space-x-2 overflow-x-auto pb-2 border-b border-slate-800 scrollbar-none touch-pan-x my-2">
-        {details.seasons
-          ?.filter((s) => s.season_number > 0)
-          .map((s) => {
-            const isSelected = selectedSeason === s.season_number;
-            return (
-              <button
-                key={s.id}
-                ref={isSelected ? activeSeasonRef : null}
-                onClick={() => handleSeasonChange(s.season_number)}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
-                  isSelected
-                    ? 'bg-[#8CFA96] text-slate-900 shadow-sm'
-                    : 'bg-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                Season {s.season_number}
-              </button>
-            );
-          })}
+      {/* STICKY SEASON SELECTION TABS */}
+      <div className="sticky top-[49px] z-30 bg-[#0F172A] py-2 border-b border-slate-800">
+        <div className="flex space-x-2 overflow-x-auto pb-0.5 scrollbar-none touch-pan-x">
+          {details.seasons
+            ?.filter((s) => s.season_number > 0)
+            .map((s) => {
+              const isSelected = selectedSeason === s.season_number;
+              return (
+                <button
+                  key={s.id}
+                  ref={isSelected ? activeSeasonRef : null}
+                  onClick={() => handleSeasonChange(s.season_number)}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
+                    isSelected
+                      ? 'bg-[#8CFA96] text-slate-900 shadow-sm'
+                      : 'bg-slate-800 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Season {s.season_number}
+                </button>
+              );
+            })}
+        </div>
       </div>
 
       {/* Episode Checklist */}

@@ -92,6 +92,9 @@ export function StatsDashboard({ watchlist }) {
       localStorage.setItem('mint_tv_exclude_anime', excludeAnime);
       localStorage.setItem('mint_tv_exclude_true_crime', excludeTrueCrime);
       localStorage.setItem('mint_tv_boost_nature', boostNature);
+      
+      // Dispatch event to instantly update Header without refresh
+      window.dispatchEvent(new Event('mint_tv_profile_update'));
     } catch (e) {
       console.warn('LocalStorage limit reached while saving profile settings', e);
     }
@@ -120,11 +123,11 @@ export function StatsDashboard({ watchlist }) {
     // Exact trophy SVG path from your layout
     const trophySvg = (
     <path
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    strokeWidth="2"
-    d="M12 15a6 6 0 006-6V3H6v6a6 6 0 006 6zm0 0v3m-4 3h8M6 5H4a2 2 0 00-2 2v1a3 3 0 003 3h1m12-6h2a2 2 0 012 2v1a3 3 0 01-3 3h-1"
-  /> 
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    strokeWidth="2"
+    d="M12 15a6 6 0 006-6V3H6v6a6 6 0 006 6zm0 0v3m-4 3h8M6 5H4a2 2 0 00-2 2v1a3 3 0 003 3h1m12-6h2a2 2 0 012 2v1a3 3 0 01-3 3h-1"
+  /> 
   );
 
     if (episodes >= 5000) {
@@ -331,7 +334,7 @@ export function StatsDashboard({ watchlist }) {
   return (
     <div className="space-y-1 relative">
       {/* PROFILE HEADER HERO */}
-      <div className="flex flex-col items-center text-center pt-1 pb-1">
+      <div className="flex flex-col items-center text-center pt-0 pb-0">
         <div
           onMouseDown={handlePointerDown}
           onMouseMove={handlePointerMove}
@@ -339,7 +342,7 @@ export function StatsDashboard({ watchlist }) {
           onTouchStart={handlePointerDown}
           onTouchMove={handlePointerMove}
           onTouchEnd={handlePointerUp}
-          className={`relative mb-1 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[#8CFA96] bg-slate-900 shadow-xl shadow-[#8CFA96]/15 ${
+          className={`relative mb-1 flex h-18 w-18 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[#8CFA96] bg-slate-900 shadow-xl shadow-[#8CFA96]/15 ${
             isEditing && customPhoto ? 'cursor-grab active:cursor-grabbing ring-2 ring-[#8CFA96]/50' : ''
           }`}
         >
@@ -496,7 +499,7 @@ export function StatsDashboard({ watchlist }) {
 
       {/* USER STATS CONTAINER */}
       <div className="-mx-3 sm:-mx-4 overflow-hidden rounded-2xl border border-slate-800 bg-[#1E293B] shadow-lg divide-y divide-slate-800/80">
-        <div className="flex items-center justify-between px-4 py-3 bg-slate-900/50">
+        <div className="flex items-center justify-between px-4 py-2 bg-slate-900/50">
           <div className="flex items-center space-x-2.5">
             <div className={`flex h-7 w-7 items-center justify-center rounded-lg border ${levelInfo.color}`}>
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -522,7 +525,7 @@ export function StatsDashboard({ watchlist }) {
           </div>
         </div>
 
-        <div className="flex items-center justify-between px-4 py-3 gap-2">
+        <div className="flex items-center justify-between px-4 py-2 gap-2">
           <div className="flex items-center space-x-3 min-w-0">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#8CFA96]/10 border border-[#8CFA96]/30 text-[#8CFA96]">
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -534,7 +537,7 @@ export function StatsDashboard({ watchlist }) {
           <span className="text-sm font-bold text-[#8CFA96] shrink-0 tracking-tight">{totalEpisodesWatched}</span>
         </div>
 
-        <div className="flex items-center justify-between px-4 py-3 gap-2">
+        <div className="flex items-center justify-between px-4 py-2 gap-2">
           <div className="flex items-center space-x-3 min-w-0">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#8CFA96]/10 border border-[#8CFA96]/30 text-[#8CFA96]">
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -553,7 +556,7 @@ export function StatsDashboard({ watchlist }) {
       <div className="-mx-3 sm:-mx-4 overflow-hidden rounded-2xl border border-slate-800 bg-[#1E293B] shadow-lg">
         <button
           onClick={() => setIsGenreDrawerOpen(!isGenreDrawerOpen)}
-          className="w-full flex justify-between items-center px-4 py-3 bg-slate-900/60 hover:bg-slate-900 transition-all cursor-pointer"
+          className="w-full flex justify-between items-center px-4 py-2.5 bg-slate-900/60 hover:bg-slate-900 transition-all cursor-pointer"
         >
           <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
             MANAGE GENRE PREFERENCES
@@ -762,7 +765,7 @@ export function StatsDashboard({ watchlist }) {
 
       {/* DATA MANAGEMENT CARD */}
       <div className="-mx-3 sm:-mx-4 overflow-hidden rounded-2xl border border-slate-800 bg-[#1E293B] shadow-lg">
-        <div className="px-4 pt-2.5 pb-1 border-b border-slate-800/80 text-left">
+        <div className="px-4 pt-2 pb-1 border-b border-slate-800/80 text-left">
           <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
             Data Management
           </span>
@@ -771,7 +774,7 @@ export function StatsDashboard({ watchlist }) {
         <div className="grid grid-cols-2 divide-x divide-slate-800/80">
           <button
             onClick={handleExportData}
-            className="flex items-center justify-center space-x-2 p-2.5 text-[11px] font-bold text-slate-300 hover:bg-slate-800/50 hover:text-[#8CFA96] transition-all"
+            className="flex items-center justify-center space-x-2 p-2 text-[11px] font-bold text-slate-300 hover:bg-slate-800/50 hover:text-[#8CFA96] transition-all"
           >
             <svg className="h-3.5 w-3.5 text-[#8CFA96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -779,7 +782,7 @@ export function StatsDashboard({ watchlist }) {
             <span>Export Backup</span>
           </button>
 
-          <label className="flex items-center justify-center space-x-2 p-2.5 text-[11px] font-bold text-slate-300 hover:bg-slate-800/50 hover:text-[#8CFA96] transition-all cursor-pointer">
+          <label className="flex items-center justify-center space-x-2 p-2 text-[11px] font-bold text-slate-300 hover:bg-slate-800/50 hover:text-[#8CFA96] transition-all cursor-pointer">
             <svg className="h-3.5 w-3.5 text-[#8CFA96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
             </svg>
@@ -787,6 +790,11 @@ export function StatsDashboard({ watchlist }) {
             <input type="file" accept=".json" onChange={handleImportData} className="hidden" />
           </label>
         </div>
+      </div>
+
+      {/* COPYRIGHT TEXT */}
+      <div className="pt-3 pb-0 text-center text-[8px] font-medium text-slate-500 uppercase tracking-widest">
+        © {new Date().getFullYear()} Mint Logic LLC. All rights reserved.
       </div>
     </div>
   );

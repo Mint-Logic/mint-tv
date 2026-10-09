@@ -129,60 +129,63 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
 
   return (
     <div className={`space-y-2 ${showAlphabetIndex ? 'pr-5' : ''}`}>
-      {/* Sub-Tab Toggle Bar */}
-      <div className="flex rounded-xl border border-slate-800 bg-[#1E293B] p-0 text-xs font-bold">
-        <button
-          onClick={() => setSubTab('active')}
-          className={`flex-1 rounded-lg py-2 transition-all ${
-            subTab === 'active'
-              ? 'bg-slate-800 text-[#8CFA96] shadow-sm'
-              : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          Active Shows ({activeCount})
-        </button>
-        <button
-          onClick={() => setSubTab('archive')}
-          className={`flex-1 rounded-lg py-2 transition-all ${
-            subTab === 'archive'
-              ? 'bg-slate-800 text-[#8CFA96] shadow-sm'
-              : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          Archived Shows ({archivedCount})
-        </button>
-      </div>
+      {/* STICKY CONTROLS CONTAINER */}
+      <div className="sticky top-[49px] z-30 bg-[#0F172A] pt-1 pb-2 space-y-2">
+        {/* Sub-Tab Toggle Bar */}
+        <div className="flex rounded-xl border border-slate-800 bg-[#1E293B] p-0 text-xs font-bold shadow-md">
+          <button
+            onClick={() => setSubTab('active')}
+            className={`flex-1 rounded-lg py-2 transition-all ${
+              subTab === 'active'
+                ? 'bg-slate-800 text-[#8CFA96] shadow-sm'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Active Shows ({activeCount})
+          </button>
+          <button
+            onClick={() => setSubTab('archive')}
+            className={`flex-1 rounded-lg py-2 transition-all ${
+              subTab === 'archive'
+                ? 'bg-slate-800 text-[#8CFA96] shadow-sm'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Archived Shows ({archivedCount})
+          </button>
+        </div>
 
-      {/* Sort & Filter Dropdown */}
-      <div className="relative w-full space-y-2">
-        <button
-          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          className="flex w-full items-center justify-between rounded-xl border border-slate-800 bg-[#1E293B] px-3.5 py-2.5 text-xs font-semibold text-white transition-all hover:border-slate-700"
-        >
-          <span className="truncate">
-            {SORT_OPTIONS.find((opt) => opt.id === sortMode)?.label}
-          </span>
-          <span className="ml-2 text-slate-400">{isDropdownOpen ? '▲' : '▼'}</span>
-        </button>
+        {/* Sort & Filter Dropdown */}
+        <div className="relative w-full space-y-2">
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="flex w-full items-center justify-between rounded-xl border border-slate-800 bg-[#1E293B] px-3.5 py-2.5 text-xs font-semibold text-white transition-all hover:border-slate-700 shadow-md"
+          >
+            <span className="truncate">
+              {SORT_OPTIONS.find((opt) => opt.id === sortMode)?.label}
+            </span>
+            <span className="ml-2 text-slate-400">{isDropdownOpen ? '▲' : '▼'}</span>
+          </button>
 
-        {isDropdownOpen && (
-          <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-xl border border-slate-800 bg-[#1E293B] shadow-2xl">
-            {SORT_OPTIONS.map((option) => (
-              <button
-                key={option.id}
-                onClick={() => handleSelectSort(option.id)}
-                className={`flex w-full items-center justify-between px-3.5 py-1.5 text-xs font-bold transition-all border-b border-slate-800/50 last:border-0 ${
-                  sortMode === option.id
-                    ? 'bg-[#8CFA96]/10 text-[#8CFA96]'
-                    : 'text-slate-300 hover:bg-slate-800'
-                }`}
-              >
-                <span>{option.label}</span>
-                {sortMode === option.id && <span>✓</span>}
-              </button>
-            ))}
-          </div>
-        )}
+          {isDropdownOpen && (
+            <div className="absolute z-40 mt-1 w-full overflow-hidden rounded-xl border border-slate-800 bg-[#1E293B] shadow-2xl">
+              {SORT_OPTIONS.map((option) => (
+                <button
+                  key={option.id}
+                  onClick={() => handleSelectSort(option.id)}
+                  className={`flex w-full items-center justify-between px-3.5 py-1.5 text-xs font-bold transition-all border-b border-slate-800/50 last:border-0 ${
+                    sortMode === option.id
+                      ? 'bg-[#8CFA96]/10 text-[#8CFA96]'
+                      : 'text-slate-300 hover:bg-slate-800'
+                  }`}
+                >
+                  <span>{option.label}</span>
+                  {sortMode === option.id && <span>✓</span>}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Floating Vertical Full Alphabet Side Index */}
@@ -348,11 +351,11 @@ function ShowCard({ show, sortMode, onSelectShow, onRemoveShow, onToggleArchive,
         >
           {isArchived ? (
             <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
             </svg>
           ) : (
             <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v1a2 2 0 01-2 2M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
           )}
         </button>

@@ -13,6 +13,8 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('ready');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [showExitModal, setShowExitModal] = useState(false); // NEW: Exit Modal State
+  
   const [watchlist, setWatchlist] = useState(() => {
     return JSON.parse(localStorage.getItem('mint_tv_shows') || '[]');
   });
@@ -21,28 +23,34 @@ export default function App() {
     localStorage.setItem('mint_tv_shows', JSON.stringify(watchlist));
   }, [watchlist]);
 
-  // Android System Back Navigation Integration
+  // Android System Back Navigation Integration with Exit Trap
   useEffect(() => {
-    if (selectedShowId || isSearchOpen || isProfileOpen) {
-      window.history.pushState({ appState: 'subview' }, '');
-    }
+    // Push an initial dummy state so the back button has something to pop
+    window.history.pushState({ appState: 'active' }, '');
 
     const handlePopState = () => {
       if (selectedShowId) {
         setSelectedShowId(null);
+        window.history.pushState({ appState: 'active' }, ''); // Restore trap
       } else if (isSearchOpen) {
         setIsSearchOpen(false);
+        window.history.pushState({ appState: 'active' }, ''); // Restore trap
       } else if (isProfileOpen) {
         setIsProfileOpen(false);
+        window.history.pushState({ appState: 'active' }, ''); // Restore trap
+      } else if (showExitModal) {
+        setShowExitModal(false);
+        window.history.pushState({ appState: 'active' }, ''); // Restore trap
+      } else {
+        // At the root level, trap the exit and show modal
+        setShowExitModal(true);
+        window.history.pushState({ appState: 'trap' }, ''); // Prevent double-tap exit
       }
     };
 
     window.addEventListener('popstate', handlePopState);
-
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, [selectedShowId, isSearchOpen, isProfileOpen]);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [selectedShowId, isSearchOpen, isProfileOpen, showExitModal]);
 
   function handleAddShow(show) {
     if (!watchlist.some((s) => s.id === show.id)) {
@@ -119,6 +127,34 @@ export default function App() {
               </button>
             </div>
             <StatsDashboard watchlist={watchlist} />
+          </div>
+        </div>
+      )}
+
+      {/* Exit Confirmation Modal */}
+      {showExitModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-sm rounded-2xl border border-slate-800 bg-[#1E293B] p-6 shadow-2xl space-y-6 text-center">
+            <h3 className="text-lg font-black text-white">Exit MintTV?</h3>
+            <p className="text-sm text-slate-400">Are you sure you want to close the app?</p>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowExitModal(false)}
+                className="flex-1 rounded-xl bg-slate-800 py-3 text-sm font-bold text-white hover:bg-slate-700 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  // Actually allow the app to exit
+                  window.history.go(-2); 
+                  setTimeout(() => window.close(), 100);
+                }}
+                className="flex-1 rounded-xl bg-[#8CFA96] py-3 text-sm font-black text-slate-900 hover:bg-[#7be385] transition-all"
+              >
+                Exit App
+              </button>
+            </div>
           </div>
         </div>
       )}

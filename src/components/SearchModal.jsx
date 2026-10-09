@@ -213,32 +213,33 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
                         {show.overview || 'No synopsis available for this title.'}
                       </p>
 
-                      <div className="flex items-center justify-between border-t border-slate-800/80 pt-2">
-                        <div className="flex space-x-1.5">
-                          <a
-                            href={imdbSearchUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-[9px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 px-2 py-0.5 rounded border border-amber-400/30 transition-all"
-                          >
-                            IMDb ↗
-                          </a>
-                          <a
-                            href={rtSearchUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-[9px] font-black uppercase tracking-wider text-red-400 bg-red-500/10 hover:bg-red-500/20 px-2 py-0.5 rounded border border-red-500/30 transition-all"
-                          >
-                            Rotten Tomatoes ↗
-                          </a>
-                        </div>
+                      {/* Updated SearchModal Link Buttons */}
+<div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-800/80 pt-2">
+  <div className="flex items-center gap-1.5 shrink-0">
+    <a
+      href={imdbSearchUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      className="text-[9px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 px-2 py-0.5 rounded border border-amber-400/30 transition-all whitespace-nowrap"
+    >
+      IMDB
+    </a>
+    <a
+      href={rtSearchUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      className="text-[9px] font-black uppercase tracking-wider text-red-400 bg-red-500/10 hover:bg-red-500/20 px-2 py-0.5 rounded border border-red-500/30 transition-all whitespace-nowrap"
+    >
+      ROTTEN TOMATOES
+    </a>
+  </div>
 
-                        <span className="text-[10px] text-slate-400">
-                          Aired: {show.first_air_date || 'N/A'}
-                        </span>
-                      </div>
+  <span className="text-[10px] text-slate-400 shrink-0 ml-auto whitespace-nowrap">
+    Aired: {show.first_air_date || 'N/A'}
+  </span>
+</div>
                     </div>
                   )}
                 </div>
