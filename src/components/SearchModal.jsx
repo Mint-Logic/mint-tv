@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { searchShows, IMAGE_BASE_URL } from '../services/tmdb';
+import { searchShows as searchTMDB, IMAGE_BASE_URL } from '../services/tmdb';
 
-export function SearchModal({ isOpen, onClose, onAddShow }) {
+export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
   const [query, setQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [trendingShows, setTrendingShows] = useState([]);
@@ -30,19 +30,21 @@ export function SearchModal({ isOpen, onClose, onAddShow }) {
     fetchPopular();
   }, [isOpen]);
 
-  // Live search query handling
+  // Smoothed Live search query handling
   useEffect(() => {
     if (!query.trim()) {
       setSearchResults([]);
       return;
     }
 
+    // Instantly trigger loading state the moment a key is pressed to prevent erratic UI jumping
+    setLoading(true);
+
     const timer = setTimeout(async () => {
-      setLoading(true);
-      const results = await searchShows(query);
+      const results = await searchTMDB(query);
       setSearchResults(results);
       setLoading(false);
-    }, 300);
+    }, 600); // Increased delay to 600ms for a smoother typing experience
 
     return () => clearTimeout(timer);
   }, [query]);
@@ -59,15 +61,13 @@ export function SearchModal({ isOpen, onClose, onAddShow }) {
       currentEpisode: 1,
       completed: false,
     });
-    setQuery('');
-    onClose();
   }
 
   const showsToDisplay = query.trim() ? searchResults : trendingShows;
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-md rounded-2xl border border-slate-800 bg-[#1E293B] p-5 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+      <div className="relative w-full max-w-md rounded-2xl border border-slate-800 bg-[#1E293B] p-5 shadow-2xl space-y-4 h-[85vh] flex flex-col">
         {/* Header Bar */}
         <div className="flex justify-between items-center border-b border-slate-800 pb-3 shrink-0">
           <h2 className="text-sm font-extrabold text-white uppercase tracking-wider">
@@ -85,15 +85,24 @@ export function SearchModal({ isOpen, onClose, onAddShow }) {
         </div>
 
         {/* Input Box */}
-        <div className="shrink-0">
+        <div className="shrink-0 relative">
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search TV shows..."
             autoFocus
-            className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-[#8CFA96] focus:outline-none"
+            className="w-full rounded-xl border border-slate-700 bg-slate-900 py-2.5 pl-3.5 pr-10 text-xs text-white placeholder-slate-500 focus:border-[#8CFA96] focus:outline-none"
           />
+          {query.length > 0 && (
+            <button
+              onClick={() => setQuery('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full bg-slate-800 text-[10px] font-bold text-slate-400 hover:bg-slate-700 hover:text-white transition-all"
+              title="Clear search"
+            >
+              ✕
+            </button>
+          )}
         </div>
 
         {/* Shows Feed List */}
@@ -108,6 +117,7 @@ export function SearchModal({ isOpen, onClose, onAddShow }) {
             </div>
           ) : (
             showsToDisplay.map((show) => {
+              const isAdded = watchlist.some((s) => s.id === show.id);
               const posterUrl = show.poster_path ? `${IMAGE_BASE_URL}${show.poster_path}` : '';
               const backdropUrl = show.backdrop_path ? `${IMAGE_BASE_URL}${show.backdrop_path}` : '';
               const isExpanded = expandedShowId === show.id;
@@ -137,7 +147,6 @@ export function SearchModal({ isOpen, onClose, onAddShow }) {
                         </div>
                       )}
 
-                      {/* CHANGED: Used w-0 flex-1 instead of min-w-0 flex-1 */}
                       <div className="w-0 flex-1">
                         <h3 
                           className="text-xs font-bold text-white leading-snug"
@@ -161,17 +170,28 @@ export function SearchModal({ isOpen, onClose, onAddShow }) {
                     </div>
 
                     <button
+                      disabled={isAdded}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleSelectShow(show);
+                        if (!isAdded) handleSelectShow(show);
                       }}
-                      className="p-2 bg-[#8CFA96] text-slate-950 font-extrabold rounded-lg text-xs hover:opacity-90 transition-all shrink-0 active:scale-95 flex items-center space-x-1 self-center"
-                      title="Add to Watchlist"
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all active:scale-95 flex items-center self-center ${
+                        isAdded
+                          ? 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed'
+                          : 'bg-[#8CFA96] text-slate-950 hover:bg-[#7be385]'
+                      }`}
+                      title={isAdded ? "Already on Watchlist" : "Add to Watchlist"}
                     >
-                      <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" />
-                      </svg>
-                      <span>Add</span>
+                      {isAdded ? (
+                        <span>Added ✓</span>
+                      ) : (
+                        <>
+                          <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" />
+                          </svg>
+                          <span>Add</span>
+                        </>
+                      )}
                     </button>
                   </div>
 

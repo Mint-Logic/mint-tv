@@ -69,7 +69,12 @@ export default function App() {
     setWatchlist(
       watchlist.map((show) => {
         if (show.id === id) {
-          return { ...show, archived: !show.archived };
+          const nextArchived = !show.archived;
+          return { 
+            ...show, 
+            archived: nextArchived,
+            isRewatching: !nextArchived ? true : false 
+          };
         }
         return show;
       })
@@ -80,7 +85,13 @@ export default function App() {
     setWatchlist(
       watchlist.map((show) => {
         if (show.id === id) {
-          return { ...show, currentSeason: 1, currentEpisode: 1, archived: false };
+          return { 
+            ...show, 
+            currentSeason: 1, 
+            currentEpisode: 1, 
+            archived: false,
+            isRewatching: true 
+          };
         }
         return show;
       })
@@ -169,7 +180,12 @@ export default function App() {
         )}
       </main>
 
-      <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} onAddShow={handleAddShow} />
+      <SearchModal 
+        isOpen={isSearchOpen} 
+        onClose={() => setIsSearchOpen(false)} 
+        onAddShow={handleAddShow}
+        watchlist={watchlist} 
+      />
 
       {/* 4-Tab Bottom Navigation with Safe Area Extension */}
       <nav className="fixed bottom-0 left-0 right-0 z-20 mx-auto flex max-w-md justify-around border-t border-slate-800 bg-[#1E293B] px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-md">

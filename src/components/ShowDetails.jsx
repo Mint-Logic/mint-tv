@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getShowDetails, IMAGE_BASE_URL } from '../services/tmdb';
 
 export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
@@ -15,6 +15,8 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
   const [expandedEpisodeId, setExpandedEpisodeId] = useState(null);
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(false);
   const [showGestureInfo, setShowGestureInfo] = useState(false);
+
+  const activeSeasonRef = useRef(null);
 
   function handleSeasonChange(seasonNumber) {
     setSelectedSeason(seasonNumber);
@@ -44,6 +46,17 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
     }
     fetchFullShow();
   }, [showId, selectedSeason]);
+
+  // Smoothly scroll active season tab into view when selected season or episodes load
+  useEffect(() => {
+    if (activeSeasonRef.current) {
+      activeSeasonRef.current.scrollIntoView({
+        behavior: 'smooth',
+        inline: 'center',
+        block: 'nearest',
+      });
+    }
+  }, [selectedSeason, loading]);
 
   if (loading) {
     return (
@@ -129,23 +142,27 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
         </div>
       </div>
 
-      {/* Season Selection Tabs */}
+      {/* Season Selection Tabs with Active Ref */}
       <div className="flex space-x-2 overflow-x-auto pb-2 border-b border-slate-800 scrollbar-none touch-pan-x my-2">
         {details.seasons
           ?.filter((s) => s.season_number > 0)
-          .map((s) => (
-            <button
-              key={s.id}
-              onClick={() => handleSeasonChange(s.season_number)}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
-                selectedSeason === s.season_number
-                  ? 'bg-[#8CFA96] text-slate-900 shadow-sm'
-                  : 'bg-slate-800 text-slate-400 hover:text-white'
-              }`}
-            >
-              Season {s.season_number}
-            </button>
-          ))}
+          .map((s) => {
+            const isSelected = selectedSeason === s.season_number;
+            return (
+              <button
+                key={s.id}
+                ref={isSelected ? activeSeasonRef : null}
+                onClick={() => handleSeasonChange(s.season_number)}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
+                  isSelected
+                    ? 'bg-[#8CFA96] text-slate-900 shadow-sm'
+                    : 'bg-slate-800 text-slate-400 hover:text-white'
+                }`}
+              >
+                Season {s.season_number}
+              </button>
+            );
+          })}
       </div>
 
       {/* Episode Checklist */}
@@ -193,7 +210,6 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
               className="bg-[#1E293B] border border-slate-800 rounded-xl p-3 shadow-md transition-all overflow-hidden"
             >
               <div className="flex justify-between items-start space-x-3 min-w-0">
-                {/* Clicking anywhere on this block toggles synopsis expansion for ALL episodes */}
                 <div
                   onClick={() => setExpandedEpisodeId(isExpanded ? null : ep.id)}
                   className="flex-1 min-w-0 cursor-pointer select-none"
