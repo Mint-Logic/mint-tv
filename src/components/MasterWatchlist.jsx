@@ -169,7 +169,7 @@ export function MasterWatchlist({
           <button
             onClick={() => setSubTab('attic')}
             className={`flex-1 py-2 rounded-lg transition-all ${
-              subTab === 'attic' ? 'bg-slate-800 text-[#8CFA96] shadow-sm' : 'text-slate-400 hover:text-white'
+              subTab === 'attic' ? 'bg-slate-800 text-purple-400 shadow-sm' : 'text-slate-400 hover:text-white'
             }`}
           >
             The Attic ({atticWithMeta.length})
