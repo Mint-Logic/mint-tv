@@ -96,7 +96,7 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
   const archivedCount = showsWithMeta.filter((s) => s.archived).length;
 
   return (
-    <div className="space-y-4">
+    <div className={`space-y-3 ${filteredShows.length > 0 ? 'pr-5' : ''}`}>
       {/* Sub-Tab Toggle Bar */}
       <div className="flex rounded-xl border border-slate-800 bg-[#1E293B] p-1 text-xs font-bold">
         <button
@@ -195,7 +195,7 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
 
       {/* Floating Vertical Full Alphabet Side Index */}
       {filteredShows.length > 0 && (
-        <div className="fixed right-1 bottom-14 z-40 flex flex-col items-center justify-center">
+        <div className="fixed right-2 bottom-14 z-40 flex flex-col items-center justify-center">
           {FULL_ALPHABET.map((letter) => (
             <button
               key={letter}
@@ -209,7 +209,7 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
       )}
 
       {/* SHOW LIST */}
-      <div className={`space-y-3 ${filteredShows.length > 0 ? 'pr-6' : ''}`}>
+      <div className="space-y-2">
         {filteredShows.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-800 py-12 px-4 text-center mt-4">
             <p className="text-sm font-medium text-slate-400">
