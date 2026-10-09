@@ -159,7 +159,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
 
   return (
     <div className="space-y-3">
-      {/* Restored Original Header Structure */}
+      {/* Header Structure */}
       <div className="sticky top-[49px] z-30 bg-[#0F172A] pt-1 pb-2">
         <div className="flex w-full items-center justify-evenly rounded-xl border border-slate-800 bg-[#1E293B] py-2.5 text-[11px] sm:text-xs font-bold shadow-md">
           <button
@@ -253,7 +253,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                             onClick={(e) => { e.stopPropagation(); handleSaveAttic(show); }}
                             className="flex items-center rounded border border-purple-400/30 bg-purple-400/10 px-1.5 py-0.5 text-purple-400 hover:bg-purple-400 hover:text-slate-900 transition-all active:scale-95"
                           >
-                            <span className="text-[8px] font-black uppercase tracking-tight">To Attic</span>
+                            <span className="text-[8px] font-black uppercase tracking-tight">Cosmic Kitty</span>
                           </button>
 
                           <button
@@ -345,7 +345,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                         </button>
 
                         <button onClick={(e) => { e.stopPropagation(); handleMoveWLtoAttic(show); }} className="flex items-center rounded border border-purple-400/30 bg-purple-400/10 px-1.5 py-0.5 text-purple-400 hover:bg-purple-400 hover:text-slate-900 transition-all active:scale-95">
-                          <span className="text-[8px] font-black uppercase tracking-tight">To Attic</span>
+                          <span className="text-[8px] font-black uppercase tracking-tight">Cosmic Kitty</span>
                         </button>
 
                         <button onClick={(e) => { e.stopPropagation(); setWatchLater(prev => prev.filter(s => s.id !== show.id)); }} className="flex items-center rounded border border-red-900/30 bg-red-950/20 px-1.5 py-0.5 text-red-700 hover:bg-red-900/40 hover:text-red-600 transition-all active:scale-95">

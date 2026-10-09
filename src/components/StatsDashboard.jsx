@@ -387,7 +387,7 @@ export function StatsDashboard({ watchlist }) {
                 onClick={() => setIsEditing(false)}
                 className="text-xs font-bold text-[#8CFA96] hover:underline"
               >
-                Done
+                Save Edits
               </button>
             </div>
 

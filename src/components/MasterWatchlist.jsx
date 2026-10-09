@@ -61,7 +61,7 @@ export function MasterWatchlist({
     }
   }, [watchlist]);
 
-  // Hydrate metadata for The Attic
+  // Hydrate metadata for Cosmic Kitty
   useEffect(() => {
     async function loadAtticMetadata() {
       const hydrated = await Promise.all(
@@ -156,7 +156,7 @@ export function MasterWatchlist({
     <div className={`space-y-2 ${showAlphabetIndex ? 'pr-5' : ''}`}>
       {/* STICKY CONTROLS CONTAINER */}
       <div className="sticky top-[49px] z-30 bg-[#0F172A] pt-1 pb-2 space-y-2">
-        {/* Restored Segmented Sub-Tab Header */}
+        {/* Segmented Sub-Tab Header */}
         <div className="flex w-full items-center justify-evenly rounded-xl border border-slate-800 bg-[#1E293B] p-1 text-[11px] sm:text-xs font-bold shadow-md">
           <button
             onClick={() => setSubTab('active')}
@@ -172,7 +172,7 @@ export function MasterWatchlist({
               subTab === 'attic' ? 'bg-slate-800 text-purple-400 shadow-sm' : 'text-slate-400 hover:text-white'
             }`}
           >
-            The Attic ({atticWithMeta.length})
+            Cosmic Kitty ({atticWithMeta.length})
           </button>
         </div>
 
@@ -233,12 +233,12 @@ export function MasterWatchlist({
                 ? 'No completed series in this view'
                 : subTab === 'active'
                 ? 'No active shows in library'
-                : 'The Attic is empty'}
+                : 'Cosmic Kitty is empty'}
             </p>
             <p className="mt-1 text-xs text-slate-500">
               {subTab === 'active'
                 ? 'Tap "+ Add" above to start tracking shows'
-                : 'Move completed or ended series to The Attic'}
+                : 'Move completed or ended series to Cosmic Kitty'}
             </p>
           </div>
         ) : (
@@ -367,10 +367,10 @@ function ShowCard({
               e.stopPropagation();
               onMoveToAttic(show);
             }}
-            title="Move to The Attic"
+            title="Move to Cosmic Kitty"
             className="flex items-center space-x-1 rounded-lg border border-purple-400/30 bg-purple-400/10 px-2 py-1.5 text-[10px] font-bold text-purple-400 hover:bg-purple-400 hover:text-slate-900 transition-all active:scale-95"
           >
-            <span className="text-[9px] font-extrabold uppercase">To Attic</span>
+            <span className="text-[9px] font-extrabold uppercase">Send to Kitty</span>
           </button>
         )}
 
