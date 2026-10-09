@@ -6,22 +6,31 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
   const [showsWithMeta, setShowsWithMeta] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  const [selectedGenres, setSelectedGenres] = useState([]);
+  const [sortMode, setSortMode] = useState('az');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const FULL_ALPHABET = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','#'];
+
+  const SORT_OPTIONS = [
+    { id: 'az', label: 'Alphabetical (A-Z)' },
+    { id: 'recent', label: 'Recently Added' },
+    { id: 'network', label: 'By Network' },
+    { id: 'episodes', label: 'Fewest Episodes' },
+    { id: 'completed', label: 'Completed Series Only' },
+  ];
 
   useEffect(() => {
     async function loadMetadata() {
       // Intentionally omitting setLoading(true) here so the list doesn't jump when removing shows
       const hydrated = await Promise.all(
-        watchlist.map(async (show) => {
+        watchlist.map(async (show, index) => {
           const meta = await getShowMetadata(show.id);
           return {
             ...show,
+            originalIndex: index, // Preserves the order they were added to the watchlist
             network: meta?.network || 'Unknown Streamer',
-            status: meta?.status || 'Active',
-            genres: meta?.genres || [],
+            isEnded: meta?.isEnded || false,
+            numberOfEpisodes: meta?.numberOfEpisodes || 0,
           };
         })
       );
@@ -45,30 +54,36 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
     );
   }
 
-  const availableGenres = Array.from(
-    new Set(showsWithMeta.flatMap((s) => s.genres || []))
-  ).sort();
-
-  function toggleGenre(genre) {
-    setSelectedGenres((prev) =>
-      prev.includes(genre)
-        ? prev.filter((g) => g !== genre)
-        : [...prev, genre]
-    );
+  // 1. Filter by Active/Archive tab and Completed status
+  let processedShows = showsWithMeta.filter((s) => (subTab === 'active' ? !s.archived : s.archived));
+  
+  if (sortMode === 'completed') {
+    processedShows = processedShows.filter((s) => s.isEnded);
   }
 
-  function clearGenres() {
-    setSelectedGenres([]);
-  }
+  // 2. Sort the array based on the selected mode
+  processedShows.sort((a, b) => {
+    if (sortMode === 'recent') {
+      return b.originalIndex - a.originalIndex;
+    }
+    if (sortMode === 'network') {
+      const netA = a.network || '';
+      const netB = b.network || '';
+      const netCompare = netA.localeCompare(netB);
+      if (netCompare !== 0) return netCompare;
+      return (a.name || '').localeCompare(b.name || '');
+    }
+    if (sortMode === 'episodes') {
+      return (a.numberOfEpisodes || 0) - (b.numberOfEpisodes || 0);
+    }
+    // Default 'az' and 'completed' fall back to alphabetical
+    return (a.name || '').localeCompare(b.name || '');
+  });
 
-  // Filter and sort the shows
-  const filteredShows = showsWithMeta
-    .filter((s) => (subTab === 'active' ? !s.archived : s.archived))
-    .filter((s) => {
-      if (selectedGenres.length === 0) return true;
-      return selectedGenres.some((g) => s.genres?.includes(g));
-    })
-    .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  function handleSelectSort(id) {
+    setSortMode(id);
+    setIsDropdownOpen(false);
+  }
 
   function scrollToLetter(targetLetter) {
     const startIndex = FULL_ALPHABET.indexOf(targetLetter);
@@ -94,9 +109,12 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
 
   const activeCount = showsWithMeta.filter((s) => !s.archived).length;
   const archivedCount = showsWithMeta.filter((s) => s.archived).length;
+  
+  // Only show the side index and right-padding if we are sorting alphabetically
+  const showAlphabetIndex = processedShows.length > 0 && ['az', 'completed'].includes(sortMode);
 
   return (
-    <div className={`space-y-2 ${filteredShows.length > 0 ? 'pr-5' : ''}`}>
+    <div className={`space-y-2 ${showAlphabetIndex ? 'pr-5' : ''}`}>
       {/* Sub-Tab Toggle Bar */}
       <div className="flex rounded-xl border border-slate-800 bg-[#1E293B] p-0 text-xs font-bold">
         <button
@@ -121,80 +139,41 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
         </button>
       </div>
 
-      {/* Multi-Select Genre Dropdown */}
+      {/* Sort & Filter Dropdown */}
       <div className="relative w-full space-y-2">
         <button
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           className="flex w-full items-center justify-between rounded-xl border border-slate-800 bg-[#1E293B] px-3.5 py-2.5 text-xs font-semibold text-white transition-all hover:border-slate-700"
         >
           <span className="truncate">
-            {selectedGenres.length === 0
-              ? 'Filter by Genres (All)'
-              : `Genres (${selectedGenres.length} selected)`}
+            {SORT_OPTIONS.find((opt) => opt.id === sortMode)?.label}
           </span>
           <span className="ml-2 text-slate-400">{isDropdownOpen ? '▲' : '▼'}</span>
         </button>
 
         {isDropdownOpen && (
-          <div className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-slate-800 bg-[#1E293B] p-2 shadow-2xl space-y-1">
-            <div className="flex justify-between items-center px-2 py-1 text-[10px] text-slate-400 border-b border-slate-800 pb-1.5 mb-1">
-              <span>Select Genres</span>
-              {selectedGenres.length > 0 && (
-                <button
-                  onClick={clearGenres}
-                  className="text-[#8CFA96] hover:underline font-bold"
-                >
-                  Clear All
-                </button>
-              )}
-            </div>
-
-            {availableGenres.length === 0 ? (
-              <p className="p-2 text-center text-xs text-slate-500">No genre data available</p>
-            ) : (
-              availableGenres.map((genre) => {
-                const isSelected = selectedGenres.includes(genre);
-                return (
-                  <button
-                    key={genre}
-                    onClick={() => toggleGenre(genre)}
-                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-bold transition-all ${
-                      isSelected
-                        ? 'bg-[#8CFA96]/15 text-[#8CFA96]'
-                        : 'text-slate-300 hover:bg-slate-800'
-                    }`}
-                  >
-                    <span>{genre}</span>
-                    {isSelected && <span>✓</span>}
-                  </button>
-                );
-              })
-            )}
-          </div>
-        )}
-
-        {selectedGenres.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 pt-1">
-            {selectedGenres.map((genre) => (
-              <span
-                key={genre}
-                className="inline-flex items-center space-x-1 rounded-md border border-[#8CFA96]/30 bg-[#8CFA96]/10 px-2 py-0.5 text-[10px] font-bold text-[#8CFA96]"
+          <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-xl border border-slate-800 bg-[#1E293B] shadow-2xl">
+            {SORT_OPTIONS.map((option) => (
+              <button
+                key={option.id}
+                onClick={() => handleSelectSort(option.id)}
+                // Changed py-3 to py-1.5 here 👇
+                className={`flex w-full items-center justify-between px-3.5 py-1.5 text-xs font-bold transition-all border-b border-slate-800/50 last:border-0 ${
+                  sortMode === option.id
+                    ? 'bg-[#8CFA96]/10 text-[#8CFA96]'
+                    : 'text-slate-300 hover:bg-slate-800'
+                }`}
               >
-                <span>{genre}</span>
-                <button
-                  onClick={() => toggleGenre(genre)}
-                  className="ml-1 text-slate-400 hover:text-white"
-                >
-                  ✕
-                </button>
-              </span>
+                <span>{option.label}</span>
+                {sortMode === option.id && <span>✓</span>}
+              </button>
             ))}
           </div>
         )}
       </div>
 
       {/* Floating Vertical Full Alphabet Side Index */}
-      {filteredShows.length > 0 && (
+      {showAlphabetIndex && (
         <div className="fixed right-2 bottom-15 z-40 flex flex-col items-center justify-center">
           {FULL_ALPHABET.map((letter) => (
             <button
@@ -210,30 +189,29 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
 
       {/* SHOW LIST */}
       <div className="space-y-2">
-        {filteredShows.length === 0 ? (
+        {processedShows.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-800 py-12 px-4 text-center mt-4">
             <p className="text-sm font-medium text-slate-400">
-              {selectedGenres.length > 0
-                ? 'No shows match all selected genres'
+              {sortMode === 'completed'
+                ? 'No completed series in this view'
                 : subTab === 'active'
                 ? 'No active shows in library'
                 : 'Archive Vault is empty'}
             </p>
             <p className="mt-1 text-xs text-slate-500">
-              {selectedGenres.length > 0
-                ? 'Try clearing or selecting different genres'
+              {sortMode === 'completed'
+                ? 'Change your filter to see ongoing shows'
                 : 'Tap "+ Add" above to start tracking shows'}
             </p>
           </div>
         ) : (
-          filteredShows.map((show, index) => {
-            // Check if this show is the first one to start with its letter
+          processedShows.map((show, index) => {
             let currentLetter = (show.name || '#').charAt(0).toUpperCase();
             if (!/[A-Z]/.test(currentLetter)) currentLetter = '#';
 
             let prevLetter = null;
             if (index > 0) {
-              prevLetter = (filteredShows[index - 1].name || '#').charAt(0).toUpperCase();
+              prevLetter = (processedShows[index - 1].name || '#').charAt(0).toUpperCase();
               if (!/[A-Z]/.test(prevLetter)) prevLetter = '#';
             }
 
@@ -242,8 +220,8 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
             return (
               <div
                 key={show.id}
-                id={isFirstOfLetter ? `letter-${currentLetter}` : undefined}
-                className="scroll-mt-32"
+                id={showAlphabetIndex && isFirstOfLetter ? `letter-${currentLetter}` : undefined}
+                className={showAlphabetIndex ? "scroll-mt-32" : ""}
               >
                 <ShowCard
                   show={show}
@@ -307,9 +285,9 @@ function ShowCard({ show, onSelectShow, onRemoveShow, onToggleArchive, onRewatch
                 Rewatching
               </span>
             )}
-            {show.genres?.[0] && (
+            {show.numberOfEpisodes > 0 && (
               <span className="rounded bg-slate-800 border border-slate-700 px-1.5 py-0.2 text-[9px] font-semibold text-slate-400 shrink-0">
-                {show.genres[0]}
+                {show.numberOfEpisodes} EPs
               </span>
             )}
           </div>
