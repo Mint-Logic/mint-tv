@@ -223,8 +223,8 @@ export default function App() {
         watchlist={watchlist} 
       />
 
-      {/* 4-Tab Bottom Navigation with Safe Area Extension */}
-      <nav className="fixed bottom-0 left-0 right-0 z-20 mx-auto flex max-w-md justify-around border-t border-slate-800 bg-[#1E293B] px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-md">
+      {/* 4-Tab Bottom Navigation with Seamless Background Extension */}
+      <nav className="fixed bottom-0 left-0 right-0 z-20 mx-auto flex max-w-md justify-around border-t border-slate-800/80 bg-[#0F172A] px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-md">
         <button
           onClick={() => {
             setSelectedShowId(null);
