@@ -1,9 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { IMAGE_BASE_URL, getShowMetadata } from '../services/tmdb';
 
-export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggleArchive, onRewatchShow }) {
-  const [subTab, setSubTab] = useState('active'); // 'active' | 'archive'
+export function MasterWatchlist({ 
+  watchlist, 
+  atticShows, 
+  onSelectShow, 
+  onRemoveShow, 
+  onRemoveFromAttic, 
+  onMoveToAttic, 
+  onRestoreFromAttic 
+}) {
+  const [subTab, setSubTab] = useState('active'); // 'active' | 'attic'
   const [showsWithMeta, setShowsWithMeta] = useState([]);
+  const [atticWithMeta, setAtticWithMeta] = useState([]);
   const [loading, setLoading] = useState(true);
   
   const [sortMode, setSortMode] = useState('az');
@@ -21,20 +30,18 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
     { id: 'completed', label: 'Completed Series Only' },
   ];
 
+  // Hydrate metadata for Active Watchlist
   useEffect(() => {
-    async function loadMetadata() {
-      // Intentionally omitting setLoading(true) here so the list doesn't jump when removing shows
+    async function loadActiveMetadata() {
       const hydrated = await Promise.all(
         watchlist.map(async (show, index) => {
           const meta = await getShowMetadata(show.id);
-          
-          // Bulletproof fallbacks for dates and completed status
           const airDate = meta?.first_air_date || meta?.firstAirDate || show.first_air_date;
           const isActuallyEnded = meta?.isEnded || meta?.status === 'Ended' || meta?.status === 'Canceled' || false;
           
           return {
             ...show,
-            originalIndex: index, // Preserves the order they were added to the watchlist
+            originalIndex: index,
             network: meta?.network || 'Unknown Streamer',
             isEnded: isActuallyEnded,
             numberOfEpisodes: meta?.numberOfEpisodes || 0,
@@ -47,29 +54,56 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
     }
 
     if (watchlist.length > 0) {
-      loadMetadata();
+      loadActiveMetadata();
     } else {
       setShowsWithMeta([]);
       setLoading(false);
     }
   }, [watchlist]);
 
+  // Hydrate metadata for The Attic
+  useEffect(() => {
+    async function loadAtticMetadata() {
+      const hydrated = await Promise.all(
+        atticShows.map(async (show, index) => {
+          const meta = await getShowMetadata(show.id);
+          const airDate = meta?.first_air_date || meta?.firstAirDate || show.first_air_date;
+          const isActuallyEnded = meta?.isEnded || meta?.status === 'Ended' || meta?.status === 'Canceled' || false;
+          
+          return {
+            ...show,
+            originalIndex: index,
+            network: meta?.network || show.network || 'Unknown Streamer',
+            isEnded: isActuallyEnded,
+            numberOfEpisodes: meta?.numberOfEpisodes || show.numberOfEpisodes || 0,
+            firstAirDate: airDate ? airDate : '9999-12-31', 
+          };
+        })
+      );
+      setAtticWithMeta(hydrated);
+    }
+
+    if (atticShows.length > 0) {
+      loadAtticMetadata();
+    } else {
+      setAtticWithMeta([]);
+    }
+  }, [atticShows]);
+
   if (loading) {
     return (
       <div className="py-20 text-center text-xs font-bold text-slate-500">
-        Loading show directory...
+        Loading directory...
       </div>
     );
   }
 
-  // 1. Filter by Active/Archive tab and Completed status
-  let processedShows = showsWithMeta.filter((s) => (subTab === 'active' ? !s.archived : s.archived));
+  let processedShows = subTab === 'active' ? [...showsWithMeta] : [...atticWithMeta];
   
   if (sortMode === 'completed') {
     processedShows = processedShows.filter((s) => s.isEnded);
   }
 
-  // 2. Sort the array based on the selected mode
   processedShows.sort((a, b) => {
     if (sortMode === 'recent') {
       return b.originalIndex - a.originalIndex;
@@ -90,7 +124,6 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
     if (sortMode === 'age-desc') {
       return (b.firstAirDate).localeCompare(a.firstAirDate);
     }
-    // Default 'az' and 'completed' fall back to alphabetical
     return (a.name || '').localeCompare(b.name || '');
   });
 
@@ -101,8 +134,6 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
 
   function scrollToLetter(targetLetter) {
     const startIndex = FULL_ALPHABET.indexOf(targetLetter);
-    
-    // Look forward for the closest existing letter
     for (let i = startIndex; i < FULL_ALPHABET.length; i++) {
       const el = document.getElementById(`letter-${FULL_ALPHABET[i]}`);
       if (el) {
@@ -110,8 +141,6 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
         return;
       }
     }
-    
-    // If no letters ahead, look backward
     for (let i = startIndex - 1; i >= 0; i--) {
       const el = document.getElementById(`letter-${FULL_ALPHABET[i]}`);
       if (el) {
@@ -121,45 +150,37 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
     }
   }
 
-  const activeCount = showsWithMeta.filter((s) => !s.archived).length;
-  const archivedCount = showsWithMeta.filter((s) => s.archived).length;
-  
-  // Only show the side index and right-padding if we are sorting alphabetically
   const showAlphabetIndex = processedShows.length > 0 && ['az', 'completed'].includes(sortMode);
 
   return (
     <div className={`space-y-2 ${showAlphabetIndex ? 'pr-5' : ''}`}>
       {/* STICKY CONTROLS CONTAINER */}
       <div className="sticky top-[49px] z-30 bg-[#0F172A] pt-1 pb-2 space-y-2">
-        {/* Sub-Tab Toggle Bar */}
-        <div className="flex rounded-xl border border-slate-800 bg-[#1E293B] p-0 text-xs font-bold shadow-md">
+        {/* Restored Segmented Sub-Tab Header */}
+        <div className="flex w-full items-center justify-evenly rounded-xl border border-slate-800 bg-[#1E293B] p-1 text-[11px] sm:text-xs font-bold shadow-md">
           <button
             onClick={() => setSubTab('active')}
-            className={`flex-1 rounded-lg py-2 transition-all ${
-              subTab === 'active'
-                ? 'bg-slate-800 text-[#8CFA96] shadow-sm'
-                : 'text-slate-400 hover:text-white'
+            className={`flex-1 py-2 rounded-lg transition-all ${
+              subTab === 'active' ? 'bg-slate-800 text-[#8CFA96] shadow-sm' : 'text-slate-400 hover:text-white'
             }`}
           >
-            Active Shows ({activeCount})
+            Active Shows ({showsWithMeta.length})
           </button>
           <button
-            onClick={() => setSubTab('archive')}
-            className={`flex-1 rounded-lg py-2 transition-all ${
-              subTab === 'archive'
-                ? 'bg-slate-800 text-[#8CFA96] shadow-sm'
-                : 'text-slate-400 hover:text-white'
+            onClick={() => setSubTab('attic')}
+            className={`flex-1 py-2 rounded-lg transition-all ${
+              subTab === 'attic' ? 'bg-slate-800 text-[#8CFA96] shadow-sm' : 'text-slate-400 hover:text-white'
             }`}
           >
-            Archived Shows ({archivedCount})
+            The Attic ({atticWithMeta.length})
           </button>
         </div>
 
-        {/* Sort & Filter Dropdown */}
+        {/* Sort Dropdown */}
         <div className="relative w-full space-y-2">
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex w-full items-center justify-between rounded-xl border border-slate-800 bg-[#1E293B] px-3.5 py-2.5 text-xs font-semibold text-white transition-all hover:border-slate-700 shadow-md"
+            className="flex w-full items-center justify-between rounded-xl border border-slate-800 bg-[#1E293B] px-5 py-2.5 text-[11px] sm:text-xs font-semibold text-white transition-all hover:border-slate-700 shadow-md"
           >
             <span className="truncate">
               {SORT_OPTIONS.find((opt) => opt.id === sortMode)?.label}
@@ -188,7 +209,7 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
         </div>
       </div>
 
-      {/* Floating Vertical Full Alphabet Side Index */}
+      {/* Floating Vertical Alphabet Side Index */}
       {showAlphabetIndex && (
         <div className="fixed right-2 bottom-15 z-40 flex flex-col items-center justify-center">
           {FULL_ALPHABET.map((letter) => (
@@ -212,12 +233,12 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
                 ? 'No completed series in this view'
                 : subTab === 'active'
                 ? 'No active shows in library'
-                : 'Archive Vault is empty'}
+                : 'The Attic is empty'}
             </p>
             <p className="mt-1 text-xs text-slate-500">
-              {sortMode === 'completed'
-                ? 'Check your Archive tab for completed shows'
-                : 'Tap "+ Add" above to start tracking shows'}
+              {subTab === 'active'
+                ? 'Tap "+ Add" above to start tracking shows'
+                : 'Move completed or ended series to The Attic'}
             </p>
           </div>
         ) : (
@@ -242,11 +263,12 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
                 <ShowCard
                   show={show}
                   sortMode={sortMode}
+                  isAttic={subTab === 'attic'}
                   onSelectShow={onSelectShow}
                   onRemoveShow={onRemoveShow}
-                  onToggleArchive={onToggleArchive}
-                  onRewatchShow={onRewatchShow}
-                  isArchived={subTab === 'archive'}
+                  onRemoveFromAttic={onRemoveFromAttic}
+                  onMoveToAttic={onMoveToAttic}
+                  onRestoreFromAttic={onRestoreFromAttic}
                 />
               </div>
             );
@@ -257,8 +279,17 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
   );
 }
 
-function ShowCard({ show, sortMode, onSelectShow, onRemoveShow, onToggleArchive, onRewatchShow, isArchived }) {
-  const posterUrl = show.poster ? `${IMAGE_BASE_URL}${show.poster}` : '';
+function ShowCard({ 
+  show, 
+  sortMode, 
+  isAttic, 
+  onSelectShow, 
+  onRemoveShow, 
+  onRemoveFromAttic, 
+  onMoveToAttic, 
+  onRestoreFromAttic 
+}) {
+  const posterUrl = show.poster_path || show.poster ? `${IMAGE_BASE_URL}${show.poster_path || show.poster}` : '';
   const premiereYear = show.firstAirDate && show.firstAirDate !== '9999-12-31' 
     ? show.firstAirDate.substring(0, 4) 
     : '';
@@ -273,7 +304,7 @@ function ShowCard({ show, sortMode, onSelectShow, onRemoveShow, onToggleArchive,
           <img
             src={posterUrl}
             alt={show.name}
-            className="h-14 w-10 rounded-lg object-cover shrink-0 bg-slate-900 shadow"
+            className={`h-14 w-10 rounded-lg object-cover shrink-0 bg-slate-900 shadow ${isAttic ? 'opacity-80' : ''}`}
           />
         ) : (
           <div className="h-14 w-10 rounded-lg bg-slate-900 shrink-0 flex items-center justify-center text-[9px] text-slate-600">
@@ -300,11 +331,6 @@ function ShowCard({ show, sortMode, onSelectShow, onRemoveShow, onToggleArchive,
             <span className="rounded bg-[#8CFA96]/15 border border-[#8CFA96]/30 px-1.5 py-0.2 text-[9px] font-extrabold uppercase text-[#8CFA96] shrink-0">
               {show.network}
             </span>
-            {show.isRewatching && (
-              <span className="rounded bg-amber-400/15 border border-amber-400/30 px-1.5 py-0.2 text-[9px] font-extrabold uppercase text-amber-400 shrink-0">
-                Rewatching
-              </span>
-            )}
             {sortMode === 'episodes' && show.numberOfEpisodes > 0 && (
               <span className="rounded bg-slate-800 border border-slate-700 px-1.5 py-0.2 text-[9px] font-semibold text-slate-400 shrink-0">
                 {show.numberOfEpisodes} EPs
@@ -319,23 +345,32 @@ function ShowCard({ show, sortMode, onSelectShow, onRemoveShow, onToggleArchive,
         </div>
       </div>
 
-      {/* Compact Action Buttons */}
       <div className="flex items-center space-x-1.5 shrink-0 self-center pl-1 border-l border-slate-800/80">
-        {isArchived && onRewatchShow && (
+        {isAttic ? (
           <button
             type="button"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              onRewatchShow(show.id);
+              onRestoreFromAttic(show);
             }}
-            title="Rewatch from S01E01"
+            title="Restore to Active Watchlist"
             className="flex items-center space-x-1 rounded-lg border border-[#8CFA96]/40 bg-[#8CFA96]/10 px-2 py-1.5 text-[10px] font-bold text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-900 transition-all active:scale-95"
           >
-            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            <span className="hidden xs:inline">Rewatch</span>
+            <span className="text-[9px] font-extrabold uppercase">Watchlist</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onMoveToAttic(show);
+            }}
+            title="Move to The Attic"
+            className="flex items-center space-x-1 rounded-lg border border-purple-400/30 bg-purple-400/10 px-2 py-1.5 text-[10px] font-bold text-purple-400 hover:bg-purple-400 hover:text-slate-900 transition-all active:scale-95"
+          >
+            <span className="text-[9px] font-extrabold uppercase">To Attic</span>
           </button>
         )}
 
@@ -344,30 +379,13 @@ function ShowCard({ show, sortMode, onSelectShow, onRemoveShow, onToggleArchive,
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            onToggleArchive(show.id);
+            if (isAttic) {
+              onRemoveFromAttic(show.id);
+            } else {
+              onRemoveShow(show.id);
+            }
           }}
-          title={isArchived ? "Restore to Active Watchlist" : "Move to Archive Vault"}
-          className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-700 bg-slate-900/80 text-slate-300 hover:border-[#8CFA96] hover:text-[#8CFA96] transition-all active:scale-90"
-        >
-          {isArchived ? (
-            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-            </svg>
-          ) : (
-            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-            </svg>
-          )}
-        </button>
-
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onRemoveShow(show.id);
-          }}
-          title="Remove show permanently"
+          title="Remove permanently"
           className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-700 bg-slate-900/80 text-[10px] text-slate-400 hover:border-red-500/50 hover:bg-red-500/20 hover:text-red-400 transition-all active:scale-90"
         >
           ✕

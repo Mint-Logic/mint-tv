@@ -13,13 +13,25 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('ready');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  // Active Watchlist
   const [watchlist, setWatchlist] = useState(() => {
     return JSON.parse(localStorage.getItem('mint_tv_shows') || '[]');
+  });
+
+  // The Attic (Preserves the 350 legacy items safely!)
+  const [atticShows, setAtticShows] = useState(() => {
+    const saved = localStorage.getItem('mint_tv_watch_later');
+    return saved ? JSON.parse(saved) : [];
   });
 
   useEffect(() => {
     localStorage.setItem('mint_tv_shows', JSON.stringify(watchlist));
   }, [watchlist]);
+
+  useEffect(() => {
+    localStorage.setItem('mint_tv_watch_later', JSON.stringify(atticShows));
+  }, [atticShows]);
 
   // Android System Back Navigation Integration
   useEffect(() => {
@@ -54,6 +66,10 @@ export default function App() {
     setWatchlist(watchlist.filter((s) => s.id !== id));
   }
 
+  function handleRemoveFromAttic(id) {
+    setAtticShows(atticShows.filter((s) => s.id !== id));
+  }
+
   function handleAdvanceEpisode(id) {
     setWatchlist(
       watchlist.map((show) => {
@@ -65,37 +81,26 @@ export default function App() {
     );
   }
 
-  function handleToggleArchive(id) {
-    setWatchlist(
-      watchlist.map((show) => {
-        if (show.id === id) {
-          const nextArchived = !show.archived;
-          return { 
-            ...show, 
-            archived: nextArchived,
-            isRewatching: !nextArchived ? true : false 
-          };
-        }
-        return show;
-      })
-    );
+  // Move a show from Active Watchlist -> The Attic
+  function handleMoveToAttic(show) {
+    if (!atticShows.some((s) => s.id === show.id)) {
+      setAtticShows([show, ...atticShows]);
+    }
+    setWatchlist(watchlist.filter((s) => s.id !== show.id));
   }
 
-  function handleRewatchShow(id) {
-    setWatchlist(
-      watchlist.map((show) => {
-        if (show.id === id) {
-          return { 
-            ...show, 
-            currentSeason: 1, 
-            currentEpisode: 1, 
-            archived: false,
-            isRewatching: true 
-          };
-        }
-        return show;
-      })
-    );
+  // Restore a show from The Attic -> Active Watchlist
+  function handleRestoreFromAttic(show) {
+    handleAddShow({
+      id: show.id,
+      name: show.name,
+      poster: show.poster_path || show.poster,
+      backdrop: show.backdrop_path || show.backdrop,
+      currentSeason: 1,
+      currentEpisode: 1,
+      completed: false,
+    });
+    setAtticShows(atticShows.filter((s) => s.id !== show.id));
   }
 
   return (
@@ -127,7 +132,7 @@ export default function App() {
         {selectedShowId ? (
           <ShowDetails
             showId={selectedShowId}
-            showData={watchlist.find((s) => s.id === selectedShowId)}
+            showData={watchlist.find((s) => s.id === selectedShowId) || atticShows.find((s) => s.id === selectedShowId)}
             onBack={() => setSelectedShowId(null)}
             onUpdateEpisode={(id, season, episode) => {
               setWatchlist(
@@ -163,17 +168,25 @@ export default function App() {
             {activeTab === 'watchlist' && (
               <MasterWatchlist
                 watchlist={watchlist}
+                atticShows={atticShows}
                 onSelectShow={(id) => setSelectedShowId(id)}
                 onRemoveShow={handleRemoveShow}
-                onToggleArchive={handleToggleArchive}
-                onRewatchShow={handleRewatchShow}
+                onRemoveFromAttic={handleRemoveFromAttic}
+                onMoveToAttic={handleMoveToAttic}
+                onRestoreFromAttic={handleRestoreFromAttic}
               />
             )}
 
             {activeTab === 'recommended' && (
               <RecommendationsTab
                 watchlist={watchlist}
+                atticShows={atticShows}
                 onAddShow={handleAddShow}
+                onMoveToAttic={(show) => {
+                  if (!atticShows.some((s) => s.id === show.id)) {
+                    setAtticShows([show, ...atticShows]);
+                  }
+                }}
               />
             )}
           </>
@@ -187,57 +200,37 @@ export default function App() {
         watchlist={watchlist} 
       />
 
-      {/* 4-Tab Bottom Navigation with Safe Area Extension */}
+      {/* 4-Tab Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-20 mx-auto flex max-w-md justify-around border-t border-slate-800 bg-[#1E293B] px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-md">
         <button
-          onClick={() => {
-            setSelectedShowId(null);
-            setActiveTab('ready');
-          }}
+          onClick={() => { setSelectedShowId(null); setActiveTab('ready'); }}
           className={`flex flex-col items-center ${activeTab === 'ready' && !selectedShowId ? 'text-[#8CFA96]' : 'text-slate-500'}`}
         >
-          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z" />
-          </svg>
+          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
           <span className="mt-1 text-[10px] font-bold">Ready</span>
         </button>
 
         <button
-          onClick={() => {
-            setSelectedShowId(null);
-            setActiveTab('upcoming');
-          }}
+          onClick={() => { setSelectedShowId(null); setActiveTab('upcoming'); }}
           className={`flex flex-col items-center ${activeTab === 'upcoming' && !selectedShowId ? 'text-[#8CFA96]' : 'text-slate-500'}`}
         >
-          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z" />
-          </svg>
+          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z" /></svg>
           <span className="mt-1 text-[10px] font-bold">Upcoming</span>
         </button>
 
         <button
-          onClick={() => {
-            setSelectedShowId(null);
-            setActiveTab('watchlist');
-          }}
+          onClick={() => { setSelectedShowId(null); setActiveTab('watchlist'); }}
           className={`flex flex-col items-center ${activeTab === 'watchlist' && !selectedShowId ? 'text-[#8CFA96]' : 'text-slate-500'}`}
         >
-          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
-          </svg>
+          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" /></svg>
           <span className="mt-1 text-[10px] font-bold">Watchlist</span>
         </button>
 
         <button
-          onClick={() => {
-            setSelectedShowId(null);
-            setActiveTab('recommended');
-          }}
+          onClick={() => { setSelectedShowId(null); setActiveTab('recommended'); }}
           className={`flex flex-col items-center ${activeTab === 'recommended' && !selectedShowId ? 'text-[#8CFA96]' : 'text-slate-500'}`}
         >
-          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2l2.4 4.8 5.3.8-3.8 3.7.9 5.3-4.8-2.5-4.8 2.5.9-5.3-3.8-3.7 5.3-.8L12 2z" />
-          </svg>
+          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.4 4.8 5.3.8-3.8 3.7.9 5.3-4.8-2.5-4.8 2.5.9-5.3-3.8-3.7 5.3-.8L12 2z" /></svg>
           <span className="mt-1 text-[10px] font-bold">For You</span>
         </button>
       </nav>

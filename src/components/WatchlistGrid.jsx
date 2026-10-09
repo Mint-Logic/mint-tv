@@ -105,25 +105,27 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {/* STICKY SUB-TAB HEADER */}
       <div className="sticky top-[49px] z-30 bg-[#0F172A] pt-1 pb-2">
-        <div className="flex rounded-xl border border-slate-800 bg-[#1E293B] p-1 text-xs font-bold shadow-md">
+        <div className="flex w-full items-center justify-evenly rounded-xl border border-slate-800 bg-[#1E293B] py-2.5 text-[11px] sm:text-xs font-bold shadow-md">
           <button
+            type="button"
             onClick={() => setSubTab('ready')}
-            className={`flex-1 rounded-lg py-2 transition-all ${
+            className={`px-4 transition-colors ${
               subTab === 'ready'
-                ? 'bg-slate-800 text-[#8CFA96] shadow-sm'
+                ? 'text-[#8CFA96]'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
             Ready to Watch ({airedQueue.length})
           </button>
           <button
+            type="button"
             onClick={() => setSubTab('caughtup')}
-            className={`flex-1 rounded-lg py-2 transition-all ${
+            className={`px-4 transition-colors ${
               subTab === 'caughtup'
-                ? 'bg-slate-800 text-[#8CFA96] shadow-sm'
+                ? 'text-[#8CFA96]'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -134,7 +136,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
 
       {/* READY TO WATCH SUB-TAB */}
       {subTab === 'ready' && (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {airedQueue.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-800 py-12 px-4 text-center">
               <p className="text-sm font-medium text-slate-400">All caught up!</p>
@@ -235,7 +237,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
 
       {/* CAUGHT UP SUB-TAB */}
       {subTab === 'caughtup' && (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {completedQueue.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-800 py-12 px-4 text-center">
               <p className="text-sm font-medium text-slate-400">No completed active shows!</p>
@@ -278,7 +280,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
                     </div>
                   </div>
 
-                  <span className="text-[10px] font-bold text-slate-400 bg-slate-800 px-2.5 py-1 rounded border border-slate-700 shrink-0">
+                  <span className="text-[10px] font-bold text-slate-400 bg-slate-800 px-2.5 py-0.5 rounded border border-slate-700 shrink-0">
                     Caught Up
                   </span>
                 </div>

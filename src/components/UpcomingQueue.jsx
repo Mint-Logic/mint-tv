@@ -143,7 +143,7 @@ export function UpcomingQueue({ watchlist, onSelectShow, onRemoveShow }) {
           {/* STICKY SECTION HEADER */}
           <div className="sticky top-[49px] z-30 bg-[#0F172A] pt-1 pb-2">
             <div className="flex justify-between items-center px-3 py-2 rounded-xl border border-slate-800 bg-[#1E293B] shadow-md">
-              <h2 className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center space-x-1.5">
+              <h2 className="text-[11px] sm:text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center space-x-1.5">
                 <span>Upcoming Premieres</span>
               </h2>
               <span className="bg-amber-400/10 text-amber-400 px-2.5 py-0.5 rounded-full text-[10px] font-black border border-amber-400/20">
