@@ -67,6 +67,7 @@ export async function getShowMetadata(showId) {
       numberOfSeasons: data.number_of_seasons || 1,
       numberOfEpisodes: data.number_of_episodes || 0,
       isEnded: data.status === 'Ended' || data.status === 'Canceled',
+      firstAirDate: data.first_air_date, // Passes the premiere date to the watchlist
     };
   } catch (err) {
     console.error('TMDB Metadata Error:', err);

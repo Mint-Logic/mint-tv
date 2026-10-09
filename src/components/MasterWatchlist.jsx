@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { IMAGE_BASE_URL, getShowMetadata } from '../services/tmdb';
 
 export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggleArchive, onRewatchShow }) {
-  const [subTab, setSubTab] = useState('active'); // 'active' | 'archive'
+  const [subTab, setSubTab] = useState('active');
   const [showsWithMeta, setShowsWithMeta] = useState([]);
   const [loading, setLoading] = useState(true);
   
@@ -16,6 +16,8 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
     { id: 'recent', label: 'Recently Added' },
     { id: 'network', label: 'By Network' },
     { id: 'episodes', label: 'Fewest Episodes' },
+    { id: 'age-desc', label: 'Newest Series' },
+    { id: 'age-asc', label: 'Oldest Series' },
     { id: 'completed', label: 'Completed Series Only' },
   ];
 
@@ -25,12 +27,17 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
       const hydrated = await Promise.all(
         watchlist.map(async (show, index) => {
           const meta = await getShowMetadata(show.id);
+          
+          // Safely catch the date whether the API returns snake_case or your service returns camelCase
+          const airDate = meta?.first_air_date || meta?.firstAirDate || show.first_air_date;
+          
           return {
             ...show,
-            originalIndex: index, // Preserves the order they were added to the watchlist
+            originalIndex: index,
             network: meta?.network || 'Unknown Streamer',
             isEnded: meta?.isEnded || false,
             numberOfEpisodes: meta?.numberOfEpisodes || 0,
+            firstAirDate: airDate ? airDate : '9999-12-31', // Fallback only if the date is entirely missing
           };
         })
       );
@@ -76,6 +83,12 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
     if (sortMode === 'episodes') {
       return (a.numberOfEpisodes || 0) - (b.numberOfEpisodes || 0);
     }
+    if (sortMode === 'age-asc') {
+      return (a.firstAirDate).localeCompare(b.firstAirDate);
+    }
+    if (sortMode === 'age-desc') {
+      return (b.firstAirDate).localeCompare(a.firstAirDate);
+    }
     // Default 'az' and 'completed' fall back to alphabetical
     return (a.name || '').localeCompare(b.name || '');
   });
@@ -88,7 +101,6 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
   function scrollToLetter(targetLetter) {
     const startIndex = FULL_ALPHABET.indexOf(targetLetter);
     
-    // Look forward for the closest existing letter
     for (let i = startIndex; i < FULL_ALPHABET.length; i++) {
       const el = document.getElementById(`letter-${FULL_ALPHABET[i]}`);
       if (el) {
@@ -97,7 +109,6 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
       }
     }
     
-    // If no letters ahead, look backward
     for (let i = startIndex - 1; i >= 0; i--) {
       const el = document.getElementById(`letter-${FULL_ALPHABET[i]}`);
       if (el) {
@@ -110,7 +121,6 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
   const activeCount = showsWithMeta.filter((s) => !s.archived).length;
   const archivedCount = showsWithMeta.filter((s) => s.archived).length;
   
-  // Only show the side index and right-padding if we are sorting alphabetically
   const showAlphabetIndex = processedShows.length > 0 && ['az', 'completed'].includes(sortMode);
 
   return (
@@ -157,7 +167,6 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
               <button
                 key={option.id}
                 onClick={() => handleSelectSort(option.id)}
-                // Changed py-3 to py-1.5 here 👇
                 className={`flex w-full items-center justify-between px-3.5 py-1.5 text-xs font-bold transition-all border-b border-slate-800/50 last:border-0 ${
                   sortMode === option.id
                     ? 'bg-[#8CFA96]/10 text-[#8CFA96]'
@@ -225,6 +234,7 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
               >
                 <ShowCard
                   show={show}
+                  sortMode={sortMode}
                   onSelectShow={onSelectShow}
                   onRemoveShow={onRemoveShow}
                   onToggleArchive={onToggleArchive}
@@ -240,8 +250,11 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
   );
 }
 
-function ShowCard({ show, onSelectShow, onRemoveShow, onToggleArchive, onRewatchShow, isArchived }) {
+function ShowCard({ show, sortMode, onSelectShow, onRemoveShow, onToggleArchive, onRewatchShow, isArchived }) {
   const posterUrl = show.poster ? `${IMAGE_BASE_URL}${show.poster}` : '';
+  const premiereYear = show.firstAirDate && show.firstAirDate !== '9999-12-31' 
+    ? show.firstAirDate.substring(0, 4) 
+    : '';
 
   return (
     <div
@@ -285,9 +298,14 @@ function ShowCard({ show, onSelectShow, onRemoveShow, onToggleArchive, onRewatch
                 Rewatching
               </span>
             )}
-            {show.numberOfEpisodes > 0 && (
+            {sortMode === 'episodes' && show.numberOfEpisodes > 0 && (
               <span className="rounded bg-slate-800 border border-slate-700 px-1.5 py-0.2 text-[9px] font-semibold text-slate-400 shrink-0">
                 {show.numberOfEpisodes} EPs
+              </span>
+            )}
+            {(sortMode === 'age-asc' || sortMode === 'age-desc') && premiereYear && (
+              <span className="rounded bg-slate-800 border border-slate-700 px-1.5 py-0.2 text-[9px] font-semibold text-slate-400 shrink-0">
+                Est. {premiereYear}
               </span>
             )}
           </div>
