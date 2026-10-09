@@ -9,7 +9,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
 
   useEffect(() => {
     async function processQueue() {
-      setLoading(true);
+      
       const today = new Date().toISOString().split('T')[0];
 
       const unarchivedWatchlist = watchlist.filter((show) => !show.archived);
@@ -186,6 +186,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
                       title="Remove show from watchlist"
                       aria-label="Remove show from watchlist"
                       onClick={(e) => {
+                        e.preventDefault();
                         e.stopPropagation();
                         onRemoveShow(show.id);
                       }}

@@ -9,9 +9,11 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
   const [selectedGenres, setSelectedGenres] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  const FULL_ALPHABET = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','#'];
+
   useEffect(() => {
     async function loadMetadata() {
-      setLoading(true);
+      // Intentionally omitting setLoading(true) here so the list doesn't jump when removing shows
       const hydrated = await Promise.all(
         watchlist.map(async (show) => {
           const meta = await getShowMetadata(show.id);
@@ -59,6 +61,7 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
     setSelectedGenres([]);
   }
 
+  // Filter and sort the shows
   const filteredShows = showsWithMeta
     .filter((s) => (subTab === 'active' ? !s.archived : s.archived))
     .filter((s) => {
@@ -66,6 +69,28 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
       return selectedGenres.some((g) => s.genres?.includes(g));
     })
     .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+  function scrollToLetter(targetLetter) {
+    const startIndex = FULL_ALPHABET.indexOf(targetLetter);
+    
+    // Look forward for the closest existing letter
+    for (let i = startIndex; i < FULL_ALPHABET.length; i++) {
+      const el = document.getElementById(`letter-${FULL_ALPHABET[i]}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+    }
+    
+    // If no letters ahead, look backward
+    for (let i = startIndex - 1; i >= 0; i--) {
+      const el = document.getElementById(`letter-${FULL_ALPHABET[i]}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+    }
+  }
 
   const activeCount = showsWithMeta.filter((s) => !s.archived).length;
   const archivedCount = showsWithMeta.filter((s) => s.archived).length;
@@ -168,10 +193,26 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
         )}
       </div>
 
+      {/* Floating Vertical Full Alphabet Side Index */}
+      {filteredShows.length > 0 && (
+        <div className="fixed right-1.5 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center justify-center bg-slate-950/60 py-2 px-1 rounded-full backdrop-blur-md border border-slate-800/50 shadow-2xl">
+          {FULL_ALPHABET.map((letter) => (
+            <button
+              key={letter}
+              onClick={() => scrollToLetter(letter)}
+              // Expanded to h-5 w-5 for larger touch targets, increased font size to 9px
+              className="flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-black text-slate-400 hover:bg-[#8CFA96]/20 hover:text-[#8CFA96] transition-all active:scale-95"
+            >
+              {letter}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* SHOW LIST */}
-      <div className="space-y-3">
+      <div className={`space-y-3 ${filteredShows.length > 0 ? 'pr-6' : ''}`}>
         {filteredShows.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-800 py-12 px-4 text-center">
+          <div className="rounded-2xl border border-dashed border-slate-800 py-12 px-4 text-center mt-4">
             <p className="text-sm font-medium text-slate-400">
               {selectedGenres.length > 0
                 ? 'No shows match all selected genres'
@@ -186,17 +227,36 @@ export function MasterWatchlist({ watchlist, onSelectShow, onRemoveShow, onToggl
             </p>
           </div>
         ) : (
-          filteredShows.map((show) => (
-            <ShowCard
-              key={show.id}
-              show={show}
-              onSelectShow={onSelectShow}
-              onRemoveShow={onRemoveShow}
-              onToggleArchive={onToggleArchive}
-              onRewatchShow={onRewatchShow}
-              isArchived={subTab === 'archive'}
-            />
-          ))
+          filteredShows.map((show, index) => {
+            // Check if this show is the first one to start with its letter
+            let currentLetter = (show.name || '#').charAt(0).toUpperCase();
+            if (!/[A-Z]/.test(currentLetter)) currentLetter = '#';
+
+            let prevLetter = null;
+            if (index > 0) {
+              prevLetter = (filteredShows[index - 1].name || '#').charAt(0).toUpperCase();
+              if (!/[A-Z]/.test(prevLetter)) prevLetter = '#';
+            }
+
+            const isFirstOfLetter = currentLetter !== prevLetter;
+
+            return (
+              <div
+                key={show.id}
+                id={isFirstOfLetter ? `letter-${currentLetter}` : undefined}
+                className="scroll-mt-32"
+              >
+                <ShowCard
+                  show={show}
+                  onSelectShow={onSelectShow}
+                  onRemoveShow={onRemoveShow}
+                  onToggleArchive={onToggleArchive}
+                  onRewatchShow={onRewatchShow}
+                  isArchived={subTab === 'archive'}
+                />
+              </div>
+            );
+          })
         )}
       </div>
     </div>
@@ -261,7 +321,9 @@ function ShowCard({ show, onSelectShow, onRemoveShow, onToggleArchive, onRewatch
       <div className="flex items-center space-x-1.5 shrink-0 self-center pl-1 border-l border-slate-800/80">
         {isArchived && onRewatchShow && (
           <button
+            type="button"
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               onRewatchShow(show.id);
             }}
@@ -276,7 +338,9 @@ function ShowCard({ show, onSelectShow, onRemoveShow, onToggleArchive, onRewatch
         )}
 
         <button
+          type="button"
           onClick={(e) => {
+            e.preventDefault();
             e.stopPropagation();
             onToggleArchive(show.id);
           }}
@@ -295,7 +359,9 @@ function ShowCard({ show, onSelectShow, onRemoveShow, onToggleArchive, onRewatch
         </button>
 
         <button
+          type="button"
           onClick={(e) => {
+            e.preventDefault();
             e.stopPropagation();
             onRemoveShow(show.id);
           }}
