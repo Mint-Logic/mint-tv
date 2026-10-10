@@ -171,28 +171,6 @@ export default function App() {
         onOpenProfile={() => setIsProfileOpen(true)}
       />
 
-      {/* Cloud Account Login Bar */}
-      <div className="bg-slate-900 border-b border-slate-800 px-4 py-1.5 flex justify-between items-center text-xs">
-        <span className="text-slate-400 font-medium">
-          {currentUser ? `Cloud Sync: ${currentUser.email}` : 'Cloud Sync: Logged Out'}
-        </span>
-        {currentUser ? (
-          <button 
-            onClick={() => supabase.auth.signOut()}
-            className="text-red-400 hover:underline font-bold text-[11px]"
-          >
-            Sign Out
-          </button>
-        ) : (
-          <button 
-            onClick={() => setIsAuthOpen(true)}
-            className="text-[#8CFA96] hover:underline font-bold text-[11px]"
-          >
-            Login / Sign Up
-          </button>
-        )}
-      </div>
-
       {/* Profile / Stats Overlay Modal */}
       {isProfileOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
@@ -206,7 +184,11 @@ export default function App() {
                 ✕ Close
               </button>
             </div>
-            <StatsDashboard watchlist={watchlist} />
+            <StatsDashboard 
+              watchlist={watchlist} 
+              currentUser={currentUser}
+              onOpenAuth={() => setIsAuthOpen(true)}
+            />
           </div>
         </div>
       )}

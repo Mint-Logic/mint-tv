@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { supabase } from '../supabase';
 
 const PRESET_TITLES = [
   'TV & Movie Collector',
@@ -28,7 +29,7 @@ const TMDB_TV_GENRES = [
   { id: 37, name: 'Western' },
 ];
 
-export function StatsDashboard({ watchlist }) {
+export function StatsDashboard({ watchlist, currentUser, onOpenAuth }) {
   const [profileName, setProfileName] = useState(() => {
     return localStorage.getItem('mint_tv_user_name') || 'TV Collector';
   });
@@ -120,15 +121,14 @@ export function StatsDashboard({ watchlist }) {
   const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
 
   const getLevelDetails = (episodes) => {
-    // Exact trophy SVG path from your layout
     const trophySvg = (
-    <path
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    strokeWidth="2"
-    d="M12 15a6 6 0 006-6V3H6v6a6 6 0 006 6zm0 0v3m-4 3h8M6 5H4a2 2 0 00-2 2v1a3 3 0 003 3h1m12-6h2a2 2 0 012 2v1a3 3 0 01-3 3h-1"
-  /> 
-  );
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M12 15a6 6 0 006-6V3H6v6a6 6 0 006 6zm0 0v3m-4 3h8M6 5H4a2 2 0 00-2 2v1a3 3 0 003 3h1m12-6h2a2 2 0 012 2v1a3 3 0 01-3 3h-1"
+      /> 
+    );
 
     if (episodes >= 5000) {
       return {
@@ -332,7 +332,7 @@ export function StatsDashboard({ watchlist }) {
   );
 
   return (
-    <div className="space-y-1 relative">
+    <div className="space-y-3 relative">
       {/* PROFILE HEADER HERO */}
       <div className="flex flex-col items-center text-center pt-0 pb-0">
         <div
@@ -374,7 +374,7 @@ export function StatsDashboard({ watchlist }) {
               <svg className="h-2.5 w-2.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
-              <span>Edit</span>
+              <span>Edit Profile</span>
             </button>
           </div>
         ) : (
@@ -763,11 +763,40 @@ export function StatsDashboard({ watchlist }) {
         </div>
       )}
 
-      {/* DATA MANAGEMENT CARD */}
+      {/* DATA & ACCOUNT MANAGEMENT CARD */}
       <div className="-mx-3 sm:-mx-4 overflow-hidden rounded-2xl border border-slate-800 bg-[#1E293B] shadow-lg">
-        <div className="px-4 pt-2 pb-1 border-b border-slate-800/80 text-left">
-          <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-            Data Management
+        {/* CLOUD SYNC CONTROL SECTION */}
+        <div className="px-4 py-3 border-b border-slate-800 bg-slate-900/50 flex justify-between items-center">
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+              Cloud Backup & Sync
+            </span>
+            <span className="text-xs font-semibold text-slate-200">
+              {currentUser ? currentUser.email : 'Not connected'}
+            </span>
+          </div>
+
+          {currentUser ? (
+            <button
+              onClick={() => supabase.auth.signOut()}
+              className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-bold text-red-400 hover:bg-red-500 hover:text-white transition-all"
+            >
+              Sign Out
+            </button>
+          ) : (
+            <button
+              onClick={onOpenAuth}
+              className="rounded-lg border border-[#8CFA96]/40 bg-[#8CFA96]/10 px-3 py-1.5 text-xs font-bold text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-950 transition-all"
+            >
+              Log In / Sign Up
+            </button>
+          )}
+        </div>
+
+        {/* MANUAL BACKUP SECTION */}
+        <div className="px-4 pt-2 pb-1 text-left bg-slate-900/30 border-b border-slate-800/80">
+          <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-500">
+            Manual File Backup
           </span>
         </div>
 
