@@ -168,14 +168,14 @@ export function MasterWatchlist({
             Active Shows ({showsWithMeta.length})
           </button>
           <button
-            onClick={() => setSubTab('attic')}
-            className={`flex-1 py-2 rounded-lg transition-all flex items-center justify-center space-x-1.5 ${
-              subTab === 'attic' ? 'bg-slate-800 text-[#8CFA96] shadow-sm' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            {/*<img src={retroVisionLogo} alt="" className="h-4 w-4 rounded-sm object-cover" />*/}
-            <span>RetroVision ({atticWithMeta.length})</span>
-          </button>
+  onClick={() => setSubTab('attic')}
+  className={`flex-1 py-2 rounded-lg transition-all flex items-center justify-center space-x-1.5 ${
+    subTab === 'attic' ? 'bg-slate-800 text-[#8CFA96] shadow-sm' : 'text-slate-400 hover:text-white'
+  }`}
+>
+ 
+  <span>RetroVision ({atticWithMeta.length})</span>
+</button>
         </div>
 
         {/* Sort Dropdown */}

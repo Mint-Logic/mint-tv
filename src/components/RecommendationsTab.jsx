@@ -134,7 +134,6 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
     fetchDiscoverFeed(false);
   }, []);
 
-  // Actions - Using functional updates to keep scroll position locked
   function handleSaveWatchLater(show) {
     setWatchLater((prev) => [...prev, show]);
     setFeedShows((prev) => prev.filter((s) => s.id !== show.id));
@@ -281,13 +280,13 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                           <button
                             onClick={(e) => { e.stopPropagation(); handleSaveAttic(show); }}
                             className="p-0.5 rounded-lg hover:opacity-80 transition-all active:scale-95"
-                            title="Move to Cosmic Kitty"
+                            title="Move to RetroVision"
                           >
                             <img 
-  src={retroVisionLogo} 
-  alt="RetroVision" 
-  className="h-6 w-6 rounded object-cover" 
-/>
+                              src={retroVisionLogo} 
+                              alt="RetroVision" 
+                              className="h-6 w-6 rounded object-cover" 
+                            />
                           </button>
 
                           <button
@@ -395,12 +394,12 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                           <span className="text-[8px] font-black uppercase tracking-tight">Watchlist</span>
                         </button>
 
-                        <button onClick={(e) => { e.stopPropagation(); handleMoveWLtoAttic(show); }} className="p-0.5 rounded-lg hover:opacity-80 transition-all active:scale-95" title="Move to Cosmic Kitty">
+                        <button onClick={(e) => { e.stopPropagation(); handleMoveWLtoAttic(show); }} className="p-0.5 rounded-lg hover:opacity-80 transition-all active:scale-95" title="Move to RetroVision">
                           <img 
-  src={retroVisionLogo} 
-  alt="RetroVision" 
-  className="h-6 w-6 rounded object-cover" 
-/>
+                            src={retroVisionLogo} 
+                            alt="RetroVision" 
+                            className="h-6 w-6 rounded object-cover" 
+                          />
                         </button>
 
                         <button onClick={(e) => { e.stopPropagation(); setWatchLater(prev => prev.filter(s => s.id !== show.id)); }} className="flex items-center rounded border border-red-900/30 bg-red-950/20 px-2 py-1 text-red-700 hover:bg-red-900/40 hover:text-red-600 transition-all active:scale-95">
@@ -430,3 +429,5 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
     </div>
   );
 }
+
+export default RecommendationsTab;
