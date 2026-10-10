@@ -92,12 +92,20 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
     }
   }
 
-  function handleMarkSeasonWatched() {
+  function handleMarkSeasonWatched(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (episodes.length === 0) return;
     onUpdateEpisode(showId, selectedSeason, episodes.length + 1);
   }
 
-  function handleMarkSeasonUnwatched() {
+  function handleMarkSeasonUnwatched(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (episodes.length === 0) return;
     onUpdateEpisode(showId, selectedSeason, 1);
   }
@@ -209,7 +217,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
         {episodes.map((ep, index) => {
           const isFirstEpisode = index === 0;
 
-          // STRICT FINALE VERIFICATION:
+          // STRICT FINALE VERIFICATION
           const isExplicitFinale = ep.episode_type === 'finale';
           const isReturningSeries = details.status === 'Returning Series' || details.status === 'In Production' || details.in_production;
           const isMatchForExpectedCount = totalExpectedEpisodes > 0 && ep.episode_number === totalExpectedEpisodes;
@@ -250,10 +258,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
                     {isFirstEpisode && (
                       <button
                         type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleMarkSeasonUnwatched();
-                        }}
+                        onClick={handleMarkSeasonUnwatched}
                         title="Click to reset season as unwatched"
                         className="text-[9px] font-black text-slate-300 uppercase tracking-widest bg-slate-800/90 hover:bg-red-500/20 hover:text-red-400 px-1.5 py-0.5 rounded border border-slate-700 shrink-0 transition-all active:scale-95"
                       >
@@ -265,10 +270,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
                     {isTrueFinale && (
                       <button
                         type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleMarkSeasonWatched();
-                        }}
+                        onClick={handleMarkSeasonWatched}
                         title="Click to mark entire season watched"
                         className={`text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border shrink-0 transition-all active:scale-95 ${
                           isUltimateSeriesFinale
@@ -289,6 +291,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
                 </div>
 
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     toggleEpisodeWatched(ep.episode_number, isWatched);
