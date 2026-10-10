@@ -173,7 +173,7 @@ export function MasterWatchlist({
               subTab === 'attic' ? 'bg-slate-800 text-[#8CFA96] shadow-sm' : 'text-slate-400 hover:text-white'
             }`}
           >
-            <img src={cosmicKittyIcon} alt="" className="h-4 w-4 rounded-sm object-cover" />
+            {/*<img src={cosmicKittyIcon} alt="" className="h-4 w-4 rounded-sm object-cover" />*/}
             <span>RetroVision ({atticWithMeta.length})</span>
           </button>
         </div>
@@ -372,7 +372,7 @@ function ShowCard({
             title="Move to RetroVision"
             className="flex items-center justify-center p-1 rounded-lg hover:opacity-80 transition-all active:scale-95"
           >
-            <img src={cosmicKittyIcon} alt="Send to RetroVision" className="h-5 w-5 rounded object-cover" />
+            <img src={cosmicKittyIcon} alt="Send to RetroVision" className="h-6 w-6 rounded object-cover" />
           </button>
         )}
 
