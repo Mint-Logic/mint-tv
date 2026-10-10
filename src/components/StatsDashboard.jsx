@@ -282,13 +282,28 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
       atticShows: atticShows,
     };
 
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupPayload, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `mint_tv_backup_${new Date().toISOString().split('T')[0]}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
+    const jsonString = JSON.stringify(backupPayload, null, 2);
+    const fileName = `mint_tv_backup_${new Date().toISOString().split('T')[0]}.json`;
+    const blob = new Blob([jsonString], { type: 'application/json' });
+
+    // iOS Safari Web Share API Support
+    if (navigator.canShare && navigator.canShare({ files: [new File([blob], fileName, { type: 'application/json' })] })) {
+      const file = new File([blob], fileName, { type: 'application/json' });
+      navigator.share({
+        files: [file],
+        title: 'Mint TV Backup',
+      }).catch(() => {});
+    } else {
+      // Fallback for desktop & Android
+      const url = URL.createObjectURL(blob);
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.href = url;
+      downloadAnchor.download = fileName;
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      URL.revokeObjectURL(url);
+    }
   }
 
   function handleImportData(e) {
@@ -301,9 +316,11 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
 
           if (importedData.watchlist && Array.isArray(importedData.watchlist)) {
             localStorage.setItem('mint_tv_shows', JSON.stringify(importedData.watchlist));
+            
             if (importedData.atticShows && Array.isArray(importedData.atticShows)) {
-    localStorage.setItem('mint_tv_watch_later', JSON.stringify(importedData.atticShows));
-  }
+              localStorage.setItem('mint_tv_watch_later', JSON.stringify(importedData.atticShows));
+            }
+
             if (importedData.profile) {
               if (importedData.profile.name) localStorage.setItem('mint_tv_user_name', importedData.profile.name);
               if (importedData.profile.title) localStorage.setItem('mint_tv_user_title', importedData.profile.title);

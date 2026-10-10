@@ -32,13 +32,16 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
       if (!needsHydration) return;
       const updated = await Promise.all(
         watchLater.map(async (show) => {
-          if (show.network && show.numberOfEpisodes !== undefined) return show;
+          if (show.network && show.numberOfEpisodes !== undefined && show.numberOfSeasons !== undefined) return show;
           const meta = await getShowMetadata(show.id);
           return {
             ...show,
             network: meta?.network || null,
             first_air_date: meta?.firstAirDate || meta?.first_air_date || show.first_air_date,
             numberOfEpisodes: meta?.numberOfEpisodes || 0,
+            numberOfSeasons: meta?.numberOfSeasons || 0,
+            status: meta?.status || null,
+            inProduction: meta?.inProduction ?? true,
           };
         })
       );
@@ -103,7 +106,14 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
       const hydratedShows = await Promise.all(
         itemsToHydrate.map(async (show) => {
           const meta = await getShowMetadata(show.id);
-          return { ...show, network: meta?.network || null };
+          return {
+            ...show,
+            network: meta?.network || null,
+            numberOfSeasons: meta?.numberOfSeasons || 0,
+            numberOfEpisodes: meta?.numberOfEpisodes || 0,
+            status: meta?.status || null,
+            inProduction: meta?.inProduction ?? true,
+          };
         })
       );
 
@@ -122,9 +132,9 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
 
   useEffect(() => {
     fetchDiscoverFeed(false);
-  }, [watchlist, atticShows]);
+  }, []);
 
-  // Actions
+  // Actions - Using functional updates to keep scroll position locked
   function handleSaveWatchLater(show) {
     setWatchLater((prev) => [...prev, show]);
     setFeedShows((prev) => prev.filter((s) => s.id !== show.id));
@@ -210,6 +220,8 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                 const imdbSearchUrl = `https://www.imdb.com/find?q=${encodeURIComponent(show.name)}`;
                 const rtSearchUrl = `https://www.rottentomatoes.com/search?search=${encodeURIComponent(show.name)}`;
 
+                const isOnAir = show.inProduction || show.status === 'Returning Series';
+
                 return (
                   <div key={show.id} className="rounded-xl border border-slate-800 bg-[#1E293B] overflow-hidden transition-all">
                     <div
@@ -240,6 +252,22 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                               </>
                             )}
                           </div>
+
+                          {/* Show Status & Season Badges */}
+                          <div className="flex items-center gap-1.5 pt-0.5">
+                            <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-tight border ${
+                              isOnAir
+                                ? 'bg-emerald-500/10 text-[#8CFA96] border-[#8CFA96]/30'
+                                : 'bg-slate-800 text-slate-400 border-slate-700'
+                            }`}>
+                              {isOnAir ? 'On Air' : show.status || 'Ended'}
+                            </span>
+                            {show.numberOfSeasons > 0 && (
+                              <span className="px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-tight bg-slate-800 text-slate-300 border border-slate-700">
+                                {show.numberOfSeasons} {show.numberOfSeasons === 1 ? 'Season' : 'Seasons'}
+                              </span>
+                            )}
+                          </div>
                         </div>
 
                         <div className="flex items-center gap-4 mt-2">
@@ -253,9 +281,9 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                           <button
                             onClick={(e) => { e.stopPropagation(); handleSaveAttic(show); }}
                             className="p-0.5 rounded-lg hover:opacity-80 transition-all active:scale-95"
-                            title="Move to RetroVision"
+                            title="Move to Cosmic Kitty"
                           >
-                            <img src={cosmicKittyIcon} alt="RetroVision" className="h-6 w-6 rounded object-cover" />
+                            <img src={cosmicKittyIcon} alt="Cosmic Kitty" className="h-6 w-6 rounded object-cover" />
                           </button>
 
                           <button
@@ -317,6 +345,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
               const posterUrl = show.poster_path || show.poster ? `${IMAGE_BASE_URL}${show.poster_path || show.poster}` : '';
               const isExpanded = expandedShowId === show.id;
               const imdbSearchUrl = `https://www.imdb.com/find?q=${encodeURIComponent(show.name)}`;
+              const isOnAir = show.inProduction || show.status === 'Returning Series';
 
               return (
                 <div key={show.id} className="rounded-xl border border-slate-800 bg-[#1E293B] overflow-hidden transition-all">
@@ -339,6 +368,22 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                             </>
                           )}
                         </div>
+
+                        {/* Show Status & Season Badges */}
+                        <div className="flex items-center gap-1.5 pt-0.5">
+                          <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-tight border ${
+                            isOnAir
+                              ? 'bg-emerald-500/10 text-[#8CFA96] border-[#8CFA96]/30'
+                              : 'bg-slate-800 text-slate-400 border-slate-700'
+                          }`}>
+                            {isOnAir ? 'On Air' : show.status || 'Ended'}
+                          </span>
+                          {show.numberOfSeasons > 0 && (
+                            <span className="px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-tight bg-slate-800 text-slate-300 border border-slate-700">
+                              {show.numberOfSeasons} {show.numberOfSeasons === 1 ? 'Season' : 'Seasons'}
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       <div className="flex items-center gap-4 mt-3">
@@ -346,8 +391,8 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                           <span className="text-[8px] font-black uppercase tracking-tight">Watchlist</span>
                         </button>
 
-                        <button onClick={(e) => { e.stopPropagation(); handleMoveWLtoAttic(show); }} className="p-0.5 rounded-lg hover:opacity-80 transition-all active:scale-95" title="Move to RetroVision">
-                          <img src={cosmicKittyIcon} alt="RetroVision" className="h-6 w-6 rounded object-cover" />
+                        <button onClick={(e) => { e.stopPropagation(); handleMoveWLtoAttic(show); }} className="p-0.5 rounded-lg hover:opacity-80 transition-all active:scale-95" title="Move to Cosmic Kitty">
+                          <img src={cosmicKittyIcon} alt="Cosmic Kitty" className="h-6 w-6 rounded object-cover" />
                         </button>
 
                         <button onClick={(e) => { e.stopPropagation(); setWatchLater(prev => prev.filter(s => s.id !== show.id)); }} className="flex items-center rounded border border-red-900/30 bg-red-950/20 px-2 py-1 text-red-700 hover:bg-red-900/40 hover:text-red-600 transition-all active:scale-95">

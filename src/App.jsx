@@ -41,39 +41,54 @@ export default function App() {
     localStorage.setItem('mint_tv_watch_later', JSON.stringify(atticShows));
   }, [atticShows]);
 
-  // Helper to push current state up to Supabase
-  async function pushToCloud(userId, currentWatchlist, currentAttic) {
-    await supabase
-      .from('watchlists')
-      .upsert(
-        {
-          user_id: userId,
-          shows: currentWatchlist,
-          attic_shows: currentAttic,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'user_id' }
-      );
-  }
+// Helper to push current state & profile settings up to Supabase
+async function pushToCloud(userId, currentWatchlist, currentAttic) {
+  const profileData = {
+    name: localStorage.getItem('mint_tv_user_name') || 'TV Collector',
+    title: localStorage.getItem('mint_tv_user_title') || 'TV & Movie Collector',
+    photo: localStorage.getItem('mint_tv_user_photo') || '',
+    photoPos: JSON.parse(localStorage.getItem('mint_tv_photo_pos') || '{"x":0,"y":0,"scale":1}'),
+  };
 
-  // Fetch watchlist & attic from Supabase
-  async function loadCloudData(userId) {
-    const { data, error } = await supabase
-      .from('watchlists')
-      .select('shows, attic_shows')
-      .eq('user_id', userId)
-      .maybeSingle();
+  await supabase
+    .from('watchlists')
+    .upsert(
+      {
+        user_id: userId,
+        shows: currentWatchlist,
+        attic_shows: currentAttic,
+        profile: profileData,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' }
+    );
+}
 
-    if (data && (data.shows || data.attic_shows)) {
-      if (data.shows) setWatchlist(data.shows);
-      if (data.attic_shows) setAtticShows(data.attic_shows);
-    } else {
-      // If table row doesn't exist yet, push initial local data to populate Supabase
-      await pushToCloud(userId, watchlist, atticShows);
+// Fetch watchlist, attic & profile settings from Supabase
+async function loadCloudData(userId) {
+  const { data } = await supabase
+    .from('watchlists')
+    .select('shows, attic_shows, profile')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (data) {
+    if (data.shows) setWatchlist(data.shows);
+    if (data.attic_shows) setAtticShows(data.attic_shows);
+    
+    if (data.profile) {
+      if (data.profile.name) localStorage.setItem('mint_tv_user_name', data.profile.name);
+      if (data.profile.title) localStorage.setItem('mint_tv_user_title', data.profile.title);
+      if (data.profile.photo) localStorage.setItem('mint_tv_user_photo', data.profile.photo);
+      if (data.profile.photoPos) localStorage.setItem('mint_tv_photo_pos', JSON.stringify(data.profile.photoPos));
+      window.dispatchEvent(new Event('mint_tv_profile_update'));
     }
-
-    setHasLoadedFromCloud(true);
+  } else {
+    await pushToCloud(userId, watchlist, atticShows);
   }
+
+  setHasLoadedFromCloud(true);
+}
 
   // Listen for Supabase Authentication state
   useEffect(() => {

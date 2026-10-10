@@ -9,7 +9,6 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
 
   useEffect(() => {
     async function processQueue() {
-      
       const today = new Date().toISOString().split('T')[0];
 
       const unarchivedWatchlist = watchlist.filter((show) => !show.archived);
@@ -58,10 +57,14 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
           let epData = null;
           let isAired = false;
 
+          // Only fetch episode info and mark as aired if the current season is NOT completed
           if (!isSeasonCompleted) {
             epData = await getNextEpisodeInfo(show.id, season, episode);
             const airDate = epData?.air_date || null;
-            isAired = airDate ? airDate <= today : true;
+            isAired = airDate ? airDate <= today : false;
+          } else {
+            // When all available episodes in the season are watched, it is NOT ready to watch
+            isAired = false;
           }
 
           return {

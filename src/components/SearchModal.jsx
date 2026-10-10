@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { searchShows as searchTMDB, IMAGE_BASE_URL } from '../services/tmdb';
+import { searchShows as searchTMDB, IMAGE_BASE_URL, getShowMetadata } from '../services/tmdb';
 
 export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
   const [query, setQuery] = useState('');
@@ -20,7 +20,22 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
           `https://api.themoviedb.org/3/tv/popular?api_key=${apiKey}&language=en-US&page=1`
         );
         const data = await res.json();
-        setTrendingShows(data.results || []);
+        const rawResults = data.results || [];
+
+        // Hydrate trending shows with full metadata (status, seasons, on air info)
+        const hydrated = await Promise.all(
+          rawResults.map(async (show) => {
+            const meta = await getShowMetadata(show.id);
+            return {
+              ...show,
+              numberOfSeasons: meta?.numberOfSeasons || 0,
+              status: meta?.status || null,
+              inProduction: meta?.inProduction ?? true,
+            };
+          })
+        );
+
+        setTrendingShows(hydrated);
       } catch (err) {
         console.error('Error fetching trending shows:', err);
       }
@@ -37,14 +52,27 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
       return;
     }
 
-    // Instantly trigger loading state the moment a key is pressed to prevent erratic UI jumping
     setLoading(true);
 
     const timer = setTimeout(async () => {
       const results = await searchTMDB(query);
-      setSearchResults(results);
+      
+      // Hydrate search results with metadata
+      const hydratedResults = await Promise.all(
+        results.map(async (show) => {
+          const meta = await getShowMetadata(show.id);
+          return {
+            ...show,
+            numberOfSeasons: meta?.numberOfSeasons || 0,
+            status: meta?.status || null,
+            inProduction: meta?.inProduction ?? true,
+          };
+        })
+      );
+
+      setSearchResults(hydratedResults);
       setLoading(false);
-    }, 600); // Increased delay to 600ms for a smoother typing experience
+    }, 600);
 
     return () => clearTimeout(timer);
   }, [query]);
@@ -125,6 +153,8 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
               const imdbSearchUrl = `https://www.imdb.com/find?q=${encodeURIComponent(show.name)}`;
               const rtSearchUrl = `https://www.rottentomatoes.com/search?search=${encodeURIComponent(show.name)}`;
 
+              const isOnAir = show.inProduction || show.status === 'Returning Series';
+
               return (
                 <div
                   key={show.id}
@@ -161,10 +191,27 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
                         >
                           {show.name}
                         </h3>
-                        <div className="flex items-center space-x-2 text-[10px] text-slate-400 mt-1">
+                        
+                        <div className="flex items-center space-x-2 text-[10px] text-slate-400 mt-0.5">
                           <span className="text-amber-400 font-bold">★ {show.vote_average?.toFixed(1) || 'N/A'}</span>
                           <span>•</span>
                           <span>{show.first_air_date ? show.first_air_date.split('-')[0] : 'N/A'}</span>
+                        </div>
+
+                        {/* Show Status & Season Badges */}
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-tight border ${
+                            isOnAir
+                              ? 'bg-emerald-500/10 text-[#8CFA96] border-[#8CFA96]/30'
+                              : 'bg-slate-800 text-slate-400 border-slate-700'
+                          }`}>
+                            {isOnAir ? 'On Air' : show.status || 'Ended'}
+                          </span>
+                          {show.numberOfSeasons > 0 && (
+                            <span className="px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-tight bg-slate-800 text-slate-300 border border-slate-700">
+                              {show.numberOfSeasons} {show.numberOfSeasons === 1 ? 'Season' : 'Seasons'}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -213,33 +260,32 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
                         {show.overview || 'No synopsis available for this title.'}
                       </p>
 
-                      {/* Updated SearchModal Link Buttons */}
-<div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-800/80 pt-2">
-  <div className="flex items-center gap-1.5 shrink-0">
-    <a
-      href={imdbSearchUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      onClick={(e) => e.stopPropagation()}
-      className="text-[9px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 px-2 py-0.5 rounded border border-amber-400/30 transition-all whitespace-nowrap"
-    >
-      IMDB
-    </a>
-    <a
-      href={rtSearchUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      onClick={(e) => e.stopPropagation()}
-      className="text-[9px] font-black uppercase tracking-wider text-red-400 bg-red-500/10 hover:bg-red-500/20 px-2 py-0.5 rounded border border-red-500/30 transition-all whitespace-nowrap"
-    >
-      ROTTEN TOMATOES
-    </a>
-  </div>
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-800/80 pt-2">
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <a
+                            href={imdbSearchUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-[9px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 px-2 py-0.5 rounded border border-amber-400/30 transition-all whitespace-nowrap"
+                          >
+                            IMDB
+                          </a>
+                          <a
+                            href={rtSearchUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-[9px] font-black uppercase tracking-wider text-red-400 bg-red-500/10 hover:bg-red-500/20 px-2 py-0.5 rounded border border-red-500/30 transition-all whitespace-nowrap"
+                          >
+                            ROTTEN TOMATOES
+                          </a>
+                        </div>
 
-  <span className="text-[10px] text-slate-400 shrink-0 ml-auto whitespace-nowrap">
-    Aired: {show.first_air_date || 'N/A'}
-  </span>
-</div>
+                        <span className="text-[10px] text-slate-400 shrink-0 ml-auto whitespace-nowrap">
+                          Aired: {show.first_air_date || 'N/A'}
+                        </span>
+                      </div>
                     </div>
                   )}
                 </div>

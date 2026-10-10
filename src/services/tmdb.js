@@ -62,7 +62,8 @@ export async function getShowMetadata(showId) {
     return { 
       network, 
       airTime, 
-      status: data.status, 
+      status: data.status,
+      inProduction: data.in_production ?? true,
       genres,
       numberOfSeasons: data.number_of_seasons || 1,
       numberOfEpisodes: data.number_of_episodes || 0,
