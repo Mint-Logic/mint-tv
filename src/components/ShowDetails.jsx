@@ -94,36 +94,39 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
 
   function handleMarkSeasonWatched(e) {
     if (e) {
-      e.preventDefault();
       e.stopPropagation();
+      e.preventDefault();
     }
     if (episodes.length === 0) return;
+    
+    // Force immediate episode advance past final episode
     onUpdateEpisode(showId, selectedSeason, episodes.length + 1);
   }
 
   function handleMarkSeasonUnwatched(e) {
     if (e) {
-      e.preventDefault();
       e.stopPropagation();
+      e.preventDefault();
     }
     if (episodes.length === 0) return;
     onUpdateEpisode(showId, selectedSeason, 1);
   }
 
-  // Check if current season is the final season of the entire series
   const isFinalSeasonOfSeries = details.number_of_seasons > 0 && selectedSeason >= details.number_of_seasons;
   const isSeriesEnded = details.status === 'Ended' || details.status === 'Canceled';
   const isUltimateSeriesFinale = isFinalSeasonOfSeries && isSeriesEnded;
 
   return (
     <div className="space-y-4 pb-12">
-      {/* Back Button */}
-      <button
-        onClick={onBack}
-        className="flex items-center space-x-2 text-xs font-bold text-[#8CFA96] bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-700 transition-all"
-      >
-        <span>← Back to Queue</span>
-      </button>
+      {/* STICKY BACK BUTTON CONTAINER (ALIGNED TOP RIGHT) */}
+      <div className="sticky top-[49px] z-40 bg-[#0F172A] pt-1 pb-2 flex justify-end">
+        <button
+          onClick={onBack}
+          className="flex items-center space-x-2 text-xs font-bold text-[#8CFA96] bg-slate-800/90 px-3 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-700 transition-all shadow-md active:scale-95"
+        >
+          <span>← Back to Queue</span>
+        </button>
+      </div>
 
       {/* Hero Backdrop & Show Info */}
       <div 
@@ -159,7 +162,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
       </div>
 
       {/* STICKY SEASON SELECTION TABS */}
-      <div className="sticky top-[49px] z-30 bg-[#0F172A] py-2 border-b border-slate-800">
+      <div className="sticky top-[92px] z-30 bg-[#0F172A] py-2 border-b border-slate-800">
         <div className="flex space-x-2 overflow-x-auto pb-0.5 scrollbar-none touch-pan-x">
           {details.seasons
             ?.filter((s) => s.season_number > 0)
@@ -217,7 +220,6 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
         {episodes.map((ep, index) => {
           const isFirstEpisode = index === 0;
 
-          // STRICT FINALE VERIFICATION
           const isExplicitFinale = ep.episode_type === 'finale';
           const isReturningSeries = details.status === 'Returning Series' || details.status === 'In Production' || details.in_production;
           const isMatchForExpectedCount = totalExpectedEpisodes > 0 && ep.episode_number === totalExpectedEpisodes;
@@ -254,25 +256,25 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
                       {ep.name}
                     </span>
 
-                    {/* Premiere badge triggers Unwatch Season */}
+                    {/* Premiere badge */}
                     {isFirstEpisode && (
                       <button
                         type="button"
                         onClick={handleMarkSeasonUnwatched}
                         title="Click to reset season as unwatched"
-                        className="text-[9px] font-black text-slate-300 uppercase tracking-widest bg-slate-800/90 hover:bg-red-500/20 hover:text-red-400 px-1.5 py-0.5 rounded border border-slate-700 shrink-0 transition-all active:scale-95"
+                        className="text-[9px] font-black text-slate-300 uppercase tracking-widest bg-slate-800/90 hover:bg-red-500/20 hover:text-red-400 px-1.5 py-0.5 rounded border border-slate-700 shrink-0 transition-all active:scale-95 pointer-events-auto"
                       >
                         Premiere ↺
                       </button>
                     )}
 
-                    {/* Differentiated Season Finale vs Series Finale Badge */}
+                    {/* Finale Badge */}
                     {isTrueFinale && (
                       <button
                         type="button"
                         onClick={handleMarkSeasonWatched}
                         title="Click to mark entire season watched"
-                        className={`text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border shrink-0 transition-all active:scale-95 ${
+                        className={`text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border shrink-0 transition-all active:scale-95 pointer-events-auto ${
                           isUltimateSeriesFinale
                             ? 'bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border-amber-400/30'
                             : 'bg-[#8CFA96]/10 hover:bg-[#8CFA96]/20 text-[#8CFA96] border-[#8CFA96]/30'

@@ -9,6 +9,7 @@ import { StatsDashboard } from './components/StatsDashboard';
 import { RecommendationsTab } from './components/RecommendationsTab';
 import { supabase } from './supabase';
 import { AuthModal } from './components/AuthModal';
+import { getShowMetadata } from './services/tmdb';
 
 export default function App() {
   const [selectedShowId, setSelectedShowId] = useState(null);
@@ -18,7 +19,6 @@ export default function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   
-  // Prevents empty local state from overwriting cloud data on startup
   const [hasLoadedFromCloud, setHasLoadedFromCloud] = useState(false);
 
   // Active Watchlist
@@ -26,13 +26,12 @@ export default function App() {
     return JSON.parse(localStorage.getItem('mint_tv_shows') || '[]');
   });
 
-  // The Attic (Preserves legacy items)
+  // The Attic / RetroVision
   const [atticShows, setAtticShows] = useState(() => {
     const saved = localStorage.getItem('mint_tv_watch_later');
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Local storage backups
   useEffect(() => {
     localStorage.setItem('mint_tv_shows', JSON.stringify(watchlist));
   }, [watchlist]);
@@ -41,56 +40,53 @@ export default function App() {
     localStorage.setItem('mint_tv_watch_later', JSON.stringify(atticShows));
   }, [atticShows]);
 
-// Helper to push current state & profile settings up to Supabase
-async function pushToCloud(userId, currentWatchlist, currentAttic) {
-  const profileData = {
-    name: localStorage.getItem('mint_tv_user_name') || 'TV Collector',
-    title: localStorage.getItem('mint_tv_user_title') || 'TV & Movie Collector',
-    photo: localStorage.getItem('mint_tv_user_photo') || '',
-    photoPos: JSON.parse(localStorage.getItem('mint_tv_photo_pos') || '{"x":0,"y":0,"scale":1}'),
-  };
+  async function pushToCloud(userId, currentWatchlist, currentAttic) {
+    const profileData = {
+      name: localStorage.getItem('mint_tv_user_name') || 'TV Collector',
+      title: localStorage.getItem('mint_tv_user_title') || 'TV & Movie Collector',
+      photo: localStorage.getItem('mint_tv_user_photo') || '',
+      photoPos: JSON.parse(localStorage.getItem('mint_tv_photo_pos') || '{"x":0,"y":0,"scale":1}'),
+    };
 
-  await supabase
-    .from('watchlists')
-    .upsert(
-      {
-        user_id: userId,
-        shows: currentWatchlist,
-        attic_shows: currentAttic,
-        profile: profileData,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'user_id' }
-    );
-}
-
-// Fetch watchlist, attic & profile settings from Supabase
-async function loadCloudData(userId) {
-  const { data } = await supabase
-    .from('watchlists')
-    .select('shows, attic_shows, profile')
-    .eq('user_id', userId)
-    .maybeSingle();
-
-  if (data) {
-    if (data.shows) setWatchlist(data.shows);
-    if (data.attic_shows) setAtticShows(data.attic_shows);
-    
-    if (data.profile) {
-      if (data.profile.name) localStorage.setItem('mint_tv_user_name', data.profile.name);
-      if (data.profile.title) localStorage.setItem('mint_tv_user_title', data.profile.title);
-      if (data.profile.photo) localStorage.setItem('mint_tv_user_photo', data.profile.photo);
-      if (data.profile.photoPos) localStorage.setItem('mint_tv_photo_pos', JSON.stringify(data.profile.photoPos));
-      window.dispatchEvent(new Event('mint_tv_profile_update'));
-    }
-  } else {
-    await pushToCloud(userId, watchlist, atticShows);
+    await supabase
+      .from('watchlists')
+      .upsert(
+        {
+          user_id: userId,
+          shows: currentWatchlist,
+          attic_shows: currentAttic,
+          profile: profileData,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id' }
+      );
   }
 
-  setHasLoadedFromCloud(true);
-}
+  async function loadCloudData(userId) {
+    const { data } = await supabase
+      .from('watchlists')
+      .select('shows, attic_shows, profile')
+      .eq('user_id', userId)
+      .maybeSingle();
 
-  // Listen for Supabase Authentication state
+    if (data) {
+      if (data.shows) setWatchlist(data.shows);
+      if (data.attic_shows) setAtticShows(data.attic_shows);
+      
+      if (data.profile) {
+        if (data.profile.name) localStorage.setItem('mint_tv_user_name', data.profile.name);
+        if (data.profile.title) localStorage.setItem('mint_tv_user_title', data.profile.title);
+        if (data.profile.photo) localStorage.setItem('mint_tv_user_photo', data.profile.photo);
+        if (data.profile.photoPos) localStorage.setItem('mint_tv_photo_pos', JSON.stringify(data.profile.photoPos));
+        window.dispatchEvent(new Event('mint_tv_profile_update'));
+      }
+    } else {
+      await pushToCloud(userId, watchlist, atticShows);
+    }
+
+    setHasLoadedFromCloud(true);
+  }
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
@@ -112,7 +108,6 @@ async function loadCloudData(userId) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Sync state changes to Supabase in background
   useEffect(() => {
     if (!currentUser || !hasLoadedFromCloud) return;
 
@@ -123,7 +118,6 @@ async function loadCloudData(userId) {
     }
   }, [watchlist, atticShows, currentUser, hasLoadedFromCloud]);
 
-  // Android System Back Navigation Integration
   useEffect(() => {
     if (selectedShowId || isSearchOpen || isProfileOpen || isAuthOpen) {
       window.history.pushState({ appState: 'subview' }, '');
@@ -173,9 +167,45 @@ async function loadCloudData(userId) {
     );
   }
 
+  // Direct Auto-Archive Handling on Episode Update (Clean Move)
+async function handleUpdateEpisode(id, season, episode) {
+  const meta = await getShowMetadata(id);
+  const isEnded = meta?.status === 'Ended' || meta?.status === 'Canceled' || meta?.isEnded;
+  const isFinalSeason = meta?.numberOfSeasons ? season >= meta.numberOfSeasons : true;
+
+  const newEp = Math.max(1, episode);
+  const shouldArchiveNow = Boolean(isEnded && isFinalSeason && newEp > (meta?.numberOfEpisodes || 0));
+
+  if (shouldArchiveNow) {
+    const targetShow = watchlist.find((s) => s.id === id) || atticShows.find((s) => s.id === id);
+    if (targetShow) {
+      const archivedShow = { ...targetShow, currentSeason: season, currentEpisode: newEp, archived: true };
+      
+      // Add to attic / RetroVision without creating duplicates
+      setAtticShows((prevAttic) => {
+        const filtered = prevAttic.filter((s) => s.id !== id);
+        return [archivedShow, ...filtered];
+      });
+
+      // Remove cleanly from active Watchlist
+      setWatchlist((prevWatchlist) => prevWatchlist.filter((s) => s.id !== id));
+    }
+  } else {
+    // Normal progress update
+    setWatchlist((prevWatchlist) =>
+      prevWatchlist.map((show) => {
+        if (show.id === id) {
+          return { ...show, currentSeason: season, currentEpisode: newEp };
+        }
+        return show;
+      })
+    );
+  }
+}
+
   function handleMoveToAttic(show) {
     if (!atticShows.some((s) => s.id === show.id)) {
-      setAtticShows([show, ...atticShows]);
+      setAtticShows([{ ...show, archived: true }, ...atticShows]);
     }
     setWatchlist(watchlist.filter((s) => s.id !== show.id));
   }
@@ -189,6 +219,7 @@ async function loadCloudData(userId) {
       currentSeason: 1,
       currentEpisode: 1,
       completed: false,
+      archived: false,
     });
     setAtticShows(atticShows.filter((s) => s.id !== show.id));
   }
@@ -200,7 +231,6 @@ async function loadCloudData(userId) {
         onOpenProfile={() => setIsProfileOpen(true)}
       />
 
-      {/* Profile / Stats Overlay Modal */}
       {isProfileOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
           <div className="relative w-full max-w-md rounded-2xl border border-slate-800 bg-[#1E293B] p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
@@ -214,16 +244,15 @@ async function loadCloudData(userId) {
               </button>
             </div>
             <StatsDashboard 
-  watchlist={watchlist} 
-  atticShows={atticShows}
-  currentUser={currentUser}
-  onOpenAuth={() => setIsAuthOpen(true)}
-/>
+              watchlist={watchlist} 
+              atticShows={atticShows}
+              currentUser={currentUser}
+              onOpenAuth={() => setIsAuthOpen(true)}
+            />
           </div>
         </div>
       )}
 
-      {/* Cloud Auth Modal */}
       <AuthModal 
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
@@ -236,17 +265,7 @@ async function loadCloudData(userId) {
             showId={selectedShowId}
             showData={watchlist.find((s) => s.id === selectedShowId) || atticShows.find((s) => s.id === selectedShowId)}
             onBack={() => setSelectedShowId(null)}
-            onUpdateEpisode={(id, season, episode) => {
-              setWatchlist(
-                watchlist.map((s) => {
-                  if (s.id === id) {
-                    const newEp = Math.max(1, episode);
-                    return { ...s, currentSeason: season, currentEpisode: newEp };
-                  }
-                  return s;
-                })
-              );
-            }}
+            onUpdateEpisode={handleUpdateEpisode}
           />
         ) : (
           <>
@@ -286,7 +305,7 @@ async function loadCloudData(userId) {
                 onAddShow={handleAddShow}
                 onMoveToAttic={(show) => {
                   if (!atticShows.some((s) => s.id === show.id)) {
-                    setAtticShows([show, ...atticShows]);
+                    setAtticShows([{ ...show, archived: true }, ...atticShows]);
                   }
                 }}
               />
@@ -302,7 +321,6 @@ async function loadCloudData(userId) {
         watchlist={watchlist} 
       />
 
-      {/* 4-Tab Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-20 mx-auto flex max-w-md justify-around border-t border-slate-800 bg-[#1E293B] px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-md">
         <button
           onClick={() => { setSelectedShowId(null); setActiveTab('ready'); }}
