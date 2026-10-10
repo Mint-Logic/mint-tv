@@ -199,10 +199,11 @@ export default function App() {
               </button>
             </div>
             <StatsDashboard 
-              watchlist={watchlist} 
-              currentUser={currentUser}
-              onOpenAuth={() => setIsAuthOpen(true)}
-            />
+  watchlist={watchlist} 
+  atticShows={atticShows}
+  currentUser={currentUser}
+  onOpenAuth={() => setIsAuthOpen(true)}
+/>
           </div>
         </div>
       )}

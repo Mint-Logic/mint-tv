@@ -29,7 +29,7 @@ const TMDB_TV_GENRES = [
   { id: 37, name: 'Western' },
 ];
 
-export function StatsDashboard({ watchlist, currentUser, onOpenAuth }) {
+export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpenAuth }) {
   const [profileName, setProfileName] = useState(() => {
     return localStorage.getItem('mint_tv_user_name') || 'TV Collector';
   });
@@ -279,6 +279,7 @@ export function StatsDashboard({ watchlist, currentUser, onOpenAuth }) {
         boostNature,
       },
       watchlist: watchlist,
+      atticShows: atticShows,
     };
 
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupPayload, null, 2));
@@ -300,6 +301,9 @@ export function StatsDashboard({ watchlist, currentUser, onOpenAuth }) {
 
           if (importedData.watchlist && Array.isArray(importedData.watchlist)) {
             localStorage.setItem('mint_tv_shows', JSON.stringify(importedData.watchlist));
+            if (importedData.atticShows && Array.isArray(importedData.atticShows)) {
+    localStorage.setItem('mint_tv_watch_later', JSON.stringify(importedData.atticShows));
+  }
             if (importedData.profile) {
               if (importedData.profile.name) localStorage.setItem('mint_tv_user_name', importedData.profile.name);
               if (importedData.profile.title) localStorage.setItem('mint_tv_user_title', importedData.profile.title);
