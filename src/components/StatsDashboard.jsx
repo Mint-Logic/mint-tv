@@ -74,8 +74,9 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
     return localStorage.getItem('mint_tv_boost_nature') === 'true';
   });
 
-  // Accordion state
+  // Accordion states
   const [isGenreDrawerOpen, setIsGenreDrawerOpen] = useState(false);
+  const [isHelpDrawerOpen, setIsHelpDrawerOpen] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
   const [showLevelInfo, setShowLevelInfo] = useState(false);
@@ -389,7 +390,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
             <p className="text-xs font-semibold text-slate-400">{profileTitle}</p>
 
             <button
-              onClick={() => setIsEditing(true)}
+              onClick={() => setIsEditing(false)}
               className="mt-1.5 inline-flex items-center space-x-1 rounded-full border border-slate-800 bg-slate-900/50 px-2.5 py-0.5 text-[10px] font-medium text-slate-400 hover:border-slate-700 hover:bg-slate-800 hover:text-slate-200 transition-all"
             >
               <svg className="h-2.5 w-2.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -726,6 +727,61 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* HELP & QUICK TIPS ACCORDION */}
+      <div className="-mx-3 sm:-mx-4 overflow-hidden rounded-2xl border border-slate-800 bg-[#1E293B] shadow-lg">
+        <button
+          onClick={() => setIsHelpDrawerOpen(!isHelpDrawerOpen)}
+          className="w-full flex justify-between items-center px-4 py-2.5 bg-slate-900/60 hover:bg-slate-900 transition-all cursor-pointer"
+        >
+          <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+            HELP & QUICK TIPS
+          </span>
+          <span className="text-[10px] font-bold text-[#8CFA96] transition-transform duration-200">
+            {isHelpDrawerOpen ? '▲' : '▼'}
+          </span>
+        </button>
+
+        {isHelpDrawerOpen && (
+          <div className="p-4 space-y-3.5 border-t border-slate-800 animate-in fade-in text-xs text-slate-300">
+            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
+                📺 Ready vs. Caught Up
+              </span>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Shows with available, unviewed episodes appear in <strong className="text-white">Ready to Watch</strong>. Once you finish all currently aired episodes for an ongoing series, the show automatically moves to <strong className="text-white">Caught Up</strong> until a new season releases!
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
+                ⚡ Season Shortcuts
+              </span>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Inside any show's detail view, tap the <strong className="text-white">'Finale'</strong> badge on the last episode to mark the entire season as watched, or tap <strong className="text-white">'Premiere'</strong> on the first episode to reset the season to unwatched.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
+                📺 RetroVision Queue
+              </span>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Move legacy or watch-later titles into <strong className="text-white">RetroVision</strong> to keep your active queue uncluttered while saving titles for later discovery.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
+                ☁️ Real-time Cloud Sync
+              </span>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Logging into your cloud account instantly syncs your active watchlist, RetroVision queue, and custom profile across all your phones, tablets, and desktop browsers.
+              </p>
             </div>
           </div>
         )}

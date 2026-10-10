@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { IMAGE_BASE_URL, getShowMetadata } from '../services/tmdb';
-import cosmicKittyIcon from '../assets/cosmic-kitty-icon.png';
+import retroVisionLogo from '../assets/retro-vision-logo.png';
 
 export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToAttic }) {
   const [subTab, setSubTab] = useState('feed'); // 'feed' | 'watchlater'
@@ -283,7 +283,11 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                             className="p-0.5 rounded-lg hover:opacity-80 transition-all active:scale-95"
                             title="Move to Cosmic Kitty"
                           >
-                            <img src={cosmicKittyIcon} alt="Cosmic Kitty" className="h-6 w-6 rounded object-cover" />
+                            <img 
+  src={retroVisionLogo} 
+  alt="RetroVision" 
+  className="h-6 w-6 rounded object-cover" 
+/>
                           </button>
 
                           <button
@@ -392,7 +396,11 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                         </button>
 
                         <button onClick={(e) => { e.stopPropagation(); handleMoveWLtoAttic(show); }} className="p-0.5 rounded-lg hover:opacity-80 transition-all active:scale-95" title="Move to Cosmic Kitty">
-                          <img src={cosmicKittyIcon} alt="Cosmic Kitty" className="h-6 w-6 rounded object-cover" />
+                          <img 
+  src={retroVisionLogo} 
+  alt="RetroVision" 
+  className="h-6 w-6 rounded object-cover" 
+/>
                         </button>
 
                         <button onClick={(e) => { e.stopPropagation(); setWatchLater(prev => prev.filter(s => s.id !== show.id)); }} className="flex items-center rounded border border-red-900/30 bg-red-950/20 px-2 py-1 text-red-700 hover:bg-red-900/40 hover:text-red-600 transition-all active:scale-95">
