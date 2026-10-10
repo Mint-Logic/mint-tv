@@ -29,7 +29,7 @@ export function Header({ onOpenSearch, onOpenProfile }) {
     .join('') || 'TV';
 
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between border-b border-slate-800 bg-[#0F172A] px-3.5 py-2 backdrop-blur-md">
+    <header className="pt-safe-top sticky top-0 z-50 flex items-center justify-between border-b border-slate-800 bg-[#0F172A] px-3.5 py-2 backdrop-blur-md">
       {/* Brand Logo - Increased size */}
       <div className="flex items-center">
         <img 

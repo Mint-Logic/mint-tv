@@ -12,3 +12,8 @@
     color: #ffffff !important;
   }
 }
+
+/* Safe area top padding for iOS notch / Dynamic Island */
+.pt-safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
