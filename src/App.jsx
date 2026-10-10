@@ -17,6 +17,9 @@ export default function App() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  
+  // Prevents empty local state from overwriting cloud data on startup
+  const [hasLoadedFromCloud, setHasLoadedFromCloud] = useState(false);
 
   // Active Watchlist
   const [watchlist, setWatchlist] = useState(() => {
@@ -38,6 +41,40 @@ export default function App() {
     localStorage.setItem('mint_tv_watch_later', JSON.stringify(atticShows));
   }, [atticShows]);
 
+  // Helper to push current state up to Supabase
+  async function pushToCloud(userId, currentWatchlist, currentAttic) {
+    await supabase
+      .from('watchlists')
+      .upsert(
+        {
+          user_id: userId,
+          shows: currentWatchlist,
+          attic_shows: currentAttic,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id' }
+      );
+  }
+
+  // Fetch watchlist & attic from Supabase
+  async function loadCloudData(userId) {
+    const { data, error } = await supabase
+      .from('watchlists')
+      .select('shows, attic_shows')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (data && (data.shows || data.attic_shows)) {
+      if (data.shows) setWatchlist(data.shows);
+      if (data.attic_shows) setAtticShows(data.attic_shows);
+    } else {
+      // If table row doesn't exist yet, push initial local data to populate Supabase
+      await pushToCloud(userId, watchlist, atticShows);
+    }
+
+    setHasLoadedFromCloud(true);
+  }
+
   // Listen for Supabase Authentication state
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -53,46 +90,23 @@ export default function App() {
         loadCloudData(session.user.id);
       } else {
         setCurrentUser(null);
+        setHasLoadedFromCloud(false);
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Fetch watchlist & attic from Supabase
-  async function loadCloudData(userId) {
-    const { data, error } = await supabase
-      .from('watchlists')
-      .select('shows, attic_shows')
-      .eq('user_id', userId)
-      .single();
-
-    if (data) {
-      if (data.shows) setWatchlist(data.shows);
-      if (data.attic_shows) setAtticShows(data.attic_shows);
-    }
-  }
-
   // Sync state changes to Supabase in background
   useEffect(() => {
-    if (!currentUser) return;
-
-    async function syncToCloud() {
-      await supabase
-        .from('watchlists')
-        .upsert(
-          {
-            user_id: currentUser.id,
-            shows: watchlist,
-            attic_shows: atticShows,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'user_id' }
-        );
-    }
+    if (!currentUser || !hasLoadedFromCloud) return;
 
     syncToCloud();
-  }, [watchlist, atticShows, currentUser]);
+
+    async function syncToCloud() {
+      await pushToCloud(currentUser.id, watchlist, atticShows);
+    }
+  }, [watchlist, atticShows, currentUser, hasLoadedFromCloud]);
 
   // Android System Back Navigation Integration
   useEffect(() => {
@@ -148,7 +162,7 @@ export default function App() {
     if (!atticShows.some((s) => s.id === show.id)) {
       setAtticShows([show, ...atticShows]);
     }
-    setWatchlist(watchlist.filter((s) => s.id !== id));
+    setWatchlist(watchlist.filter((s) => s.id !== show.id));
   }
 
   function handleRestoreFromAttic(show) {
