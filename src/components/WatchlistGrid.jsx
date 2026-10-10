@@ -44,9 +44,9 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
           const isFinalSeason = meta ? season >= meta.numberOfSeasons : false;
           const remainingCount = Math.max(0, totalSeasonEpisodes - episode);
 
-          const shouldAutoArchive = Boolean(
-            meta?.isEnded && isFinalSeason && isSeasonCompleted
-          );
+          // ONLY AUTO-ARCHIVE IF EXPLICITLY ENDED OR CANCELED AND FINAL SEASON IS DONE
+          const isShowEnded = meta?.status === 'Ended' || meta?.status === 'Canceled' || meta?.isEnded;
+          const shouldAutoArchive = Boolean(isShowEnded && isFinalSeason && isSeasonCompleted);
 
           if (shouldAutoArchive && !show.archived) {
             show.archived = true;
@@ -57,13 +57,12 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
           let epData = null;
           let isAired = false;
 
-          // Only fetch episode info and mark as aired if the current season is NOT completed
+          // Only fetch episode info and mark as aired if current season is NOT completed
           if (!isSeasonCompleted) {
             epData = await getNextEpisodeInfo(show.id, season, episode);
             const airDate = epData?.air_date || null;
             isAired = airDate ? airDate <= today : false;
           } else {
-            // When all available episodes in the season are watched, it is NOT ready to watch
             isAired = false;
           }
 
