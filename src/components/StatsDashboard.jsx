@@ -30,7 +30,7 @@ const TMDB_TV_GENRES = [
 
 export function StatsDashboard({ watchlist }) {
   const [profileName, setProfileName] = useState(() => {
-    return localStorage.getItem('mint_tv_user_name') || 'Peace Toes';
+    return localStorage.getItem('mint_tv_user_name') || 'TV Collector';
   });
   const [profileTitle, setProfileTitle] = useState(() => {
     return localStorage.getItem('mint_tv_user_title') || 'TV & Movie Collector';
