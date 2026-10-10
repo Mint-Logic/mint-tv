@@ -62,7 +62,7 @@ export function MasterWatchlist({
     }
   }, [watchlist]);
 
-  // Hydrate metadata for Cosmic Kitty
+  // Hydrate metadata for RetroVision
   useEffect(() => {
     async function loadAtticMetadata() {
       const hydrated = await Promise.all(
@@ -173,8 +173,8 @@ export function MasterWatchlist({
               subTab === 'attic' ? 'bg-slate-800 text-[#8CFA96] shadow-sm' : 'text-slate-400 hover:text-white'
             }`}
           >
-            <img src={cosmicKittyIcon} alt="" className="h-4 w-4 rounded-sm object-cover" />
-            <span>Cosmic Kitty ({atticWithMeta.length})</span>
+            <img src={cosmicKittyIcon} alt="" className="h-6 w-6 rounded-sm object-cover" />
+            <span>RetroVision ({atticWithMeta.length})</span>
           </button>
         </div>
 
@@ -235,12 +235,12 @@ export function MasterWatchlist({
                 ? 'No completed series in this view'
                 : subTab === 'active'
                 ? 'No active shows in library'
-                : 'Cosmic Kitty is empty'}
+                : 'RetroVision is empty'}
             </p>
             <p className="mt-1 text-xs text-slate-500">
               {subTab === 'active'
                 ? 'Tap "+ Add" above to start tracking shows'
-                : 'Move completed or ended series to Cosmic Kitty'}
+                : 'Move completed or ended series to RetroVision'}
             </p>
           </div>
         ) : (
@@ -369,10 +369,10 @@ function ShowCard({
               e.stopPropagation();
               onMoveToAttic(show);
             }}
-            title="Move to Cosmic Kitty"
+            title="Move to RetroVision"
             className="flex items-center justify-center p-1 rounded-lg hover:opacity-80 transition-all active:scale-95"
           >
-            <img src={cosmicKittyIcon} alt="Send to Cosmic Kitty" className="h-6 w-6 rounded object-cover" />
+            <img src={cosmicKittyIcon} alt="Send to RetroVision" className="h-6 w-6 rounded object-cover" />
           </button>
         )}
 
