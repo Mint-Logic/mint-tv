@@ -1,14 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { searchShows as searchTMDB, IMAGE_BASE_URL, getShowMetadata } from '../services/tmdb';
 
+// Helper: Levenshtein Distance Algorithm for Typo Detection
+function getLevenshteinDistance(a, b) {
+  const matrix = Array.from({ length: a.length + 1 }, () =>
+    Array(b.length + 1).fill(0)
+  );
+
+  for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
+  for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1].toLowerCase() === b[j - 1].toLowerCase() ? 0 : 1;
+      matrix[i][j] = Math.min(
+        matrix[i - 1][j] + 1, // deletion
+        matrix[i][j - 1] + 1, // insertion
+        matrix[i - 1][j - 1] + cost // substitution
+      );
+    }
+  }
+
+  return matrix[a.length][b.length];
+}
+
+// Clean and normalize text for fuzzy comparison
+function normalizeQuery(str) {
+  return str
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/gi, '')
+    .trim();
+}
+
 export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
   const [query, setQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [trendingShows, setTrendingShows] = useState([]);
+  const [didYouMean, setDidYouMean] = useState(null);
   const [loading, setLoading] = useState(false);
   const [expandedShowId, setExpandedShowId] = useState(null);
 
-  // Fetch trending recommendations when opened
+  // Fetch trending recommendations on modal open
   useEffect(() => {
     if (!isOpen) return;
 
@@ -22,7 +54,6 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
         const data = await res.json();
         const rawResults = data.results || [];
 
-        // Hydrate trending shows with full metadata (status, seasons, on air info)
         const hydrated = await Promise.all(
           rawResults.map(async (show) => {
             const meta = await getShowMetadata(show.id);
@@ -45,19 +76,47 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
     fetchPopular();
   }, [isOpen]);
 
-  // Smoothed Live search query handling
+  // Smart Live Search with Typo Fallback
   useEffect(() => {
     if (!query.trim()) {
       setSearchResults([]);
+      setDidYouMean(null);
       return;
     }
 
     setLoading(true);
 
     const timer = setTimeout(async () => {
-      const results = await searchTMDB(query);
+      const cleanInput = normalizeQuery(query);
       
-      // Hydrate search results with metadata
+      // 1. Primary TMDB Query Search
+      let results = await searchTMDB(query);
+
+      // 2. Smart Typo Fallback: If strict search returns 0 results, score against trending titles
+      let suggestedTitle = null;
+      if (results.length === 0 && cleanInput.length > 2) {
+        let bestMatch = null;
+        let lowestDistance = Infinity;
+
+        trendingShows.forEach((show) => {
+          const normalizedShowName = normalizeQuery(show.name);
+          const dist = getLevenshteinDistance(cleanInput, normalizedShowName);
+
+          // Allow distance threshold up to 3 errors for typos
+          if (dist < lowestDistance && dist <= 3) {
+            lowestDistance = dist;
+            bestMatch = show;
+          }
+        });
+
+        if (bestMatch) {
+          suggestedTitle = bestMatch.name;
+          // Re-query TMDB using the corrected suggested name
+          results = await searchTMDB(bestMatch.name);
+        }
+      }
+
+      // Hydrate metadata for final results
       const hydratedResults = await Promise.all(
         results.map(async (show) => {
           const meta = await getShowMetadata(show.id);
@@ -70,12 +129,13 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
         })
       );
 
+      setDidYouMean(suggestedTitle);
       setSearchResults(hydratedResults);
       setLoading(false);
-    }, 600);
+    }, 500);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, trendingShows]);
 
   if (!isOpen) return null;
 
@@ -118,13 +178,16 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search TV shows..."
+            placeholder="Search TV shows (e.g., 'Severans', 'Sucesion')..."
             autoFocus
             className="w-full rounded-xl border border-slate-700 bg-slate-900 py-2.5 pl-3.5 pr-10 text-xs text-white placeholder-slate-500 focus:border-[#8CFA96] focus:outline-none"
           />
           {query.length > 0 && (
             <button
-              onClick={() => setQuery('')}
+              onClick={() => {
+                setQuery('');
+                setDidYouMean(null);
+              }}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full bg-slate-800 text-[10px] font-bold text-slate-400 hover:bg-slate-700 hover:text-white transition-all"
               title="Clear search"
             >
@@ -133,11 +196,26 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
           )}
         </div>
 
+        {/* Smart Typo Notice Badge */}
+        {didYouMean && (
+          <div className="shrink-0 flex items-center justify-between rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs">
+            <span className="text-slate-300">
+              Showing results for: <strong className="text-amber-400">{didYouMean}</strong>
+            </span>
+            <button
+              onClick={() => setQuery(didYouMean)}
+              className="text-[10px] font-extrabold text-amber-400 underline hover:text-amber-300"
+            >
+              Use corrected title
+            </button>
+          </div>
+        )}
+
         {/* Shows Feed List */}
         <div className="overflow-y-auto space-y-2.5 flex-1 pr-1">
           {loading ? (
             <div className="py-12 text-center text-xs font-bold text-slate-500 animate-pulse">
-              {query.trim() ? 'Searching TMDB...' : 'Fetching trending shows...'}
+              {query.trim() ? 'Analyzing & searching TMDB...' : 'Fetching trending shows...'}
             </div>
           ) : showsToDisplay.length === 0 ? (
             <div className="py-12 text-center text-xs text-slate-500">

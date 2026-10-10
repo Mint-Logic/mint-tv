@@ -11,6 +11,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
   });
 
   const [episodes, setEpisodes] = useState([]);
+  const [totalExpectedEpisodes, setTotalExpectedEpisodes] = useState(0);
   const [loading, setLoading] = useState(true);
   const [expandedEpisodeId, setExpandedEpisodeId] = useState(null);
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(false);
@@ -35,6 +36,9 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
           setSelectedSeason(targetSeason);
         }
 
+        const seasonMeta = data.seasons?.find((s) => s.season_number === targetSeason);
+        setTotalExpectedEpisodes(seasonMeta?.episode_count || 0);
+
         const apiKey = import.meta.env.VITE_TMDB_API_KEY;
         const res = await fetch(
           `https://api.themoviedb.org/3/tv/${showId}/season/${targetSeason}?api_key=${apiKey}`
@@ -47,7 +51,6 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
     fetchFullShow();
   }, [showId, selectedSeason]);
 
-  // Smoothly scroll active season tab into view when selected season or episodes load
   useEffect(() => {
     if (activeSeasonRef.current) {
       activeSeasonRef.current.scrollIntoView({
@@ -200,7 +203,24 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
 
         {episodes.map((ep, index) => {
           const isFirstEpisode = index === 0;
-          const isLastEpisode = index === episodes.length - 1;
+
+          // STRICT FINALE VERIFICATION:
+          // 1. Explicit TMDB finale attribute tag
+          const isExplicitFinale = ep.episode_type === 'finale';
+
+          // 2. Series status checks
+          const isEndedOrCanceled = details.status === 'Ended' || details.status === 'Canceled';
+          const isReturningSeries = details.status === 'Returning Series' || details.status === 'In Production' || details.in_production;
+
+          // 3. Compare episode number against reported total expected season episodes
+          const isMatchForExpectedCount = totalExpectedEpisodes > 0 && ep.episode_number === totalExpectedEpisodes;
+
+          // 4. Must NOT be an active returning series with incomplete episode lists
+          const isTrueFinale = 
+            isExplicitFinale || 
+            (isMatchForExpectedCount && !isReturningSeries) ||
+            (isEndedOrCanceled && index === episodes.length - 1);
+
           const isWatched =
             currentSeason > selectedSeason ||
             (currentSeason === selectedSeason && currentEpisode > ep.episode_number);
@@ -243,8 +263,8 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
                       </button>
                     )}
 
-                    {/* Finale badge triggers Watch All Season */}
-                    {isLastEpisode && (
+                    {/* Finale badge ONLY renders if explicitly verified */}
+                    {isTrueFinale && (
                       <button
                         type="button"
                         onClick={(e) => {
