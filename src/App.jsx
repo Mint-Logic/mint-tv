@@ -7,24 +7,29 @@ import { MasterWatchlist } from './components/MasterWatchlist';
 import { ShowDetails } from './components/ShowDetails';
 import { StatsDashboard } from './components/StatsDashboard';
 import { RecommendationsTab } from './components/RecommendationsTab';
+import { supabase } from './supabase';
+import { AuthModal } from './components/AuthModal';
 
 export default function App() {
   const [selectedShowId, setSelectedShowId] = useState(null);
   const [activeTab, setActiveTab] = useState('ready');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   // Active Watchlist
   const [watchlist, setWatchlist] = useState(() => {
     return JSON.parse(localStorage.getItem('mint_tv_shows') || '[]');
   });
 
-  // The Attic (Preserves the 350 legacy items safely!)
+  // The Attic (Preserves legacy items)
   const [atticShows, setAtticShows] = useState(() => {
     const saved = localStorage.getItem('mint_tv_watch_later');
     return saved ? JSON.parse(saved) : [];
   });
 
+  // Local storage backups
   useEffect(() => {
     localStorage.setItem('mint_tv_shows', JSON.stringify(watchlist));
   }, [watchlist]);
@@ -33,9 +38,65 @@ export default function App() {
     localStorage.setItem('mint_tv_watch_later', JSON.stringify(atticShows));
   }, [atticShows]);
 
+  // Listen for Supabase Authentication state
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setCurrentUser(session.user);
+        loadCloudData(session.user.id);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setCurrentUser(session.user);
+        loadCloudData(session.user.id);
+      } else {
+        setCurrentUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Fetch watchlist & attic from Supabase
+  async function loadCloudData(userId) {
+    const { data, error } = await supabase
+      .from('watchlists')
+      .select('shows, attic_shows')
+      .eq('user_id', userId)
+      .single();
+
+    if (data) {
+      if (data.shows) setWatchlist(data.shows);
+      if (data.attic_shows) setAtticShows(data.attic_shows);
+    }
+  }
+
+  // Sync state changes to Supabase in background
+  useEffect(() => {
+    if (!currentUser) return;
+
+    async function syncToCloud() {
+      await supabase
+        .from('watchlists')
+        .upsert(
+          {
+            user_id: currentUser.id,
+            shows: watchlist,
+            attic_shows: atticShows,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'user_id' }
+        );
+    }
+
+    syncToCloud();
+  }, [watchlist, atticShows, currentUser]);
+
   // Android System Back Navigation Integration
   useEffect(() => {
-    if (selectedShowId || isSearchOpen || isProfileOpen) {
+    if (selectedShowId || isSearchOpen || isProfileOpen || isAuthOpen) {
       window.history.pushState({ appState: 'subview' }, '');
     }
 
@@ -46,6 +107,8 @@ export default function App() {
         setIsSearchOpen(false);
       } else if (isProfileOpen) {
         setIsProfileOpen(false);
+      } else if (isAuthOpen) {
+        setIsAuthOpen(false);
       }
     };
 
@@ -54,7 +117,7 @@ export default function App() {
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [selectedShowId, isSearchOpen, isProfileOpen]);
+  }, [selectedShowId, isSearchOpen, isProfileOpen, isAuthOpen]);
 
   function handleAddShow(show) {
     if (!watchlist.some((s) => s.id === show.id)) {
@@ -81,15 +144,13 @@ export default function App() {
     );
   }
 
-  // Move a show from Active Watchlist -> The Attic
   function handleMoveToAttic(show) {
     if (!atticShows.some((s) => s.id === show.id)) {
       setAtticShows([show, ...atticShows]);
     }
-    setWatchlist(watchlist.filter((s) => s.id !== show.id));
+    setWatchlist(watchlist.filter((s) => s.id !== id));
   }
 
-  // Restore a show from The Attic -> Active Watchlist
   function handleRestoreFromAttic(show) {
     handleAddShow({
       id: show.id,
@@ -110,6 +171,28 @@ export default function App() {
         onOpenProfile={() => setIsProfileOpen(true)}
       />
 
+      {/* Cloud Account Login Bar */}
+      <div className="bg-slate-900 border-b border-slate-800 px-4 py-1.5 flex justify-between items-center text-xs">
+        <span className="text-slate-400 font-medium">
+          {currentUser ? `Cloud Sync: ${currentUser.email}` : 'Cloud Sync: Logged Out'}
+        </span>
+        {currentUser ? (
+          <button 
+            onClick={() => supabase.auth.signOut()}
+            className="text-red-400 hover:underline font-bold text-[11px]"
+          >
+            Sign Out
+          </button>
+        ) : (
+          <button 
+            onClick={() => setIsAuthOpen(true)}
+            className="text-[#8CFA96] hover:underline font-bold text-[11px]"
+          >
+            Login / Sign Up
+          </button>
+        )}
+      </div>
+
       {/* Profile / Stats Overlay Modal */}
       {isProfileOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
@@ -127,6 +210,13 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* Cloud Auth Modal */}
+      <AuthModal 
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onAuthSuccess={(user) => setCurrentUser(user)}
+      />
 
       <main className="mx-auto max-w-md p-4">
         {selectedShowId ? (
