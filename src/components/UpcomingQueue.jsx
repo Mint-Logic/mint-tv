@@ -32,7 +32,6 @@ export function UpcomingQueue({ watchlist, onRemoveShow, onSelectShow }) {
             meta?.status === 'Returning Series' ||
             meta?.status === 'In Production';
 
-          // 1. Check if there's a next episode with a specific future air date
           let epData = null;
           let airDate = null;
 
@@ -63,15 +62,12 @@ export function UpcomingQueue({ watchlist, onRemoveShow, onSelectShow }) {
           if (hasFutureAirDate) {
             scheduled.push(hydratedShow);
           } else if (isOngoingOrRenewed && isSeasonCompleted) {
-            // Show is renewed/in production, but TMDB hasn't set an exact air date yet
             inProduction.push(hydratedShow);
           }
         })
       );
 
-      // Sort scheduled shows chronologically by air date
       scheduled.sort((a, b) => (a.airDate || '').localeCompare(b.airDate || ''));
-      // Sort in-production shows alphabetically
       inProduction.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
       setScheduledShows(scheduled);
@@ -117,26 +113,36 @@ export function UpcomingQueue({ watchlist, onRemoveShow, onSelectShow }) {
         </div>
       ) : (
         <>
-          {/* SECTION 1: CONFIRMED SCHEDULED DATES */}
+          {/* SECTION 1: CONFIRMED SCHEDULED DATES (FULL CARD LAYOUT) */}
           {scheduledShows.length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-[10px] font-black uppercase tracking-wider text-[#8CFA96] px-1">
-                📅 Confirmed Air Dates ({scheduledShows.length})
+              <h3 className="text-[11px] font-black uppercase tracking-wider text-[#8CFA96] px-1">
+                Confirmed Air Dates ({scheduledShows.length})
               </h3>
               {scheduledShows.map((show) => (
-                <UpcomingCard key={show.id} show={show} onSelectShow={onSelectShow} onRemoveShow={onRemoveShow} isScheduled={true} />
+                <ScheduledCard
+                  key={show.id}
+                  show={show}
+                  onSelectShow={onSelectShow}
+                  onRemoveShow={onRemoveShow}
+                />
               ))}
             </div>
           )}
 
-          {/* SECTION 2: RENEWED & IN PRODUCTION (NO DATE YET) */}
+          {/* SECTION 2: RENEWED & IN PRODUCTION (COMPACT CARD LAYOUT) */}
           {inProductionShows.length > 0 && (
-            <div className="space-y-3 pt-2">
-              <h3 className="text-[10px] font-black uppercase tracking-wider text-amber-400 px-1">
-                🛠️ Renewed & In Production ({inProductionShows.length})
+            <div className="space-y-2 pt-2">
+              <h3 className="text-[11px] font-black uppercase tracking-wider text-amber-400 px-1">
+              Renewed & In Production ({inProductionShows.length})
               </h3>
               {inProductionShows.map((show) => (
-                <UpcomingCard key={show.id} show={show} onSelectShow={onSelectShow} onRemoveShow={onRemoveShow} isScheduled={false} />
+                <InProductionCompactCard
+                  key={show.id}
+                  show={show}
+                  onSelectShow={onSelectShow}
+                  onRemoveShow={onRemoveShow}
+                />
               ))}
             </div>
           )}
@@ -146,7 +152,8 @@ export function UpcomingQueue({ watchlist, onRemoveShow, onSelectShow }) {
   );
 }
 
-function UpcomingCard({ show, onSelectShow, onRemoveShow, isScheduled }) {
+{/* Full Backdrop Card for Confirmed Scheduled Releases */}
+function ScheduledCard({ show, onSelectShow, onRemoveShow }) {
   const season = show.currentSeason || 1;
   const episode = show.currentEpisode || 1;
   const backdropUrl = show.backdrop
@@ -167,15 +174,9 @@ function UpcomingCard({ show, onSelectShow, onRemoveShow, isScheduled }) {
         <div className="absolute inset-0 bg-gradient-to-t from-[#1E293B] via-transparent to-transparent"></div>
 
         <div className="absolute top-3 left-3 flex flex-col items-start space-y-1 z-10">
-          {isScheduled ? (
-            <span className="rounded-md border border-slate-700 bg-slate-900/90 px-2.5 py-1 text-xs font-extrabold text-[#8CFA96] backdrop-blur-md shadow-md">
-              Airs: {show.airDate}
-            </span>
-          ) : (
-            <span className="rounded-md border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-xs font-extrabold text-amber-400 backdrop-blur-md shadow-md">
-              In Production / TBA
-            </span>
-          )}
+          <span className="rounded-md border border-slate-700 bg-slate-900/90 px-2.5 py-1 text-xs font-extrabold text-[#8CFA96] backdrop-blur-md shadow-md">
+            Airs: {show.airDate}
+          </span>
           <span className="rounded-md border border-slate-700/80 bg-slate-900/90 px-2 py-0.5 text-[10px] font-extrabold uppercase text-slate-300 backdrop-blur-md shadow-md">
             S{String(season).padStart(2, '0')} • E{String(episode).padStart(2, '0')}
           </span>
@@ -206,9 +207,62 @@ function UpcomingCard({ show, onSelectShow, onRemoveShow, isScheduled }) {
           </span>
         </div>
         <div className="mt-0.5 text-xs font-bold text-white truncate">
-          {isScheduled ? `E${episode}: ${show.episodeName}` : 'Awaiting premiere date release'}
+          E{episode}: {show.episodeName}
         </div>
       </div>
+    </div>
+  );
+}
+
+{/* Compact Row Card for Renewed / In-Production Shows without Air Dates */}
+function InProductionCompactCard({ show, onSelectShow, onRemoveShow }) {
+  const posterUrl = show.poster ? `${IMAGE_BASE_URL}${show.poster}` : '';
+
+  return (
+    <div
+      onClick={() => onSelectShow(show.id)}
+      className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/70 p-2 opacity-90 hover:opacity-100 hover:border-amber-500/40 transition-all cursor-pointer gap-2.5"
+    >
+      <div className="flex items-center space-x-2.5 min-w-0 flex-1">
+        {posterUrl ? (
+          <img
+            src={posterUrl}
+            alt={show.name}
+            className="h-10 w-7 rounded object-cover shrink-0 shadow-sm"
+          />
+        ) : (
+          <div className="h-10 w-7 rounded bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600">
+            N/A
+          </div>
+        )}
+
+        <div className="min-w-0 flex-1">
+          <h4 className="text-xs font-bold text-white truncate leading-snug">{show.name}</h4>
+          <div className="flex items-center space-x-1.5 mt-0.5">
+            <span className="text-[9px] font-bold text-amber-400 bg-amber-400/10 px-1.5 py-0.2 rounded border border-amber-400/20 shrink-0">
+              In Production
+            </span>
+            <span className="text-[9px] text-slate-400 truncate">
+              {show.network}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        title="Remove show"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onRemoveShow(show.id);
+        }}
+        className="flex h-6 w-6 items-center justify-center rounded-full border border-slate-700 bg-slate-900 text-slate-400 hover:border-red-500/50 hover:bg-red-500/20 hover:text-red-400 transition-all shrink-0"
+      >
+        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </div>
   );
 }
