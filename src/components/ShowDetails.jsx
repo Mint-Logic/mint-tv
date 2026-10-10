@@ -102,6 +102,11 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
     onUpdateEpisode(showId, selectedSeason, 1);
   }
 
+  // Check if current season is the final season of the entire series
+  const isFinalSeasonOfSeries = details.number_of_seasons > 0 && selectedSeason >= details.number_of_seasons;
+  const isSeriesEnded = details.status === 'Ended' || details.status === 'Canceled';
+  const isUltimateSeriesFinale = isFinalSeasonOfSeries && isSeriesEnded;
+
   return (
     <div className="space-y-4 pb-12">
       {/* Back Button */}
@@ -205,21 +210,14 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
           const isFirstEpisode = index === 0;
 
           // STRICT FINALE VERIFICATION:
-          // 1. Explicit TMDB finale attribute tag
           const isExplicitFinale = ep.episode_type === 'finale';
-
-          // 2. Series status checks
-          const isEndedOrCanceled = details.status === 'Ended' || details.status === 'Canceled';
           const isReturningSeries = details.status === 'Returning Series' || details.status === 'In Production' || details.in_production;
-
-          // 3. Compare episode number against reported total expected season episodes
           const isMatchForExpectedCount = totalExpectedEpisodes > 0 && ep.episode_number === totalExpectedEpisodes;
 
-          // 4. Must NOT be an active returning series with incomplete episode lists
           const isTrueFinale = 
             isExplicitFinale || 
             (isMatchForExpectedCount && !isReturningSeries) ||
-            (isEndedOrCanceled && index === episodes.length - 1);
+            (isSeriesEnded && isFinalSeasonOfSeries && index === episodes.length - 1);
 
           const isWatched =
             currentSeason > selectedSeason ||
@@ -263,7 +261,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
                       </button>
                     )}
 
-                    {/* Finale badge ONLY renders if explicitly verified */}
+                    {/* Differentiated Season Finale vs Series Finale Badge */}
                     {isTrueFinale && (
                       <button
                         type="button"
@@ -272,9 +270,13 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
                           handleMarkSeasonWatched();
                         }}
                         title="Click to mark entire season watched"
-                        className="text-[9px] font-black text-[#8CFA96] uppercase tracking-widest bg-[#8CFA96]/10 hover:bg-[#8CFA96]/20 px-1.5 py-0.5 rounded border border-[#8CFA96]/30 shrink-0 transition-all active:scale-95"
+                        className={`text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border shrink-0 transition-all active:scale-95 ${
+                          isUltimateSeriesFinale
+                            ? 'bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border-amber-400/30'
+                            : 'bg-[#8CFA96]/10 hover:bg-[#8CFA96]/20 text-[#8CFA96] border-[#8CFA96]/30'
+                        }`}
                       >
-                        Finale ✓
+                        {isUltimateSeriesFinale ? 'Series Finale ✓' : 'Season Finale ✓'}
                       </button>
                     )}
                   </div>
