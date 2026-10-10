@@ -76,8 +76,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
 
   // Accordion states
   const [isGenreDrawerOpen, setIsGenreDrawerOpen] = useState(false);
-  const [isHelpDrawerOpen, setIsHelpDrawerOpen] = useState(false);
-  const [isFaqDrawerOpen, setIsFaqDrawerOpen] = useState(false);
+  const [isHelpFaqDrawerOpen, setIsHelpFaqDrawerOpen] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
   const [showLevelInfo, setShowLevelInfo] = useState(false);
@@ -295,7 +294,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
         title: 'Mint TV Backup',
       }).catch(() => {});
     } else {
-      const url = URL.URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
       const downloadAnchor = document.createElement('a');
       downloadAnchor.href = url;
       downloadAnchor.download = fileName;
@@ -731,119 +730,105 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
         )}
       </div>
 
-      {/* HELP & QUICK TIPS ACCORDION */}
+      {/* COMBINED HELP & FAQ ACCORDION */}
       <div className="-mx-3 sm:-mx-4 overflow-hidden rounded-2xl border border-slate-800 bg-[#1E293B] shadow-lg">
         <button
-          onClick={() => setIsHelpDrawerOpen(!isHelpDrawerOpen)}
+          onClick={() => setIsHelpFaqDrawerOpen(!isHelpFaqDrawerOpen)}
           className="w-full flex justify-between items-center px-4 py-2.5 bg-slate-900/60 hover:bg-slate-900 transition-all cursor-pointer"
         >
           <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-            HELP & QUICK TIPS
+            HELP & FAQ
           </span>
           <span className="text-[10px] font-bold text-[#8CFA96] transition-transform duration-200">
-            {isHelpDrawerOpen ? '▲' : '▼'}
+            {isHelpFaqDrawerOpen ? '▲' : '▼'}
           </span>
         </button>
 
-        {isHelpDrawerOpen && (
-          <div className="p-4 space-y-3.5 border-t border-slate-800 animate-in fade-in text-xs text-slate-300">
-            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
-                📺 Ready vs. Caught Up
+        {isHelpFaqDrawerOpen && (
+          <div className="p-4 space-y-4 border-t border-slate-800 animate-in fade-in text-xs text-slate-300">
+            {/* Quick App Tips */}
+            <div className="space-y-2.5">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#8CFA96] block">
+                Quick Guide & Tips
               </span>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Active shows with available episodes land in <strong className="text-white">Ready to Watch</strong>. Finishing all current episodes moves an active ongoing show into <strong className="text-white">Caught Up</strong> until a brand new season releases!
-              </p>
+
+              <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
+                  📺 Ready vs. Caught Up
+                </span>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Active shows with unwatched episodes land in <strong className="text-white">Ready to Watch</strong>. Finishing all current episodes moves an active ongoing show into <strong className="text-white">Caught Up</strong> until a brand new season releases!
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
+                  🏛️ RetroVision Archive
+                </span>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                 <strong className="text-white">RetroVision</strong> acts as your personal TV museum—an auto-archive for recently finished series and lifetime shows you've watched.
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
+                  📋 Watch Later Queue
+                </span>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Located in the <strong className="text-white">For You</strong> tab, <strong className="text-white">Watch Later</strong> is a holding deck for new show discoveries you plan to start soon without cluttering your main active watchlist.
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
+                  ⚡ Season Shortcuts
+                </span>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  In show details, tap <strong className="text-white">'Finale'</strong> on the last episode to mark the entire season as watched, or tap <strong className="text-white">'Premiere'</strong> on the first episode to unwatch the entire season.
+                </p>
+              </div>
             </div>
 
-            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
-                🖼️ RetroVision Archive
+            {/* Frequently Asked Questions */}
+            <div className="space-y-2.5 pt-2 border-t border-slate-800">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#8CFA96] block">
+                Frequently Asked Questions
               </span>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                <strong className="text-white">RetroVision</strong> acts as your personal TV museum—an auto-archive for recently finished series and lifetime shows you've watched.
-              </p>
-            </div>
 
-            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
-                📋 Watch Later Queue
-              </span>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Located in the <strong className="text-white">For You</strong> tab, <strong className="text-white">Watch Later</strong> is a holding deck for new show discoveries you plan to start soon without cluttering your main active watchlist.
-              </p>
-            </div>
+              <div className="space-y-1">
+                <h4 className="text-[11px] font-bold text-white">Why isn't my show appearing in "Ready to Watch"?</h4>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  If you are completely caught up on all currently released episodes for an active show, it automatically moves to the <strong className="text-slate-300">Caught Up</strong> sub-tab under Watchlist. Once a new season airs, it will return to Ready to Watch!
+                </p>
+              </div>
 
-            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
-                ⚡ Season Shortcuts
-              </span>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                In show details, tap <strong className="text-white">'Finale'</strong> on the last episode to instantly mark the entire season as watched, or tap <strong className="text-white">'Premiere'</strong> on the first episode to unwatch the entire season.
-              </p>
-            </div>
+              <div className="space-y-1 pt-1 border-t border-slate-800/60">
+                <h4 className="text-[11px] font-bold text-white">How do shows end up in RetroVision?</h4>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Shows auto-archive to <strong className="text-slate-300">RetroVision</strong> when TMDB metadata confirms the series has officially ended or been canceled, and you've completed all available seasons. You can also manually move any show into RetroVision at any time.
+                </p>
+              </div>
 
-            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
-                ☁️ Real-time Cloud Sync
-              </span>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Sign into your cloud account to sync your active watchlist, RetroVision archive, Watch Later queue, and custom profile across all your devices in real-time.
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
+              <div className="space-y-1 pt-1 border-t border-slate-800/60">
+                <h4 className="text-[11px] font-bold text-white">What is the difference between RetroVision and Watch Later?</h4>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  <strong className="text-slate-300">RetroVision</strong> is a permanent vault/museum for completed or lifetime shows. <strong className="text-slate-300">Watch Later</strong> (found in the For You tab) is a temporary holding area for new recommendations you want to decide on or start soon.
+                </p>
+              </div>
 
-      {/* FREQUENTLY ASKED QUESTIONS (FAQ) ACCORDION */}
-      <div className="-mx-3 sm:-mx-4 overflow-hidden rounded-2xl border border-slate-800 bg-[#1E293B] shadow-lg">
-        <button
-          onClick={() => setIsFaqDrawerOpen(!isFaqDrawerOpen)}
-          className="w-full flex justify-between items-center px-4 py-2.5 bg-slate-900/60 hover:bg-slate-900 transition-all cursor-pointer"
-        >
-          <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-            FREQUENTLY ASKED QUESTIONS (FAQ)
-          </span>
-          <span className="text-[10px] font-bold text-[#8CFA96] transition-transform duration-200">
-            {isFaqDrawerOpen ? '▲' : '▼'}
-          </span>
-        </button>
+              <div className="space-y-1 pt-1 border-t border-slate-800/60">
+                <h4 className="text-[11px] font-bold text-white">Does my data work offline?</h4>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Yes! All watchlist progress and custom profile changes save locally to your device instantly. When connected to your cloud account, it seamlessly syncs in the background whenever an internet connection is available.
+                </p>
+              </div>
 
-        {isFaqDrawerOpen && (
-          <div className="p-4 space-y-3.5 border-t border-slate-800 animate-in fade-in text-xs text-slate-300">
-            <div className="space-y-1">
-              <h4 className="text-[11px] font-bold text-white">Why isn't my show appearing in "Ready to Watch"?</h4>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                If you are completely caught up on all currently released episodes for an active show, it automatically moves to the <strong className="text-slate-300">Caught Up</strong> sub-tab under Watchlist. Once a new season airs, it will return to Ready to Watch!
-              </p>
-            </div>
-
-            <div className="space-y-1 pt-1 border-t border-slate-800/60">
-              <h4 className="text-[11px] font-bold text-white">How do shows end up in RetroVision?</h4>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Shows auto-archive to <strong className="text-slate-300">RetroVision</strong> when TMDB metadata confirms the series has officially ended or been canceled, and you've completed all available seasons. You can also manually move any show into RetroVision at any time.
-              </p>
-            </div>
-
-            <div className="space-y-1 pt-1 border-t border-slate-800/60">
-              <h4 className="text-[11px] font-bold text-white">What is the difference between RetroVision and Watch Later?</h4>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                <strong className="text-slate-300">RetroVision</strong> is a permanent vault/museum for completed or lifetime shows. <strong className="text-slate-300">Watch Later</strong> (found in the For You tab) is a temporary holding area for new recommendations you want to decide on or start soon.
-              </p>
-            </div>
-
-            <div className="space-y-1 pt-1 border-t border-slate-800/60">
-              <h4 className="text-[11px] font-bold text-white">Does my data work offline?</h4>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Yes! All watchlist progress and custom profile changes save locally to your device instantly. When connected to your cloud account, it seamlessly syncs in the background whenever an internet connection is available.
-              </p>
-            </div>
-
-            <div className="space-y-1 pt-1 border-t border-slate-800/60">
-              <h4 className="text-[11px] font-bold text-white">How do I transfer data without an account?</h4>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Use the <strong className="text-slate-300">Export Backup</strong> button below to save a `.json` backup file. You can import this file on any device (including iPhone Safari using Native Web Share) to transfer your entire watchlist and profile settings manually.
-              </p>
+              <div className="space-y-1 pt-1 border-t border-slate-800/60">
+                <h4 className="text-[11px] font-bold text-white">How do I transfer data without an account?</h4>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Use the <strong className="text-slate-300">Export Backup</strong> button below to save a `.json` backup file. You can import this file on any device (including iPhone Safari using Native Web Share) to transfer your entire watchlist and profile settings manually.
+                </p>
+              </div>
             </div>
           </div>
         )}
