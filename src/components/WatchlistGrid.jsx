@@ -10,7 +10,6 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
   useEffect(() => {
     async function processQueue() {
       const today = new Date().toISOString().split('T')[0];
-
       const unarchivedWatchlist = watchlist.filter((show) => !show.archived);
 
       const hydrated = await Promise.all(
@@ -26,7 +25,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
           let totalSeasonEpisodes = seasonData?.episodes?.length || 0;
           let isSeasonCompleted = totalSeasonEpisodes > 0 && episode > totalSeasonEpisodes;
 
-          // AUTO-ADVANCE TO NEXT SEASON:
+          // AUTO-ADVANCE TO NEXT SEASON IF MORE SEASONS EXIST
           if (isSeasonCompleted && meta && season < meta.numberOfSeasons) {
             season = season + 1;
             episode = 1;
@@ -44,9 +43,16 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
           const isFinalSeason = meta ? season >= meta.numberOfSeasons : false;
           const remainingCount = Math.max(0, totalSeasonEpisodes - episode);
 
-          // ONLY AUTO-ARCHIVE IF EXPLICITLY ENDED OR CANCELED AND FINAL SEASON IS DONE
+          // ONLY AUTO-ARCHIVE IF ENDED/CANCELED AND FINAL SEASON COMPLETED
           const isShowEnded = meta?.status === 'Ended' || meta?.status === 'Canceled' || meta?.isEnded;
           const shouldAutoArchive = Boolean(isShowEnded && isFinalSeason && isSeasonCompleted);
+
+          // Un-archive self-healing check
+          if (!shouldAutoArchive && show.archived) {
+            show.archived = false;
+            const updated = watchlist.map((s) => (s.id === show.id ? { ...s, archived: false } : s));
+            localStorage.setItem('mint_tv_shows', JSON.stringify(updated));
+          }
 
           if (shouldAutoArchive && !show.archived) {
             show.archived = true;
@@ -57,10 +63,10 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
           let epData = null;
           let isAired = false;
 
-          // Only fetch episode info and mark as aired if current season is NOT completed
           if (!isSeasonCompleted) {
             epData = await getNextEpisodeInfo(show.id, season, episode);
             const airDate = epData?.air_date || null;
+            // If the next episode exists and has an air date in the future, it's not ready to watch yet
             isAired = airDate ? airDate <= today : false;
           } else {
             isAired = false;
@@ -84,8 +90,11 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
 
       const activeHydrated = hydrated.filter((s) => !s.shouldAutoArchive);
 
+      // Ready: Has aired episodes waiting to be watched right now
       setAiredQueue(activeHydrated.filter((s) => s.isAired && !s.isCompleted));
-      setCompletedQueue(activeHydrated.filter((s) => s.isCompleted));
+
+      // Caught Up: Watched all episodes currently out (both mid-season pauses & full season hiatuses)
+      setCompletedQueue(activeHydrated.filter((s) => s.isCompleted || !s.isAired));
       setLoading(false);
     }
 
@@ -244,7 +253,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
             <div className="rounded-2xl border border-dashed border-slate-800 py-12 px-4 text-center">
               <p className="text-sm font-medium text-slate-400">No completed active shows!</p>
               <p className="mt-1 text-xs text-slate-500">
-                Shows in ongoing series move here automatically when caught up. Ended series auto-archive to your Vault.
+                Shows in ongoing series move here automatically when caught up. Ended series auto-archive to RetroVision.
               </p>
             </div>
           ) : (
@@ -276,7 +285,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
                         </svg>
                         <p className="text-[10px] text-[#8CFA96] font-semibold">
-                          All episodes watched
+                          All released episodes watched
                         </p>
                       </div>
                     </div>
