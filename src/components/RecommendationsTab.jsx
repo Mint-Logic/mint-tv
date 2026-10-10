@@ -242,7 +242,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2 mt-2">
+                        <div className="flex items-center gap-4 mt-2">
                           <button
                             onClick={(e) => { e.stopPropagation(); handleSaveWatchLater(show); }}
                             className="flex items-center rounded border border-[#8CFA96]/30 bg-[#8CFA96]/10 px-2 py-1 text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-900 transition-all active:scale-95"
@@ -341,7 +341,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 mt-3">
+                      <div className="flex items-center gap-4 mt-3">
                         <button onClick={(e) => { e.stopPropagation(); handlePromoteToWatchlist(show); }} className="flex items-center rounded border border-[#8CFA96]/30 bg-[#8CFA96]/10 px-2 py-1 text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-900 transition-all active:scale-95">
                           <span className="text-[8px] font-black uppercase tracking-tight">Watchlist</span>
                         </button>
