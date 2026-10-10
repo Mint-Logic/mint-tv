@@ -357,7 +357,7 @@ function ShowCard({
               onRestoreFromAttic(show);
             }}
             title="Restore to Active Watchlist"
-            className="flex items-center space-x-1 rounded-lg border border-[#8CFA96]/40 bg-[#8CFA96]/10 px-2 py-1.5 text-[10px] font-bold text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-900 transition-all active:scale-95"
+            className="flex items-center space-x-1 rounded-lg border border-[#8CFA96]/40 bg-[#8CFA96]/10 px-2 py-1 text-[10px] font-bold text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-900 transition-all active:scale-95"
           >
             <span className="text-[9px] font-extrabold uppercase">Watchlist</span>
           </button>
