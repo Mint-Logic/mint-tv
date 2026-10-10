@@ -42,38 +42,51 @@ export default function App() {
   }, [atticShows]);
 
   // Helper to push current state up to Supabase
-  async function pushToCloud(userId, currentWatchlist, currentAttic) {
-    await supabase
-      .from('watchlists')
-      .upsert(
-        {
-          user_id: userId,
-          shows: currentWatchlist,
-          attic_shows: currentAttic,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'user_id' }
-      );
+  // Helper to push current state up to Supabase with full error reporting
+async function pushToCloud(userId, currentWatchlist, currentAttic) {
+  const { data, error } = await supabase
+    .from('watchlists')
+    .upsert(
+      {
+        user_id: userId,
+        shows: currentWatchlist,
+        attic_shows: currentAttic,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' }
+    );
+
+  if (error) {
+    console.error('Supabase Sync Error:', error);
+    alert(`Cloud Sync Error: ${error.message} (${error.code})`);
+  } else {
+    console.log('Successfully synced to Supabase cloud!');
+  }
+}
+
+// Fetch watchlist & attic from Supabase
+async function loadCloudData(userId) {
+  const { data, error } = await supabase
+    .from('watchlists')
+    .select('shows, attic_shows')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Supabase Fetch Error:', error);
+    alert(`Cloud Fetch Error: ${error.message}`);
   }
 
-  // Fetch watchlist & attic from Supabase
-  async function loadCloudData(userId) {
-    const { data, error } = await supabase
-      .from('watchlists')
-      .select('shows, attic_shows')
-      .eq('user_id', userId)
-      .maybeSingle();
-
-    if (data && (data.shows || data.attic_shows)) {
-      if (data.shows) setWatchlist(data.shows);
-      if (data.attic_shows) setAtticShows(data.attic_shows);
-    } else {
-      // If table row doesn't exist yet, push initial local data to populate Supabase
-      await pushToCloud(userId, watchlist, atticShows);
-    }
-
-    setHasLoadedFromCloud(true);
+  if (data && (data.shows || data.attic_shows)) {
+    if (data.shows) setWatchlist(data.shows);
+    if (data.attic_shows) setAtticShows(data.attic_shows);
+  } else {
+    // If row doesn't exist yet, attempt initial push
+    await pushToCloud(userId, watchlist, atticShows);
   }
+
+  setHasLoadedFromCloud(true);
+}
 
   // Listen for Supabase Authentication state
   useEffect(() => {
