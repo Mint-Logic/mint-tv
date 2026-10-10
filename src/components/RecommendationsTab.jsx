@@ -255,7 +255,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                             className="p-0.5 rounded-lg hover:opacity-80 transition-all active:scale-95"
                             title="Move to RetroVision"
                           >
-                            <img src={cosmicKittyIcon} alt="RetroVision" className="h-6 w-6 rounded object-cover" />
+                            <img src={cosmicKittyIcon} alt="RetroVision" className="h-5 w-5 rounded object-cover" />
                           </button>
 
                           <button
