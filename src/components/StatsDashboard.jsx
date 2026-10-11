@@ -780,7 +780,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  <strong className="text-white">RetroVision</strong> is your personal lifetime TV museum. It auto-archives finished series, but also serves as a permanent vault where you can store every show you've ever watched in your life as a reminder of all the great TV you've experienced.
+                  <strong className="text-white">RetroVision</strong> is your personal lifetime TV museum. It auto-archives finished series, but also serves as a permanent vault where you can store every show you've ever watched as a reminder of all the great TV you've experienced.
                 </p>
               </div>
 

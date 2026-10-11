@@ -168,14 +168,14 @@ export function MasterWatchlist({
             Active Shows ({showsWithMeta.length})
           </button>
           <button
-  onClick={() => setSubTab('attic')}
-  className={`flex-1 py-2 rounded-lg transition-all flex items-center justify-center space-x-1.5 ${
-    subTab === 'attic' ? 'bg-slate-800 text-[#8CFA96] shadow-sm' : 'text-slate-400 hover:text-white'
-  }`}
->
- 
-  <span>RetroVision ({atticWithMeta.length})</span>
-</button>
+            onClick={() => setSubTab('attic')}
+            className={`flex-1 py-2 rounded-lg transition-all flex items-center justify-center space-x-1.5 ${
+              subTab === 'attic' ? 'bg-slate-800 text-[#8CFA96] shadow-sm' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <img src={retroVisionLogo} alt="RetroVision" className="h-4 w-4 object-contain shrink-0" />
+            <span>RetroVision ({atticWithMeta.length})</span>
+          </button>
         </div>
 
         {/* Sort Dropdown */}
@@ -211,14 +211,19 @@ export function MasterWatchlist({
         </div>
       </div>
 
-      {/* Floating Vertical Alphabet Side Index */}
+      {/* DYNAMICALLY VERTICALLY CENTERED ALPHABET SIDE INDEX */}
       {showAlphabetIndex && (
-        <div className="fixed right-2 bottom-15 z-40 flex flex-col items-center justify-center">
+        <div 
+          style={{
+            top: 'calc(50% - env(safe-area-inset-bottom, 0px) / 2)',
+          }}
+          className="fixed right-1 z-40 flex -translate-y-1/2 flex-col items-center justify-center py-2"
+        >
           {FULL_ALPHABET.map((letter) => (
             <button
               key={letter}
               onClick={() => scrollToLetter(letter)}
-              className="flex h-4.5 w-4 items-center justify-center text-[8px] font-black text-slate-400 hover:text-[#8CFA96] transition-all active:scale-95"
+              className="flex h-[3.4vh] max-h-4.5 min-h-[12px] w-4 items-center justify-center text-[8px] font-black text-slate-400 hover:text-[#8CFA96] transition-all active:scale-125"
             >
               {letter}
             </button>
