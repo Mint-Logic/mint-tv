@@ -9,8 +9,23 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
   const [expandedShowId, setExpandedShowId] = useState(null);
   const [page, setPage] = useState(1);
 
+  // Global Era Filter State
+  const [selectedEra, setSelectedEra] = useState('all');
+
   // Session cache to prevent duplicate titles during a session
   const sessionSeenIds = useRef(new Set());
+  const isFetchingRef = useRef(false);
+
+  const ERAS = [
+    { id: 'all', label: 'All Eras' },
+    { id: '2020s', label: '2020s' },
+    { id: '2010s', label: '2010s' },
+    { id: '2000s', label: '2000s' },
+    { id: '1990s', label: '1990s' },
+    { id: '1980s', label: '1980s' },
+    { id: '1970s', label: '1970s' },
+    { id: 'vintage', label: '1950s–60s' },
+  ];
 
   // Watch Later Queue
   const [watchLater, setWatchLater] = useState(() => {
@@ -52,9 +67,13 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
     if (watchLater.length > 0) hydrateList();
   }, [watchLater.length]);
 
-  async function fetchDiscoverFeed(isLoadMore = false) {
+  async function fetchDiscoverFeed(isLoadMore = false, eraOverride = null) {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+
     if (!isLoadMore) setLoading(true);
 
+    const activeEra = eraOverride || selectedEra;
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     const likedGenres = JSON.parse(localStorage.getItem('mint_tv_liked_genres') || '[]');
     const mutedGenres = JSON.parse(localStorage.getItem('mint_tv_muted_genres') || '[]');
@@ -67,21 +86,30 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
     const atticIds = new Set((atticShows || []).map((s) => s.id));
     const blacklistedIds = new Set(dislikedIds);
 
-    const startPage = isLoadMore ? page + 1 : 1;
+    const startPage = isLoadMore ? page + 2 : 1;
 
     try {
       const fetchPage = async (p) => {
-        let url = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=${p}&vote_count.gte=30`;
+        let url = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=${p}&vote_count.gte=15`;
 
         if (likedGenres.length > 0) url += `&with_genres=${likedGenres.join('|')}`;
         if (mutedGenres.length > 0) url += `&without_genres=${mutedGenres.join(',')}`;
+
+        // Apply Era Bounds
+        if (activeEra === '2020s') url += '&first_air_date.gte=2020-01-01';
+        else if (activeEra === '2010s') url += '&first_air_date.gte=2010-01-01&first_air_date.lte=2019-12-31';
+        else if (activeEra === '2000s') url += '&first_air_date.gte=2000-01-01&first_air_date.lte=2009-12-31';
+        else if (activeEra === '1990s') url += '&first_air_date.gte=1990-01-01&first_air_date.lte=1999-12-31';
+        else if (activeEra === '1980s') url += '&first_air_date.gte=1980-01-01&first_air_date.lte=1989-12-31';
+        else if (activeEra === '1970s') url += '&first_air_date.gte=1970-01-01&first_air_date.lte=1979-12-31';
+        else if (activeEra === 'vintage') url += '&first_air_date.lte=1969-12-31';
 
         let res = await fetch(url);
         let data = await res.json();
         let results = data.results || [];
 
         if (results.length === 0 && likedGenres.length > 0) {
-          const fallbackUrl = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=${p}&vote_count.gte=30`;
+          const fallbackUrl = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=${p}&vote_count.gte=10`;
           res = await fetch(fallbackUrl);
           data = await res.json();
           results = data.results || [];
@@ -89,7 +117,6 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
         return results;
       };
 
-      // Fetch 2 pages at once for a robust 40-item candidate pool
       const [p1Results, p2Results] = await Promise.all([
         fetchPage(startPage),
         fetchPage(startPage + 1),
@@ -125,10 +152,9 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
         });
       }
 
-      // Record seen show IDs to guarantee no repeats
       filtered.forEach((show) => sessionSeenIds.current.add(show.id));
 
-      const itemsToHydrate = isLoadMore ? filtered : filtered.slice(0, 10);
+      const itemsToHydrate = filtered.slice(0, 20);
       const hydratedShows = await Promise.all(
         itemsToHydrate.map(async (show) => {
           const meta = await getShowMetadata(show.id);
@@ -154,11 +180,25 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
       console.error('Error fetching discovery feed:', err);
     }
     setLoading(false);
+    isFetchingRef.current = false;
   }
 
   useEffect(() => {
     fetchDiscoverFeed(false);
   }, []);
+
+  useEffect(() => {
+    if (!loading && subTab === 'feed' && feedShows.length < 6 && !isFetchingRef.current) {
+      fetchDiscoverFeed(true);
+    }
+  }, [feedShows.length, loading, subTab]);
+
+  function handleEraSelect(eraId) {
+    setSelectedEra(eraId);
+    sessionSeenIds.current.clear();
+    setFeedShows([]);
+    fetchDiscoverFeed(false, eraId);
+  }
 
   function handleSaveWatchLater(show) {
     setWatchLater((prev) => [...prev, show]);
@@ -193,17 +233,31 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
     setWatchLater((prev) => prev.filter((s) => s.id !== show.id));
   }
 
+  // Filter Watch Later Queue by Selected Era
+  const filteredWatchLater = watchLater.filter((show) => {
+    if (selectedEra === 'all') return true;
+    const year = show.first_air_date ? parseInt(show.first_air_date.split('-')[0], 10) : 0;
+    if (!year) return false;
+
+    if (selectedEra === '2020s') return year >= 2020;
+    if (selectedEra === '2010s') return year >= 2010 && year <= 2019;
+    if (selectedEra === '2000s') return year >= 2000 && year <= 2009;
+    if (selectedEra === '1990s') return year >= 1990 && year <= 1999;
+    if (selectedEra === '1980s') return year >= 1980 && year <= 1989;
+    if (selectedEra === '1970s') return year >= 1970 && year <= 1979;
+    if (selectedEra === 'vintage') return year < 1970;
+    return true;
+  });
+
   return (
     <div className="space-y-3">
       {/* Header Structure */}
-      <div className="sticky top-[49px] z-30 bg-[#0F172A] pt-1 pb-2">
+      <div className="sticky top-[49px] z-30 bg-[#0F172A] pt-1 pb-2 space-y-2">
         <div className="flex w-full items-center justify-evenly rounded-xl border border-slate-800 bg-[#1E293B] py-2.5 text-[11px] sm:text-xs font-bold shadow-md">
           <button
             onClick={() => setSubTab('feed')}
             className={`flex items-center justify-center space-x-1 px-4 transition-colors ${
-              subTab === 'feed' 
-                ? 'text-[#8CFA96]' 
-                : 'text-slate-400 hover:text-white'
+              subTab === 'feed' ? 'text-[#8CFA96]' : 'text-slate-400 hover:text-white'
             }`}
           >
             <svg className="h-3 w-3 fill-current shrink-0" viewBox="0 0 24 24">
@@ -211,13 +265,11 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
             </svg>
             <span>Feed</span>
           </button>
-          
+
           <button
             onClick={() => setSubTab('watchlater')}
             className={`flex items-center justify-center space-x-1 px-4 transition-colors ${
-              subTab === 'watchlater' 
-                ? 'text-[#8CFA96]' 
-                : 'text-slate-400 hover:text-white'
+              subTab === 'watchlater' ? 'text-[#8CFA96]' : 'text-slate-400 hover:text-white'
             }`}
           >
             <svg className="h-3 w-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -225,6 +277,23 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
             </svg>
             <span>Watch Later ({watchLater.length})</span>
           </button>
+        </div>
+
+        {/* PERMANENT ERA FILTER PILLS ACCESSIBLE BY BOTH SUB-TABS */}
+        <div className="flex space-x-1.5 overflow-x-auto pb-1 pt-1 scrollbar-none">
+          {ERAS.map((era) => (
+            <button
+              key={era.id}
+              onClick={() => handleEraSelect(era.id)}
+              className={`px-3 py-1 rounded-full text-[10px] font-bold whitespace-nowrap shrink-0 transition-all ${
+                selectedEra === era.id
+                  ? 'bg-[#8CFA96] text-slate-900 shadow-sm'
+                  : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'
+              }`}
+            >
+              {era.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -237,9 +306,9 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
             </div>
           ) : feedShows.length === 0 ? (
             <div className="rounded-xl border border-dashed border-slate-800 py-8 text-center space-y-2">
-              <p className="text-xs text-slate-400">End of recommendations.</p>
-              <button onClick={() => fetchDiscoverFeed(true)} className="text-xs font-bold text-[#8CFA96] underline">
-                Refresh Feed
+              <p className="text-xs text-slate-400">End of recommendations for this era.</p>
+              <button onClick={() => handleEraSelect('all')} className="text-xs font-bold text-[#8CFA96] underline">
+                Show All Eras
               </button>
             </div>
           ) : (
@@ -301,7 +370,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                           </div>
                         </div>
 
-                        {/* UNIVERSAL RIGHT-ANCHORED ACTION ICONS */}
+                        {/* RIGHT-ANCHORED ACTION ICONS */}
                         <div className="flex items-center justify-end gap-3 mt-2.5 ml-auto">
                           <button
                             type="button"
@@ -380,14 +449,18 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
 
       {/* WATCH LATER TAB */}
       {subTab === 'watchlater' && (
-        <div className="space-y-2 mt-4">
-          {watchLater.length === 0 ? (
+        <div className="space-y-2 mt-2">
+          {filteredWatchLater.length === 0 ? (
             <div className="rounded-xl border border-dashed border-slate-800 py-10 text-center space-y-1">
-              <p className="text-sm font-medium text-slate-400">Your queue is empty</p>
-              <p className="text-xs text-slate-500">Save shows here to decide on them later.</p>
+              <p className="text-sm font-medium text-slate-400">
+                {selectedEra === 'all' ? 'Your queue is empty' : `No items in Watch Later for ${selectedEra}`}
+              </p>
+              <p className="text-xs text-slate-500">
+                {selectedEra === 'all' ? 'Save shows here to decide on them later.' : 'Try selecting "All Eras" to view your saved queue.'}
+              </p>
             </div>
           ) : (
-            [...watchLater].reverse().map((show) => {
+            [...filteredWatchLater].reverse().map((show) => {
               const posterUrl = show.poster_path || show.poster ? `${IMAGE_BASE_URL}${show.poster_path || show.poster}` : '';
               const isExpanded = expandedShowId === show.id;
               const imdbSearchUrl = `https://www.imdb.com/find?q=${encodeURIComponent(show.name)}`;
@@ -431,7 +504,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                         </div>
                       </div>
 
-                      {/* UNIVERSAL RIGHT-ANCHORED WATCH LATER ACTIONS */}
+                      {/* WATCH LATER ACTIONS */}
                       <div className="flex items-center justify-end gap-3 mt-2.5 ml-auto">
                         <button
                           type="button"
