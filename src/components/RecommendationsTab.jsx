@@ -67,11 +67,10 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
     if (watchLater.length > 0) hydrateList();
   }, [watchLater.length]);
 
-  async function fetchDiscoverFeed(isLoadMore = false, eraOverride = null) {
+  // Core Feed Discovery Engine (Fills up to target array length)
+  async function fillFeedToCapacity(targetCount = 20, eraOverride = null) {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
-
-    if (!isLoadMore) setLoading(true);
 
     const activeEra = eraOverride || selectedEra;
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
@@ -86,16 +85,18 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
     const atticIds = new Set((atticShows || []).map((s) => s.id));
     const blacklistedIds = new Set(dislikedIds);
 
-    const startPage = isLoadMore ? page + 2 : 1;
+    let currentPageToFetch = page;
+    let accumulatedFiltered = [];
+    let attempts = 0;
 
     try {
-      const fetchPage = async (p) => {
-        let url = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=${p}&vote_count.gte=15`;
+      while (accumulatedFiltered.length < targetCount && attempts < 8) {
+        attempts++;
+        let url = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=${currentPageToFetch}&vote_count.gte=15`;
 
         if (likedGenres.length > 0) url += `&with_genres=${likedGenres.join('|')}`;
         if (mutedGenres.length > 0) url += `&without_genres=${mutedGenres.join(',')}`;
 
-        // Apply Era Bounds
         if (activeEra === '2020s') url += '&first_air_date.gte=2020-01-01';
         else if (activeEra === '2010s') url += '&first_air_date.gte=2010-01-01&first_air_date.lte=2019-12-31';
         else if (activeEra === '2000s') url += '&first_air_date.gte=2000-01-01&first_air_date.lte=2009-12-31';
@@ -106,44 +107,33 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
 
         let res = await fetch(url);
         let data = await res.json();
-        let results = data.results || [];
+        let rawResults = data.results || [];
 
-        if (results.length === 0 && likedGenres.length > 0) {
-          const fallbackUrl = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=${p}&vote_count.gte=10`;
-          res = await fetch(fallbackUrl);
-          data = await res.json();
-          results = data.results || [];
-        }
-        return results;
-      };
+        const pageFiltered = rawResults.filter((show) => {
+          if (
+            activeWatchlistIds.has(show.id) ||
+            watchLaterIds.has(show.id) ||
+            atticIds.has(show.id) ||
+            blacklistedIds.has(show.id) ||
+            sessionSeenIds.current.has(show.id)
+          ) {
+            return false;
+          }
 
-      const [p1Results, p2Results] = await Promise.all([
-        fetchPage(startPage),
-        fetchPage(startPage + 1),
-      ]);
+          const genreIds = show.genre_ids || [];
+          if (excludeAnime && genreIds.includes(16) && show.origin_country?.includes('JP')) return false;
+          if (excludeTrueCrime && genreIds.includes(80) && genreIds.includes(99)) return false;
 
-      const combinedRaw = [...p1Results, ...p2Results];
+          return true;
+        });
 
-      const filtered = combinedRaw.filter((show) => {
-        if (
-          activeWatchlistIds.has(show.id) ||
-          watchLaterIds.has(show.id) ||
-          atticIds.has(show.id) ||
-          blacklistedIds.has(show.id) ||
-          sessionSeenIds.current.has(show.id)
-        ) {
-          return false;
-        }
-
-        const genreIds = show.genre_ids || [];
-        if (excludeAnime && genreIds.includes(16) && show.origin_country?.includes('JP')) return false;
-        if (excludeTrueCrime && genreIds.includes(80) && genreIds.includes(99)) return false;
-
-        return true;
-      });
+        pageFiltered.forEach((s) => sessionSeenIds.current.add(s.id));
+        accumulatedFiltered = [...accumulatedFiltered, ...pageFiltered];
+        currentPageToFetch++;
+      }
 
       if (boostNature) {
-        filtered.sort((a, b) => {
+        accumulatedFiltered.sort((a, b) => {
           const aNature = (a.genre_ids || []).includes(99) && /nature|wildlife|planet|animal/i.test(a.overview);
           const bNature = (b.genre_ids || []).includes(99) && /nature|wildlife|planet|animal/i.test(b.overview);
           if (aNature && !bNature) return -1;
@@ -152,11 +142,8 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
         });
       }
 
-      filtered.forEach((show) => sessionSeenIds.current.add(show.id));
-
-      const itemsToHydrate = filtered.slice(0, 20);
       const hydratedShows = await Promise.all(
-        itemsToHydrate.map(async (show) => {
+        accumulatedFiltered.map(async (show) => {
           const meta = await getShowMetadata(show.id);
           return {
             ...show,
@@ -169,13 +156,13 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
         })
       );
 
-      if (isLoadMore) {
-        setFeedShows((prev) => [...prev, ...hydratedShows]);
-        setPage(startPage + 1);
-      } else {
-        setFeedShows(hydratedShows);
-        setPage(1);
-      }
+      setFeedShows((prev) => {
+        const existingIds = new Set(prev.map((s) => s.id));
+        const fresh = hydratedShows.filter((s) => !existingIds.has(s.id));
+        return [...prev, ...fresh];
+      });
+
+      setPage(currentPageToFetch);
     } catch (err) {
       console.error('Error fetching discovery feed:', err);
     }
@@ -184,12 +171,14 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
   }
 
   useEffect(() => {
-    fetchDiscoverFeed(false);
+    fillFeedToCapacity(20);
   }, []);
 
+  // Strict 20-card buffer watch trigger
   useEffect(() => {
-    if (!loading && subTab === 'feed' && feedShows.length < 6 && !isFetchingRef.current) {
-      fetchDiscoverFeed(true);
+    if (!loading && subTab === 'feed' && feedShows.length < 20 && !isFetchingRef.current) {
+      const needed = 20 - feedShows.length;
+      fillFeedToCapacity(needed);
     }
   }, [feedShows.length, loading, subTab]);
 
@@ -197,22 +186,29 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
     setSelectedEra(eraId);
     sessionSeenIds.current.clear();
     setFeedShows([]);
-    fetchDiscoverFeed(false, eraId);
+    setLoading(true);
+    setPage(1);
+    fillFeedToCapacity(20, eraId);
+  }
+
+  function handleRemoveFromFeed(showId) {
+    sessionSeenIds.current.add(showId);
+    setFeedShows((prev) => prev.filter((s) => s.id !== showId));
   }
 
   function handleSaveWatchLater(show) {
+    handleRemoveFromFeed(show.id);
     setWatchLater((prev) => [...prev, show]);
-    setFeedShows((prev) => prev.filter((s) => s.id !== show.id));
   }
 
   function handleSaveAttic(show) {
+    handleRemoveFromFeed(show.id);
     if (onMoveToAttic) onMoveToAttic(show);
-    setFeedShows((prev) => prev.filter((s) => s.id !== show.id));
   }
 
   function handleBlacklist(showId) {
+    handleRemoveFromFeed(showId);
     setDislikedIds((prev) => [...prev, showId]);
-    setFeedShows((prev) => prev.filter((s) => s.id !== showId));
   }
 
   function handlePromoteToWatchlist(show) {
@@ -279,7 +275,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
           </button>
         </div>
 
-        {/* PERMANENT ERA FILTER PILLS ACCESSIBLE BY BOTH SUB-TABS */}
+        {/* PERMANENT ERA FILTER PILLS */}
         <div className="flex space-x-1.5 overflow-x-auto pb-1 pt-1 scrollbar-none">
           {ERAS.map((era) => (
             <button
@@ -437,7 +433,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                 );
               })}
               <button
-                onClick={() => fetchDiscoverFeed(true)}
+                onClick={() => fillFeedToCapacity(10)}
                 className="w-full py-2.5 rounded-lg border border-slate-800 bg-slate-900 text-xs font-bold text-slate-400 hover:text-white transition-all mt-2"
               >
                 More Suggestions
