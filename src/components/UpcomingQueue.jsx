@@ -116,7 +116,7 @@ export function UpcomingQueue({ watchlist, onRemoveShow, onSelectShow }) {
           {/* SECTION 1: CONFIRMED SCHEDULED DATES (FULL CARD LAYOUT) */}
           {scheduledShows.length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-[11px] font-black uppercase tracking-wider text-[#8CFA96] px-1">
+              <h3 className="text-[10px] font-black uppercase tracking-wider text-[#8CFA96] px-1">
                 Confirmed Air Dates ({scheduledShows.length})
               </h3>
               {scheduledShows.map((show) => (

@@ -13,9 +13,8 @@ export function Header({ onOpenSearch, onOpenProfile }) {
       setCustomPhoto(savedPhoto);
     };
 
-    loadProfile(); // Initial load
+    loadProfile();
 
-    // Listen for the custom update event
     window.addEventListener('mint_tv_profile_update', loadProfile);
     return () => window.removeEventListener('mint_tv_profile_update', loadProfile);
   }, []);
@@ -29,8 +28,11 @@ export function Header({ onOpenSearch, onOpenProfile }) {
     .join('') || 'TV';
 
   return (
-    <header className="pt-safe-top sticky top-0 z-50 flex items-center justify-between border-b border-slate-800 bg-[#0F172A] px-3.5 py-2 backdrop-blur-md">
-      {/* Brand Logo - Increased size */}
+    <header 
+      style={{ paddingTop: '12px' }}
+      className="sticky top-0 z-50 flex items-center justify-between border-b border-slate-800 bg-[#0F172A] px-3.5 pb-2.5 backdrop-blur-md transition-all"
+    >
+      {/* Brand Logo */}
       <div className="flex items-center">
         <img 
           src={mintTvLogo} 
