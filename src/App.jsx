@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import mintTvLogo from '../assets/mint-tv-logo.png';
 import { Header } from './components/Header';
 import { SearchModal } from './components/SearchModal';
 import { WatchlistGrid } from './components/WatchlistGrid';
@@ -12,6 +13,9 @@ import { AuthModal } from './components/AuthModal';
 import { getShowMetadata } from './services/tmdb';
 
 export default function App() {
+  // Splash Screen State
+  const [showSplash, setShowSplash] = useState(true);
+  const [splashFading, setSplashFading] = useState(false);
   const [selectedShowId, setSelectedShowId] = useState(null);
   const [activeTab, setActiveTab] = useState('ready');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -20,6 +24,16 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
   
   const [hasLoadedFromCloud, setHasLoadedFromCloud] = useState(false);
+
+  // Trigger smooth splash screen transition on initial load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSplashFading(true);
+      setTimeout(() => setShowSplash(false), 400);
+    }, 1800);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Active Watchlist
   const [watchlist, setWatchlist] = useState(() => {
@@ -168,40 +182,40 @@ export default function App() {
   }
 
   // Direct Auto-Archive Handling on Episode Update (Clean Move)
-async function handleUpdateEpisode(id, season, episode) {
-  const meta = await getShowMetadata(id);
-  const isEnded = meta?.status === 'Ended' || meta?.status === 'Canceled' || meta?.isEnded;
-  const isFinalSeason = meta?.numberOfSeasons ? season >= meta.numberOfSeasons : true;
+  async function handleUpdateEpisode(id, season, episode) {
+    const meta = await getShowMetadata(id);
+    const isEnded = meta?.status === 'Ended' || meta?.status === 'Canceled' || meta?.isEnded;
+    const isFinalSeason = meta?.numberOfSeasons ? season >= meta.numberOfSeasons : true;
 
-  const newEp = Math.max(1, episode);
-  const shouldArchiveNow = Boolean(isEnded && isFinalSeason && newEp > (meta?.numberOfEpisodes || 0));
+    const newEp = Math.max(1, episode);
+    const shouldArchiveNow = Boolean(isEnded && isFinalSeason && newEp > (meta?.numberOfEpisodes || 0));
 
-  if (shouldArchiveNow) {
-    const targetShow = watchlist.find((s) => s.id === id) || atticShows.find((s) => s.id === id);
-    if (targetShow) {
-      const archivedShow = { ...targetShow, currentSeason: season, currentEpisode: newEp, archived: true };
-      
-      // Add to attic / RetroVision without creating duplicates
-      setAtticShows((prevAttic) => {
-        const filtered = prevAttic.filter((s) => s.id !== id);
-        return [archivedShow, ...filtered];
-      });
+    if (shouldArchiveNow) {
+      const targetShow = watchlist.find((s) => s.id === id) || atticShows.find((s) => s.id === id);
+      if (targetShow) {
+        const archivedShow = { ...targetShow, currentSeason: season, currentEpisode: newEp, archived: true };
+        
+        // Add to attic / RetroVision without creating duplicates
+        setAtticShows((prevAttic) => {
+          const filtered = prevAttic.filter((s) => s.id !== id);
+          return [archivedShow, ...filtered];
+        });
 
-      // Remove cleanly from active Watchlist
-      setWatchlist((prevWatchlist) => prevWatchlist.filter((s) => s.id !== id));
+        // Remove cleanly from active Watchlist
+        setWatchlist((prevWatchlist) => prevWatchlist.filter((s) => s.id !== id));
+      }
+    } else {
+      // Normal progress update
+      setWatchlist((prevWatchlist) =>
+        prevWatchlist.map((show) => {
+          if (show.id === id) {
+            return { ...show, currentSeason: season, currentEpisode: newEp };
+          }
+          return show;
+        })
+      );
     }
-  } else {
-    // Normal progress update
-    setWatchlist((prevWatchlist) =>
-      prevWatchlist.map((show) => {
-        if (show.id === id) {
-          return { ...show, currentSeason: season, currentEpisode: newEp };
-        }
-        return show;
-      })
-    );
   }
-}
 
   function handleMoveToAttic(show) {
     if (!atticShows.some((s) => s.id === show.id)) {
@@ -226,6 +240,26 @@ async function handleUpdateEpisode(id, season, episode) {
 
   return (
     <div className="min-h-screen bg-[#0F172A] pb-24 text-white font-sans select-none">
+      {/* BRAND SPLASH SCREEN OVERLAY */}
+      {showSplash && (
+        <div
+          className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0F172A] transition-opacity duration-500 ${
+            splashFading ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          }`}
+        >
+          <div className="flex flex-col items-center space-y-4 animate-in fade-in zoom-in-95 duration-500">
+            <img
+              src={mintTvLogo}
+              alt="Mint TV"
+              className="h-16 w-auto object-contain drop-shadow-[0_0_20px_rgba(140,250,150,0.4)]"
+            />
+            <div className="h-1 w-24 overflow-hidden rounded-full bg-slate-800">
+              <div className="h-full w-full bg-[#8CFA96] animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Header 
         onOpenSearch={() => setIsSearchOpen(true)} 
         onOpenProfile={() => setIsProfileOpen(true)}
