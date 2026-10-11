@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import mintTvLogo from '../assets/mint-tv-logo.png';
+import mintTvLogo from '../assets/icon.png';
 
 export function Header({ onOpenSearch, onOpenProfile }) {
   const [profileName, setProfileName] = useState('TV Collector');
@@ -29,7 +29,9 @@ export function Header({ onOpenSearch, onOpenProfile }) {
 
   return (
     <header 
-      style={{ paddingTop: '12px' }}
+      style={{
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)',
+      }}
       className="sticky top-0 z-50 flex items-center justify-between border-b border-slate-800 bg-[#0F172A] px-3.5 pb-2.5 backdrop-blur-md transition-all"
     >
       {/* Brand Logo */}
