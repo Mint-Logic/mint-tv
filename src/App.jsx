@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import mintTvLogo from './assets/icon.png';
 import { Header } from './components/Header';
 import { SearchModal } from './components/SearchModal';
 import { WatchlistGrid } from './components/WatchlistGrid';
@@ -13,9 +12,6 @@ import { AuthModal } from './components/AuthModal';
 import { getShowMetadata } from './services/tmdb';
 
 export default function App() {
-  // Splash Screen State
-  const [showSplash, setShowSplash] = useState(true);
-  const [splashFading, setSplashFading] = useState(false);
   const [selectedShowId, setSelectedShowId] = useState(null);
   const [activeTab, setActiveTab] = useState('ready');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -24,16 +20,6 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
   
   const [hasLoadedFromCloud, setHasLoadedFromCloud] = useState(false);
-
-  // Trigger smooth splash screen transition on initial load
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSplashFading(true);
-      setTimeout(() => setShowSplash(false), 400);
-    }, 1800);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   // Active Watchlist
   const [watchlist, setWatchlist] = useState(() => {
@@ -240,26 +226,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#0F172A] pb-24 text-white font-sans select-none">
-      {/* BRAND SPLASH SCREEN OVERLAY */}
-      {showSplash && (
-        <div
-          className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0F172A] transition-opacity duration-500 ${
-            splashFading ? 'opacity-0 pointer-events-none' : 'opacity-100'
-          }`}
-        >
-          <div className="flex flex-col items-center space-y-4 animate-in fade-in zoom-in-95 duration-500">
-            <img
-              src={mintTvLogo}
-              alt="Mint TV"
-              className="h-16 w-auto object-contain drop-shadow-[0_0_20px_rgba(140,250,150,0.4)]"
-            />
-            <div className="h-1 w-24 overflow-hidden rounded-full bg-slate-800">
-              <div className="h-full w-full bg-[#8CFA96] animate-pulse"></div>
-            </div>
-          </div>
-        </div>
-      )}
-
       <Header 
         onOpenSearch={() => setIsSearchOpen(true)} 
         onOpenProfile={() => setIsProfileOpen(true)}

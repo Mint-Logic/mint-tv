@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import mintTvLogo from '../assets/icon.png';
+import mintTvLogo from '../assets/mint-tv-logo.png';
 
 export function Header({ onOpenSearch, onOpenProfile }) {
   const [profileName, setProfileName] = useState('TV Collector');
