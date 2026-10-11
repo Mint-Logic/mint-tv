@@ -148,7 +148,7 @@ export default function App() {
     };
   }, [selectedShowId, isSearchOpen, isProfileOpen, isAuthOpen]);
 
-  // Touch Swipe Gesture Handlers for Footer Tab Navigation
+  // Touch Swipe Gesture Handlers
   function handleTouchStart(e) {
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
@@ -160,17 +160,14 @@ export default function App() {
     const deltaX = e.changedTouches[0].clientX - touchStartX.current;
     const deltaY = e.changedTouches[0].clientY - touchStartY.current;
 
-    // Trigger tab switch if horizontal swipe exceeds 50px and dominates vertical movement
     if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
       const currentIndex = TAB_ORDER.indexOf(activeTab);
 
       if (deltaX < 0) {
-        // Swipe Left -> Advance to next tab
         if (currentIndex < TAB_ORDER.length - 1) {
           setActiveTab(TAB_ORDER[currentIndex + 1]);
         }
       } else {
-        // Swipe Right -> Move to previous tab
         if (currentIndex > 0) {
           setActiveTab(TAB_ORDER[currentIndex - 1]);
         }
@@ -203,7 +200,6 @@ export default function App() {
     );
   }
 
-  // Direct Auto-Archive Handling on Episode Update (Clean Move)
   async function handleUpdateEpisode(id, season, episode) {
     const meta = await getShowMetadata(id);
     const isEnded = meta?.status === 'Ended' || meta?.status === 'Canceled' || meta?.isEnded;
@@ -217,17 +213,14 @@ export default function App() {
       if (targetShow) {
         const archivedShow = { ...targetShow, currentSeason: season, currentEpisode: newEp, archived: true };
         
-        // Add to attic / RetroVision without creating duplicates
         setAtticShows((prevAttic) => {
           const filtered = prevAttic.filter((s) => s.id !== id);
           return [archivedShow, ...filtered];
         });
 
-        // Remove cleanly from active Watchlist
         setWatchlist((prevWatchlist) => prevWatchlist.filter((s) => s.id !== id));
       }
     } else {
-      // Normal progress update
       setWatchlist((prevWatchlist) =>
         prevWatchlist.map((show) => {
           if (show.id === id) {
@@ -264,7 +257,7 @@ export default function App() {
     <div 
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      className="min-h-screen bg-[#0F172A] pb-24 text-white font-sans select-none overflow-x-hidden"
+      className="min-h-screen bg-[#0F172A] pb-24 text-white font-sans select-none"
     >
       <Header 
         onOpenSearch={() => setIsSearchOpen(true)} 
