@@ -87,7 +87,9 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
     const atticIds = new Set((atticShows || []).map((s) => s.id));
     const blacklistedIds = new Set(dislikedIds);
 
-    const startPage = isLoadMore ? page + 2 : 1;
+    let currentPage = isLoadMore ? page + 2 : 1;
+    let accumulatedFiltered = [];
+    let maxAttempts = 5; // Safety limit to prevent endless fetching loops
 
     try {
       const fetchPage = async (p) => {
@@ -118,33 +120,43 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
         return results;
       };
 
-      const [p1Results, p2Results] = await Promise.all([
-        fetchPage(startPage),
-        fetchPage(startPage + 1),
-      ]);
+      // Loop until we collect at least 20 shows or reach max attempts
+      while (accumulatedFiltered.length < 20 && maxAttempts > 0) {
+        const [p1Results, p2Results] = await Promise.all([
+          fetchPage(currentPage),
+          fetchPage(currentPage + 1),
+        ]);
 
-      const combinedRaw = [...p1Results, ...p2Results];
+        const combinedRaw = [...p1Results, ...p2Results];
+        if (combinedRaw.length === 0) break; // End of API results
 
-      const filtered = combinedRaw.filter((show) => {
-        if (
-          activeWatchlistIds.has(show.id) ||
-          watchLaterIds.has(show.id) ||
-          atticIds.has(show.id) ||
-          blacklistedIds.has(show.id) ||
-          sessionSeenIds.current.has(show.id)
-        ) {
-          return false;
-        }
+        const filtered = combinedRaw.filter((show) => {
+          if (
+            activeWatchlistIds.has(show.id) ||
+            watchLaterIds.has(show.id) ||
+            atticIds.has(show.id) ||
+            blacklistedIds.has(show.id) ||
+            sessionSeenIds.current.has(show.id)
+          ) {
+            return false;
+          }
 
-        const genreIds = show.genre_ids || [];
-        if (excludeAnime && genreIds.includes(16) && show.origin_country?.includes('JP')) return false;
-        if (excludeTrueCrime && genreIds.includes(80) && genreIds.includes(99)) return false;
+          const genreIds = show.genre_ids || [];
+          if (excludeAnime && genreIds.includes(16) && show.origin_country?.includes('JP')) return false;
+          if (excludeTrueCrime && genreIds.includes(80) && genreIds.includes(99)) return false;
 
-        return true;
-      });
+          return true;
+        });
+
+        filtered.forEach((show) => sessionSeenIds.current.add(show.id));
+        accumulatedFiltered.push(...filtered);
+
+        currentPage += 2;
+        maxAttempts--;
+      }
 
       if (boostNature) {
-        filtered.sort((a, b) => {
+        accumulatedFiltered.sort((a, b) => {
           const aNature = (a.genre_ids || []).includes(99) && /nature|wildlife|planet|animal/i.test(a.overview);
           const bNature = (b.genre_ids || []).includes(99) && /nature|wildlife|planet|animal/i.test(b.overview);
           if (aNature && !bNature) return -1;
@@ -153,16 +165,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
         });
       }
 
-      // If we filtered out all items (common on All Eras due to popular show overlap), fetch the next page batch
-      if (filtered.length === 0) {
-        setPage((prev) => prev + 2);
-        isFetchingRef.current = false;
-        return fetchDiscoverFeed(true, activeEra);
-      }
-
-      filtered.forEach((show) => sessionSeenIds.current.add(show.id));
-
-      const itemsToHydrate = filtered.slice(0, 40); 
+      const itemsToHydrate = accumulatedFiltered.slice(0, 40); 
       const hydratedShows = await Promise.all(
         itemsToHydrate.map(async (show) => {
           const meta = await getShowMetadata(show.id);
@@ -179,17 +182,18 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
 
       if (isLoadMore) {
         setBufferShows((prev) => [...prev, ...hydratedShows]);
-        setPage(startPage + 1);
+        setPage(currentPage);
       } else {
         setFeedShows(hydratedShows.slice(0, 20));
         setBufferShows(hydratedShows.slice(20));
-        setPage(1);
+        setPage(currentPage);
       }
     } catch (err) {
       console.error('Error fetching discovery feed:', err);
+    } finally {
+      setLoading(false);
+      isFetchingRef.current = false;
     }
-    setLoading(false);
-    isFetchingRef.current = false;
   }
 
   useEffect(() => {
