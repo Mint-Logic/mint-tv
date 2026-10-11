@@ -349,133 +349,109 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
 
                 return (
                   <div key={show.id} className="rounded-xl border border-slate-800 bg-[#1E293B] overflow-hidden transition-all">
-                    <div
-                      onClick={() => setExpandedShowId(isExpanded ? null : show.id)}
-                      className="flex items-start space-x-3 p-2.5 cursor-pointer select-none"
-                    >
-                      {posterUrl ? (
-                        <img src={posterUrl} alt={show.name} className="h-20 w-12 rounded-lg object-cover shrink-0 bg-slate-900 shadow-sm" />
-                      ) : (
-                        <div className="h-20 w-12 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600 shadow-sm">
-                          N/A
-                        </div>
-                      )}
-
-                      <div className="w-0 flex-1 flex flex-col justify-between self-stretch">
-                        <div className="space-y-0.5">
-                          {/* TITLE AND HIDE BUTTON WRAPPER */}
-                          <div className="flex justify-between items-start gap-2">
-                            <h3 
-                              className="text-xs font-extrabold text-white leading-snug"
-                              style={{
-                                display: '-webkit-box',
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: 'vertical',
-                                overflow: 'hidden',
-                                wordBreak: 'break-word',
-                              }}
-                            >
-                              {show.name}
-                            </h3>
-                            <button
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); handleBlacklist(show.id); }}
-                              className="flex items-center justify-center text-rose-700 transition-transform active:scale-90 shrink-0"
-                              title="Hide Show"
-                            >
-                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                                <line x1="1" y1="1" x2="23" y2="23" />
-                              </svg>
-                            </button>
-                          </div>
-
-                          <div className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-400 flex-wrap">
-                            <span className="text-amber-400 font-bold shrink-0">★ {show.vote_average?.toFixed(1) || 'N/A'}</span>
-                            <span className="shrink-0">•</span>
-                            <span className="shrink-0">{show.first_air_date ? show.first_air_date.split('-')[0] : 'N/A'}</span>
-                            {show.network && (
-                              <>
-                                <span className="shrink-0">•</span>
-                                <span className="text-slate-300 truncate">{show.network}</span>
-                              </>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-1.5 pt-0.5">
-                            <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-tight border ${
-                              isOnAir
-                                ? 'bg-emerald-500/10 text-[#8CFA96] border-[#8CFA96]/30'
-                                : 'bg-slate-800 text-slate-400 border-slate-700'
-                            }`}>
-                              {isOnAir ? 'On Air' : show.status || 'Ended'}
-                            </span>
-                            {show.numberOfSeasons > 0 && (
-                              <span className="px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-tight bg-slate-800 text-slate-300 border border-slate-700">
-                                {show.numberOfSeasons} {show.numberOfSeasons === 1 ? 'Season' : 'Seasons'}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* RIGHT-ANCHORED ACTION ICONS */}
-                        <div className="flex items-center justify-end gap-3 mt-1 ml-auto">
+                  <div onClick={() => setExpandedShowId(isExpanded ? null : show.id)} className="flex items-start space-x-3 p-2.5 cursor-pointer select-none">
+                    {posterUrl ? (
+                      <img src={posterUrl} alt={show.name} className="h-20 w-12 rounded-lg object-cover shrink-0 bg-slate-900 shadow-sm" />
+                    ) : (
+                      <div className="h-20 w-12 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600 shadow-sm">N/A</div>
+                    )}
+                    
+                    <div className="w-0 flex-1 flex flex-col justify-between self-stretch">
+                      <div className="space-y-0.5">
+                        {/* TITLE AND DROP BUTTON WRAPPER */}
+                        <div className="flex justify-between items-start gap-2">
+                          <h4 
+                            className="text-xs font-extrabold text-white leading-snug"
+                            style={{
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                              wordBreak: 'break-word',
+                            }}
+                          >
+                            {show.name}
+                          </h4>
                           <button
                             type="button"
-                            onClick={(e) => { e.stopPropagation(); handleSaveWatchLater(show); }}
-                            className="flex items-center justify-center text-[#8CFA96] transition-transform active:scale-90"
-                            title="Save for Watch Later"
+                            onClick={(e) => { e.stopPropagation(); setWatchLater(prev => prev.filter(s => s.id !== show.id)); }}
+                            className="flex items-center justify-center text-rose-700 transition-transform active:scale-90 shrink-0"
+                            title="Drop Show"
                           >
-                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                           </button>
-
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); handleSaveAttic(show); }}
-                            className="flex items-center justify-center transition-transform active:scale-90"
-                            title="Move to RetroVision"
-                          >
-                            <img 
-                              src={retroVisionLogo} 
-                              alt="RetroVision" 
-                              className="h-5 w-5 rounded object-cover" 
-                            />
-                          </button>
                         </div>
+
+                        <div className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-400 flex-wrap">
+                          <span className="text-amber-400 font-bold shrink-0">★ {show.vote_average?.toFixed(1) || 'N/A'}</span>
+                          {show.network && (
+                            <>
+                              <span className="shrink-0">•</span>
+                              <span className="text-slate-300 truncate">{show.network}</span>
+                            </>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-1.5 pt-0.5">
+                          <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-tight border ${
+                            isOnAir
+                              ? 'bg-emerald-500/10 text-[#8CFA96] border-[#8CFA96]/30'
+                              : 'bg-slate-800 text-slate-400 border-slate-700'
+                          }`}>
+                            {isOnAir ? 'On Air' : show.status || 'Ended'}
+                          </span>
+                          {show.numberOfSeasons > 0 && (
+                            <span className="px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-tight bg-slate-800 text-slate-300 border border-slate-700">
+                              {show.numberOfSeasons} {show.numberOfSeasons === 1 ? 'Season' : 'Seasons'}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* WATCH LATER ACTIONS */}
+                      <div className="flex items-center justify-end gap-3 mt-1 ml-auto">
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); handlePromoteToWatchlist(show); }}
+                          className="flex items-center justify-center text-[#8CFA96] transition-transform active:scale-90"
+                          title="Add to Watchlist"
+                        >
+                          <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); handleMoveWLtoAttic(show); }}
+                          className="flex items-center justify-center transition-transform active:scale-90"
+                          title="Move to RetroVision"
+                        >
+                          <img src={retroVisionLogo} alt="RetroVision" className="h-5 w-5 rounded object-cover" />
+                        </button>
                       </div>
                     </div>
-
-                    {isExpanded && (
-                      <div className="border-t border-slate-800 bg-slate-900/80 p-3 space-y-2.5 animate-in fade-in">
-                        {backdropUrl && (
-                          <div className="relative h-32 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-950">
-                            <img src={backdropUrl} alt={show.name} className="h-full w-full object-cover" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
-                          </div>
-                        )}
-                        
-                        {/* FULL UNTRUNCATED SHOW TITLE HEADER */}
-                        <h4 className="text-xs font-black text-white leading-snug">
-                          {show.name}
-                        </h4>
-
-                        <p className="text-[11px] text-slate-300 leading-relaxed">
-                          {show.overview || 'No overview available for this title.'}
-                        </p>
-                        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-800/80 pt-2.5">
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <a href={imdbSearchUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-[9px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 px-2 py-.5 rounded border border-amber-400/30 transition-all whitespace-nowrap">IMDB</a>
-                            <a href={rtSearchUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-[9px] font-black uppercase tracking-wider text-red-400 bg-red-500/10 hover:bg-red-500/20 px-2 py-.5 rounded border border-red-500/30 transition-all whitespace-nowrap">ROTTEN TOMATOES</a>
-                          </div>
-                          <span className="text-[9px] text-slate-400 font-medium shrink-0 ml-auto whitespace-nowrap">
-                            Aired: {show.first_air_date || 'N/A'}
-                          </span>
-                        </div>
-                      </div>
-                    )}
                   </div>
+
+                  {isExpanded && (
+                    <div className="border-t border-slate-800 bg-slate-900/80 p-3 space-y-2.5 animate-in fade-in">
+                      {/* FULL UNTRUNCATED SHOW TITLE HEADER */}
+                      <h4 className="text-xs font-black text-white leading-snug">
+                        {show.name}
+                      </h4>
+
+                      <p className="text-[11px] text-slate-300 leading-relaxed">{show.overview || 'No overview available.'}</p>
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-800/80 pt-2.5">
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <a href={imdbSearchUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 px-2 py-1 rounded border border-amber-400/30 whitespace-nowrap">IMDB</a>
+                        </div>
+                        <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">Aired: {show.first_air_date || 'N/A'}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
                 );
               })}
               <button
