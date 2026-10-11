@@ -66,7 +66,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
           if (!isSeasonCompleted) {
             epData = await getNextEpisodeInfo(show.id, season, episode);
             const airDate = epData?.air_date || null;
-            // If the next episode exists and has an air date in the future, it's not ready to watch yet
+            // Ready to watch if airDate <= today
             isAired = airDate ? airDate <= today : false;
           } else {
             isAired = false;
@@ -77,7 +77,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
             currentSeason: season,
             currentEpisode: episode,
             network: meta?.network || 'Unknown Streamer',
-            airDate: epData?.air_date || null,
+            airDate: epData?.air_date || '',
             isAired,
             isCompleted: isSeasonCompleted,
             shouldAutoArchive,
@@ -90,10 +90,13 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
 
       const activeHydrated = hydrated.filter((s) => !s.shouldAutoArchive);
 
-      // Ready: Has aired episodes waiting to be watched right now
-      setAiredQueue(activeHydrated.filter((s) => s.isAired && !s.isCompleted));
+      // Filter Ready Shows & Sort Most Recently Aired First (Newest air date to oldest)
+      const readyShows = activeHydrated.filter((s) => s.isAired && !s.isCompleted);
+      readyShows.sort((a, b) => (b.airDate || '').localeCompare(a.airDate || ''));
 
-      // Caught Up: Watched all episodes currently out (both mid-season pauses & full season hiatuses)
+      setAiredQueue(readyShows);
+
+      // Caught Up: Watched all episodes currently out
       setCompletedQueue(activeHydrated.filter((s) => s.isCompleted || !s.isAired));
       setLoading(false);
     }

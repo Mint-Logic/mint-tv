@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabase';
+import retroVisionLogo from '../assets/retro-vision-logo.png';
 
 const PRESET_TITLES = [
   'TV & Movie Collector',
@@ -753,10 +754,9 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
 
               <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1.5">
                 <div className="flex items-center space-x-1.5">
-                  <svg className="h-3.5 w-3.5 text-[#8CFA96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <svg className="h-3.5 w-3.5 fill-current text-[#8CFA96]" viewBox="0 0 24 24">
+  <path d="M8 5v14l11-7z" />
+</svg>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96]">
                     Ready vs. Caught Up
                   </span>
@@ -768,9 +768,13 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
 
               <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1.5">
                 <div className="flex items-center space-x-1.5">
-                  <svg className="h-3.5 w-3.5 text-[#8CFA96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
+
+                  <img 
+      src={retroVisionLogo} 
+      alt="RetroVision" 
+      className="h-4 w-4 object-contain shrink-0" 
+    />
+    
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96]">
                     RetroVision Museum
                   </span>
