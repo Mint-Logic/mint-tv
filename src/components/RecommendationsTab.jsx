@@ -153,6 +153,13 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
         });
       }
 
+      // If we filtered out all items (common on All Eras due to popular show overlap), fetch the next page batch
+      if (filtered.length === 0) {
+        setPage((prev) => prev + 2);
+        isFetchingRef.current = false;
+        return fetchDiscoverFeed(true, activeEra);
+      }
+
       filtered.forEach((show) => sessionSeenIds.current.add(show.id));
 
       const itemsToHydrate = filtered.slice(0, 40); 
@@ -171,11 +178,9 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
       );
 
       if (isLoadMore) {
-        // Append all newly fetched items to the hidden buffer
         setBufferShows((prev) => [...prev, ...hydratedShows]);
         setPage(startPage + 1);
       } else {
-        // Initial load: give 20 to the feed, and the rest to the buffer
         setFeedShows(hydratedShows.slice(0, 20));
         setBufferShows(hydratedShows.slice(20));
         setPage(1);
