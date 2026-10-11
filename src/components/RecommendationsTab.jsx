@@ -5,6 +5,7 @@ import retroVisionLogo from '../assets/retro-vision-logo.png';
 export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToAttic }) {
   const [subTab, setSubTab] = useState('feed'); // 'feed' | 'watchlater'
   const [feedShows, setFeedShows] = useState([]);
+  const [bufferShows, setBufferShows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedShowId, setExpandedShowId] = useState(null);
   const [page, setPage] = useState(1);
@@ -154,7 +155,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
 
       filtered.forEach((show) => sessionSeenIds.current.add(show.id));
 
-      const itemsToHydrate = filtered.slice(0, 20);
+      const itemsToHydrate = filtered.slice(0, 40); 
       const hydratedShows = await Promise.all(
         itemsToHydrate.map(async (show) => {
           const meta = await getShowMetadata(show.id);
@@ -170,10 +171,13 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
       );
 
       if (isLoadMore) {
-        setFeedShows((prev) => [...prev, ...hydratedShows]);
+        // Append all newly fetched items to the hidden buffer
+        setBufferShows((prev) => [...prev, ...hydratedShows]);
         setPage(startPage + 1);
       } else {
-        setFeedShows(hydratedShows);
+        // Initial load: give 20 to the feed, and the rest to the buffer
+        setFeedShows(hydratedShows.slice(0, 20));
+        setBufferShows(hydratedShows.slice(20));
         setPage(1);
       }
     } catch (err) {
@@ -188,15 +192,26 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
   }, []);
 
   useEffect(() => {
-    if (!loading && subTab === 'feed' && feedShows.length < 6 && !isFetchingRef.current) {
+    if (subTab === 'feed' && feedShows.length < 20 && bufferShows.length > 0) {
+      const needed = 20 - feedShows.length;
+      const toAdd = bufferShows.slice(0, needed);
+      setFeedShows((prev) => [...prev, ...toAdd]);
+      setBufferShows((prev) => prev.slice(needed));
+    }
+  }, [feedShows.length, bufferShows.length, subTab]);
+
+  // 2. Fetch more shows silently when the hidden buffer gets low (under 10)
+  useEffect(() => {
+    if (!loading && subTab === 'feed' && bufferShows.length < 10 && !isFetchingRef.current) {
       fetchDiscoverFeed(true);
     }
-  }, [feedShows.length, loading, subTab]);
+  }, [bufferShows.length, loading, subTab]);
 
   function handleEraSelect(eraId) {
     setSelectedEra(eraId);
     sessionSeenIds.current.clear();
     setFeedShows([]);
+    setBufferShows([]); // <-- Clear the buffer so old eras don't bleed in
     fetchDiscoverFeed(false, eraId);
   }
 
@@ -330,7 +345,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                       className="flex items-start space-x-3 p-2.5 cursor-pointer select-none"
                     >
                       {posterUrl ? (
-                        <img src={posterUrl} alt={show.name} className="h-16 w-11 rounded-lg object-cover shrink-0 bg-slate-900 shadow-sm" />
+                        <img src={posterUrl} alt={show.name} className="h-20 w-15 rounded-lg object-cover shrink-0 bg-slate-900 shadow-sm" />
                       ) : (
                         <div className="h-16 w-11 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600 shadow-sm">
                           N/A
@@ -339,9 +354,24 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
 
                       <div className="w-0 flex-1 flex flex-col justify-between self-stretch">
                         <div className="space-y-0.5">
-                          <h3 className="text-xs font-extrabold text-white truncate leading-snug">
-                            {show.name}
-                          </h3>
+                          {/* TITLE AND HIDE BUTTON WRAPPER */}
+                          <div className="flex justify-between items-start gap-2">
+                            <h3 className="text-xs font-extrabold text-white truncate leading-snug">
+                              {show.name}
+                            </h3>
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); handleBlacklist(show.id); }}
+                              className="flex items-center justify-center text-rose-700 transition-transform active:scale-90 shrink-0"
+                              title="Hide Show"
+                            >
+                              <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                                <line x1="1" y1="1" x2="23" y2="23" />
+                              </svg>
+                            </button>
+                          </div>
+
                           <div className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-400 flex-wrap">
                             <span className="text-amber-400 font-bold shrink-0">★ {show.vote_average?.toFixed(1) || 'N/A'}</span>
                             <span className="shrink-0">•</span>
@@ -370,8 +400,8 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                           </div>
                         </div>
 
-                        {/* RIGHT-ANCHORED ACTION ICONS */}
-                        <div className="flex items-center justify-end gap-3 mt-2.5 ml-auto">
+                        {/* RIGHT-ANCHORED ACTION ICONS (HIDE REMOVED) */}
+                        <div className="flex items-center justify-end gap-3 mt-0 ml-auto">
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); handleSaveWatchLater(show); }}
@@ -394,18 +424,6 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                               alt="RetroVision" 
                               className="h-6 w-6 rounded object-cover" 
                             />
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); handleBlacklist(show.id); }}
-                            className="flex items-center justify-center text-red-400 hover:scale-110 transition-transform active:scale-95"
-                            title="Hide Show"
-                          >
-                            <svg className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                              <line x1="1" y1="1" x2="23" y2="23" />
-                            </svg>
                           </button>
                         </div>
                       </div>
@@ -470,14 +488,28 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                 <div key={show.id} className="rounded-xl border border-slate-800 bg-[#1E293B] overflow-hidden transition-all">
                   <div onClick={() => setExpandedShowId(isExpanded ? null : show.id)} className="flex items-start space-x-3 p-2.5 cursor-pointer select-none">
                     {posterUrl ? (
-                      <img src={posterUrl} alt={show.name} className="h-16 w-11 rounded-lg object-cover shrink-0 bg-slate-900 shadow-sm" />
+                      <img src={posterUrl} alt={show.name} className="h-20 w-15 rounded-lg object-cover shrink-0 bg-slate-900 shadow-sm" />
                     ) : (
                       <div className="h-16 w-11 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600 shadow-sm">N/A</div>
                     )}
                     
-                    <div className="w-0 flex-1 flex flex-col justify-between self-stretch">
+                   <div className="w-0 flex-1 flex flex-col justify-between self-stretch">
                       <div className="space-y-0.5">
-                        <h4 className="text-xs font-extrabold text-white truncate leading-snug">{show.name}</h4>
+                        {/* TITLE AND DROP BUTTON WRAPPER */}
+                        <div className="flex justify-between items-start gap-2">
+                          <h4 className="text-xs font-extrabold text-white truncate leading-snug">{show.name}</h4>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setWatchLater(prev => prev.filter(s => s.id !== show.id)); }}
+                            className="flex items-center justify-center text-rose-700 transition-transform active:scale-90 shrink-0"
+                            title="Drop Show"
+                          >
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+
                         <div className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-400 flex-wrap">
                           <span className="text-amber-400 font-bold shrink-0">★ {show.vote_average?.toFixed(1) || 'N/A'}</span>
                           {show.network && (
@@ -504,12 +536,12 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                         </div>
                       </div>
 
-                      {/* WATCH LATER ACTIONS */}
-                      <div className="flex items-center justify-end gap-3 mt-2.5 ml-auto">
+                      {/* WATCH LATER ACTIONS (DROP REMOVED) */}
+                      <div className="flex items-center justify-end gap-3 mt-0 ml-auto">
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); handlePromoteToWatchlist(show); }}
-                          className="flex items-center justify-center text-[#8CFA96] hover:scale-110 transition-transform active:scale-95"
+                          className="flex items-center justify-center text-[#8CFA96] transition-transform active:scale-90"
                           title="Add to Watchlist"
                         >
                           <svg className="h-7 w-7 fill-current" viewBox="0 0 24 24">
@@ -520,21 +552,10 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); handleMoveWLtoAttic(show); }}
-                          className="flex items-center justify-center hover:scale-110 transition-transform active:scale-95"
+                          className="flex items-center justify-center transition-transform active:scale-90"
                           title="Move to RetroVision"
                         >
                           <img src={retroVisionLogo} alt="RetroVision" className="h-6 w-6 rounded object-cover" />
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); setWatchLater(prev => prev.filter(s => s.id !== show.id)); }}
-                          className="flex items-center justify-center text-red-400 hover:scale-110 transition-transform active:scale-95"
-                          title="Drop Show"
-                        >
-                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
                         </button>
                       </div>
                     </div>

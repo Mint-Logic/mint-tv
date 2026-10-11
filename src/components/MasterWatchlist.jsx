@@ -312,9 +312,10 @@ function ShowCard({
   return (
     <div
       onClick={() => onSelectShow(show.id)}
-      className="flex items-center justify-between gap-3 rounded-2xl border border-slate-800 bg-[#1E293B] p-2.5 shadow-md cursor-pointer hover:border-slate-700 transition-all overflow-hidden"
+      className="flex items-stretch justify-between gap-3 rounded-2xl border border-slate-800 bg-[#1E293B] p-2.5 shadow-md cursor-pointer hover:border-slate-700 transition-all overflow-hidden"
     >
-      <div className="flex items-center space-x-3 w-0 flex-1">
+      {/* Left Content (Image & Details) vertically centered */}
+      <div className="flex items-center space-x-3 w-0 flex-1 py-0.5">
         {posterUrl ? (
           <img
             src={posterUrl}
@@ -360,41 +361,9 @@ function ShowCard({
         </div>
       </div>
 
-      {/* BORDERLESS MATCHING ACTION ICON CLUSTER */}
-      <div className="flex items-center space-x-3 shrink-0 self-center pl-1 border-l border-slate-800/80">
-        {isAttic ? (
-          /* Restore Play Triangle Icon (h-6 w-6) */
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onRestoreFromAttic(show);
-            }}
-            title="Restore to Active Watchlist"
-            className="flex h-6 w-6 items-center justify-center text-[#8CFA96] hover:scale-110 transition-transform active:scale-95"
-          >
-            <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-          </button>
-        ) : (
-          /* Move to RetroVision Logo Icon (h-6 w-6) */
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onMoveToAttic(show);
-            }}
-            title="Move to RetroVision"
-            className="flex h-6 w-6 items-center justify-center hover:scale-110 transition-transform active:scale-95"
-          >
-            <img src={retroVisionLogo} alt="Send to RetroVision" className="h-6 w-6 rounded object-cover" />
-          </button>
-        )}
-
-        {/* Delete / Remove Icon (h-6 w-6) */}
+      {/* NEW VERTICAL ACTION CLUSTER ON THE RIGHT EDGE */}
+      <div className="flex flex-col justify-between items-end shrink-0 self-stretch pl-3 border-l border-slate-800/80 py-0.5">
+       {/* Delete / Remove Icon - Nudged to the left */}
         <button
           type="button"
           onClick={(e) => {
@@ -407,12 +376,44 @@ function ShowCard({
             }
           }}
           title="Remove permanently"
-          className="flex h-6 w-6 items-center justify-center text-slate-400 hover:text-red-400 hover:scale-110 transition-transform active:scale-90"
+          // Added mr-1.5 here to push the icon to the left
+          className="flex items-center justify-center text-rose-700 transition-transform active:scale-90 mr-1"
         >
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
+
+        {/* Restore/RetroVision Icon - Pushed strictly to Bottom Right */}
+        {isAttic ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onRestoreFromAttic(show);
+            }}
+            title="Restore to Active Watchlist"
+            className="flex h-6 w-6 items-center justify-center text-[#8CFA96] transition-transform active:scale-90"
+          >
+            <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onMoveToAttic(show);
+            }}
+            title="Move to RetroVision"
+            className="flex h-6 w-6 items-center justify-center transition-transform active:scale-90"
+          >
+            <img src={retroVisionLogo} alt="Send to RetroVision" className="h-6 w-6 rounded object-cover" />
+          </button>
+        )}
       </div>
     </div>
   );

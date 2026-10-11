@@ -134,7 +134,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
           <button
             type="button"
             onClick={() => setSubTab('caughtup')}
-            className={`flex items-center justify-center space-x-1 px-4 transition-colors ${
+            className={`flex items-center justify-center space-x-1 px-2 transition-colors ${
               subTab === 'caughtup'
                 ? 'text-[#8CFA96]'
                 : 'text-slate-400 hover:text-white'
@@ -200,10 +200,10 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
                         e.stopPropagation();
                         onRemoveShow(show.id);
                       }}
-                      className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full border border-slate-700 bg-slate-900/90 text-slate-400 hover:border-red-500/50 hover:bg-red-500/20 hover:text-red-400 transition-all z-10"
+                      className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-slate-950/60 backdrop-blur-md text-rose-700 transition-transform active:scale-90 z-10"
                     >
-                      <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
                   </div>
