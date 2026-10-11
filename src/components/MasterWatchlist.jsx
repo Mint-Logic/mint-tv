@@ -161,13 +161,13 @@ export function MasterWatchlist({
         <div className="flex w-full items-center justify-evenly rounded-xl border border-slate-800 bg-[#1E293B] py-2.5 text-[11px] sm:text-xs font-bold shadow-md">
           <button
             onClick={() => setSubTab('active')}
-            className={`flex items-center justify-center space-x-1 px-4 transition-colors ${
+            className={`flex items-center justify-center space-x-1 px-1.5 transition-colors ${
               subTab === 'active' 
                 ? 'text-[#8CFA96]' 
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            <svg className="h-3 w-3 fill-current shrink-0" viewBox="0 0 24 24">
+            <svg className="h-4 w-4 fill-current shrink-0" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z" />
             </svg>
             <span>Active Shows ({showsWithMeta.length})</span>
@@ -175,13 +175,13 @@ export function MasterWatchlist({
 
           <button
             onClick={() => setSubTab('attic')}
-            className={`flex items-center justify-center space-x-1 px-4 transition-colors ${
+            className={`flex items-center justify-center space-x-1 px-2 transition-colors ${
               subTab === 'attic' 
                 ? 'text-[#8CFA96]' 
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            <img src={retroVisionLogo} alt="RetroVision" className="h-3 w-3 object-contain shrink-0" />
+            <img src={retroVisionLogo} alt="RetroVision" className="h-4 w-4 object-contain shrink-0" />
             <span>RetroVision ({atticWithMeta.length})</span>
           </button>
         </div>
