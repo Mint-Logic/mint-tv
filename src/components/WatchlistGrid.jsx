@@ -25,7 +25,6 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
           let totalSeasonEpisodes = seasonData?.episodes?.length || 0;
           let isSeasonCompleted = totalSeasonEpisodes > 0 && episode > totalSeasonEpisodes;
 
-          // AUTO-ADVANCE TO NEXT SEASON IF MORE SEASONS EXIST
           if (isSeasonCompleted && meta && season < meta.numberOfSeasons) {
             season = season + 1;
             episode = 1;
@@ -43,11 +42,9 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
           const isFinalSeason = meta ? season >= meta.numberOfSeasons : false;
           const remainingCount = Math.max(0, totalSeasonEpisodes - episode);
 
-          // ONLY AUTO-ARCHIVE IF ENDED/CANCELED AND FINAL SEASON COMPLETED
           const isShowEnded = meta?.status === 'Ended' || meta?.status === 'Canceled' || meta?.isEnded;
           const shouldAutoArchive = Boolean(isShowEnded && isFinalSeason && isSeasonCompleted);
 
-          // Un-archive self-healing check
           if (!shouldAutoArchive && show.archived) {
             show.archived = false;
             const updated = watchlist.map((s) => (s.id === show.id ? { ...s, archived: false } : s));
@@ -66,7 +63,6 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
           if (!isSeasonCompleted) {
             epData = await getNextEpisodeInfo(show.id, season, episode);
             const airDate = epData?.air_date || null;
-            // Ready to watch if airDate <= today
             isAired = airDate ? airDate <= today : false;
           } else {
             isAired = false;
@@ -90,13 +86,10 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
 
       const activeHydrated = hydrated.filter((s) => !s.shouldAutoArchive);
 
-      // Filter Ready Shows & Sort Most Recently Aired First (Newest air date to oldest)
       const readyShows = activeHydrated.filter((s) => s.isAired && !s.isCompleted);
       readyShows.sort((a, b) => (b.airDate || '').localeCompare(a.airDate || ''));
 
       setAiredQueue(readyShows);
-
-      // Caught Up: Watched all episodes currently out
       setCompletedQueue(activeHydrated.filter((s) => s.isCompleted || !s.isAired));
       setLoading(false);
     }
@@ -120,30 +113,37 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
 
   return (
     <div className="space-y-2">
-      {/* STICKY SUB-TAB HEADER */}
+      {/* Clean Sub-Tab Container */}
       <div className="sticky top-[49px] z-30 bg-[#0F172A] pt-1 pb-2">
         <div className="flex w-full items-center justify-evenly rounded-xl border border-slate-800 bg-[#1E293B] py-2.5 text-[11px] sm:text-xs font-bold shadow-md">
           <button
             type="button"
             onClick={() => setSubTab('ready')}
-            className={`px-4 transition-colors ${
+            className={`flex items-center justify-center space-x-1 px-4 transition-colors ${
               subTab === 'ready'
                 ? 'text-[#8CFA96]'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            Ready to Watch ({airedQueue.length})
+            <svg className="h-4 w-4 fill-current shrink-0" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            <span>Ready to Watch ({airedQueue.length})</span>
           </button>
+          
           <button
             type="button"
             onClick={() => setSubTab('caughtup')}
-            className={`px-4 transition-colors ${
+            className={`flex items-center justify-center space-x-1 px-4 transition-colors ${
               subTab === 'caughtup'
                 ? 'text-[#8CFA96]'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            Caught Up ({completedQueue.length})
+            <svg className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>Caught Up ({completedQueue.length})</span>
           </button>
         </div>
       </div>
@@ -288,7 +288,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
                         </svg>
                         <p className="text-[10px] text-[#8CFA96] font-semibold">
-                          All released episodes watched
+                          All episodes watched
                         </p>
                       </div>
                     </div>

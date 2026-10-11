@@ -96,10 +96,19 @@ export function UpcomingQueue({ watchlist, onRemoveShow, onSelectShow }) {
 
   return (
     <div className="space-y-4">
-      {/* Header Bar */}
+      {/* Header Bar with Clapperboard SVG */}
       <div className="sticky top-[49px] z-30 bg-[#0F172A] pt-1 pb-2">
         <div className="flex w-full items-center justify-between rounded-xl border border-slate-800 bg-[#1E293B] px-4 py-2.5 text-xs font-bold shadow-md text-slate-300">
-          <span>Upcoming & Production</span>
+          <div className="flex items-center space-x-1">
+            {/* Vector Clapperboard Icon */}
+            <svg className="h-3.5 w-3.5 shrink-0 text-[#8CFA96]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <path d="M4 11v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8H4z" />
+              <path d="M4 11V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4H4z" />
+              <path d="M8 5l3 6" />
+              <path d="M13 5l3 6" />
+            </svg>
+            <span>Upcoming & Production</span>
+          </div>
           <span className="text-[#8CFA96]">{totalUpcoming} Tracked</span>
         </div>
       </div>
@@ -113,7 +122,7 @@ export function UpcomingQueue({ watchlist, onRemoveShow, onSelectShow }) {
         </div>
       ) : (
         <>
-          {/* SECTION 1: CONFIRMED SCHEDULED DATES (FULL CARD LAYOUT) */}
+          {/* SECTION 1: CONFIRMED SCHEDULED DATES */}
           {scheduledShows.length > 0 && (
             <div className="space-y-3">
               <h3 className="text-[10px] font-black uppercase tracking-wider text-[#8CFA96] px-1">
@@ -130,7 +139,7 @@ export function UpcomingQueue({ watchlist, onRemoveShow, onSelectShow }) {
             </div>
           )}
 
-          {/* SECTION 2: RENEWED & IN PRODUCTION (COMPACT CARD LAYOUT) */}
+          {/* SECTION 2: RENEWED & IN PRODUCTION */}
           {inProductionShows.length > 0 && (
             <div className="space-y-2 pt-2">
               <h3 className="text-[11px] font-black uppercase tracking-wider text-amber-400 px-1">
@@ -152,7 +161,6 @@ export function UpcomingQueue({ watchlist, onRemoveShow, onSelectShow }) {
   );
 }
 
-{/* Full Backdrop Card for Confirmed Scheduled Releases */}
 function ScheduledCard({ show, onSelectShow, onRemoveShow }) {
   const season = show.currentSeason || 1;
   const episode = show.currentEpisode || 1;
@@ -214,7 +222,6 @@ function ScheduledCard({ show, onSelectShow, onRemoveShow }) {
   );
 }
 
-{/* Compact Row Card for Renewed / In-Production Shows without Air Dates */}
 function InProductionCompactCard({ show, onSelectShow, onRemoveShow }) {
   const posterUrl = show.poster ? `${IMAGE_BASE_URL}${show.poster}` : '';
 

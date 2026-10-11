@@ -157,23 +157,31 @@ export function MasterWatchlist({
     <div className={`space-y-2 ${showAlphabetIndex ? 'pr-5' : ''}`}>
       {/* STICKY CONTROLS CONTAINER */}
       <div className="sticky top-[49px] z-30 bg-[#0F172A] pt-1 pb-2 space-y-2">
-        {/* Segmented Sub-Tab Header */}
-        <div className="flex w-full items-center justify-evenly rounded-xl border border-slate-800 bg-[#1E293B] p-1 text-[11px] sm:text-xs font-bold shadow-md">
+        {/* Clean Sub-Tab Header */}
+        <div className="flex w-full items-center justify-evenly rounded-xl border border-slate-800 bg-[#1E293B] py-2.5 text-[11px] sm:text-xs font-bold shadow-md">
           <button
             onClick={() => setSubTab('active')}
-            className={`flex-1 py-2 rounded-lg transition-all ${
-              subTab === 'active' ? 'bg-slate-800 text-[#8CFA96] shadow-sm' : 'text-slate-400 hover:text-white'
+            className={`flex items-center justify-center space-x-1 px-4 transition-colors ${
+              subTab === 'active' 
+                ? 'text-[#8CFA96]' 
+                : 'text-slate-400 hover:text-white'
             }`}
           >
-            Active Shows ({showsWithMeta.length})
+            <svg className="h-3 w-3 fill-current shrink-0" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            <span>Active Shows ({showsWithMeta.length})</span>
           </button>
+
           <button
             onClick={() => setSubTab('attic')}
-            className={`flex-1 py-2 rounded-lg transition-all flex items-center justify-center space-x-1.5 ${
-              subTab === 'attic' ? 'bg-slate-800 text-[#8CFA96] shadow-sm' : 'text-slate-400 hover:text-white'
+            className={`flex items-center justify-center space-x-1 px-4 transition-colors ${
+              subTab === 'attic' 
+                ? 'text-[#8CFA96]' 
+                : 'text-slate-400 hover:text-white'
             }`}
           >
-            <img src={retroVisionLogo} alt="RetroVision" className="h-4 w-4 object-contain shrink-0" />
+            <img src={retroVisionLogo} alt="RetroVision" className="h-3 w-3 object-contain shrink-0" />
             <span>RetroVision ({atticWithMeta.length})</span>
           </button>
         </div>
@@ -352,8 +360,10 @@ function ShowCard({
         </div>
       </div>
 
-      <div className="flex items-center space-x-1.5 shrink-0 self-center pl-1 border-l border-slate-800/80">
+      {/* BORDERLESS MATCHING ACTION ICON CLUSTER */}
+      <div className="flex items-center space-x-3 shrink-0 self-center pl-1 border-l border-slate-800/80">
         {isAttic ? (
+          /* Restore Play Triangle Icon (h-6 w-6) */
           <button
             type="button"
             onClick={(e) => {
@@ -362,11 +372,14 @@ function ShowCard({
               onRestoreFromAttic(show);
             }}
             title="Restore to Active Watchlist"
-            className="flex items-center space-x-1 rounded-lg border border-[#8CFA96]/40 bg-[#8CFA96]/10 px-2 py-1 text-[10px] font-bold text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-900 transition-all active:scale-95"
+            className="flex h-6 w-6 items-center justify-center text-[#8CFA96] hover:scale-110 transition-transform active:scale-95"
           >
-            <span className="text-[9px] font-extrabold uppercase">Watchlist</span>
+            <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
           </button>
         ) : (
+          /* Move to RetroVision Logo Icon (h-6 w-6) */
           <button
             type="button"
             onClick={(e) => {
@@ -375,12 +388,13 @@ function ShowCard({
               onMoveToAttic(show);
             }}
             title="Move to RetroVision"
-            className="flex items-center justify-center p-1 rounded-lg hover:opacity-80 transition-all active:scale-95"
+            className="flex h-6 w-6 items-center justify-center hover:scale-110 transition-transform active:scale-95"
           >
             <img src={retroVisionLogo} alt="Send to RetroVision" className="h-6 w-6 rounded object-cover" />
           </button>
         )}
 
+        {/* Delete / Remove Icon (h-6 w-6) */}
         <button
           type="button"
           onClick={(e) => {
@@ -393,9 +407,11 @@ function ShowCard({
             }
           }}
           title="Remove permanently"
-          className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-700 bg-slate-900/80 text-[10px] text-slate-400 hover:border-red-500/50 hover:bg-red-500/20 hover:text-red-400 transition-all active:scale-90"
+          className="flex h-6 w-6 items-center justify-center text-slate-400 hover:text-red-400 hover:scale-110 transition-transform active:scale-90"
         >
-          ✕
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </button>
       </div>
     </div>

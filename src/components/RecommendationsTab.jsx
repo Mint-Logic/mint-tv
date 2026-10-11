@@ -25,7 +25,6 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
     localStorage.setItem('mint_tv_disliked_ids', JSON.stringify(dislikedIds));
   }, [watchLater, dislikedIds]);
 
-  // Hydrate Watch Later Metadata
   useEffect(() => {
     async function hydrateList() {
       const needsHydration = watchLater.some((s) => !s.network || s.numberOfEpisodes === undefined);
@@ -174,23 +173,30 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
         <div className="flex w-full items-center justify-evenly rounded-xl border border-slate-800 bg-[#1E293B] py-2.5 text-[11px] sm:text-xs font-bold shadow-md">
           <button
             onClick={() => setSubTab('feed')}
-            className={`px-4 transition-colors ${
+            className={`flex items-center justify-center space-x-1 px-4 transition-colors ${
               subTab === 'feed' 
                 ? 'text-[#8CFA96]' 
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            Feed
+            <svg className="h-3 w-3 fill-current shrink-0" viewBox="0 0 24 24">
+              <path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" />
+            </svg>
+            <span>Feed</span>
           </button>
+          
           <button
             onClick={() => setSubTab('watchlater')}
-            className={`px-4 transition-colors ${
+            className={`flex items-center justify-center space-x-1 px-4 transition-colors ${
               subTab === 'watchlater' 
                 ? 'text-[#8CFA96]' 
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            Watch Later ({watchLater.length})
+            <svg className="h-3 w-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Watch Later ({watchLater.length})</span>
           </button>
         </div>
       </div>
@@ -252,7 +258,6 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                             )}
                           </div>
 
-                          {/* Show Status & Season Badges */}
                           <div className="flex items-center gap-1.5 pt-0.5">
                             <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-tight border ${
                               isOnAir
@@ -269,17 +274,25 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-4 mt-2">
+                        {/* BORDERLESS, SIZED-MATCHED ACTION ICONS */}
+                        <div className="flex items-center gap-4 mt-2.5 ml-28" >
+                          {/* Watch Later Clock Icon (h-6 w-6) */}
                           <button
+                            type="button"
                             onClick={(e) => { e.stopPropagation(); handleSaveWatchLater(show); }}
-                            className="flex items-center rounded border border-[#8CFA96]/30 bg-[#8CFA96]/10 px-2 py-1 text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-900 transition-all active:scale-95"
+                            className="flex h-5 w-5 items-center justify-center text-[#8CFA96] hover:scale-110 transition-transform active:scale-95"
+                            title="Save for Watch Later"
                           >
-                            <span className="text-[8px] font-black uppercase tracking-tight">Watch Later</span>
+                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
                           </button>
 
+                          {/* RetroVision TV Logo (h-6 w-6) */}
                           <button
+                            type="button"
                             onClick={(e) => { e.stopPropagation(); handleSaveAttic(show); }}
-                            className="p-0.5 rounded-lg hover:opacity-80 transition-all active:scale-95"
+                            className="flex h-5 w-5 items-center justify-center hover:scale-110 transition-transform active:scale-95"
                             title="Move to RetroVision"
                           >
                             <img 
@@ -289,11 +302,17 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                             />
                           </button>
 
+                          {/* Hide Eye-Off Icon (h-6 w-6) */}
                           <button
+                            type="button"
                             onClick={(e) => { e.stopPropagation(); handleBlacklist(show.id); }}
-                            className="flex items-center rounded border border-red-900/30 bg-red-950/20 px-2 py-1 text-red-700 hover:bg-red-900/40 hover:text-red-600 transition-all active:scale-95"
+                            className="flex h-6 w-6 items-center justify-center text-red-400 hover:scale-110 transition-transform active:scale-95"
+                            title="Hide Show"
                           >
-                            <span className="text-[8px] font-black uppercase tracking-tight">Hide</span>
+                            <svg className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                              <line x1="1" y1="1" x2="23" y2="23" />
+                            </svg>
                           </button>
                         </div>
                       </div>
@@ -372,7 +391,6 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                           )}
                         </div>
 
-                        {/* Show Status & Season Badges */}
                         <div className="flex items-center gap-1.5 pt-0.5">
                           <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-tight border ${
                             isOnAir
@@ -389,12 +407,27 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-4 mt-3">
-                        <button onClick={(e) => { e.stopPropagation(); handlePromoteToWatchlist(show); }} className="flex items-center rounded border border-[#8CFA96]/30 bg-[#8CFA96]/10 px-2 py-1 text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-900 transition-all active:scale-95">
-                          <span className="text-[8px] font-black uppercase tracking-tight">Watchlist</span>
+                      {/* BORDERLESS, SIZED-MATCHED ACTION ICONS */}
+                      <div className="flex items-center gap-4 mt-2 ml-27" >
+                        {/* Promote to Watchlist Play Icon (h-6 w-6) */}
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); handlePromoteToWatchlist(show); }}
+                          className="flex h-7 w-7 items-center justify-center text-[#8CFA96] hover:scale-110 transition-transform active:scale-95"
+                          title="Add to Watchlist"
+                        >
+                          <svg className="h-7 w-7 fill-current" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
                         </button>
 
-                        <button onClick={(e) => { e.stopPropagation(); handleMoveWLtoAttic(show); }} className="p-0.5 rounded-lg hover:opacity-80 transition-all active:scale-95" title="Move to RetroVision">
+                        {/* Move to RetroVision Logo (h-6 w-6) */}
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); handleMoveWLtoAttic(show); }}
+                          className="flex h-6 w-6 items-center justify-center hover:scale-110 transition-transform active:scale-95"
+                          title="Move to RetroVision"
+                        >
                           <img 
                             src={retroVisionLogo} 
                             alt="RetroVision" 
@@ -402,8 +435,16 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                           />
                         </button>
 
-                        <button onClick={(e) => { e.stopPropagation(); setWatchLater(prev => prev.filter(s => s.id !== show.id)); }} className="flex items-center rounded border border-red-900/30 bg-red-950/20 px-2 py-1 text-red-700 hover:bg-red-900/40 hover:text-red-600 transition-all active:scale-95">
-                          <span className="text-[8px] font-black uppercase tracking-tight">Drop</span>
+                        {/* Drop Trash Can Icon (h-6 w-6) */}
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setWatchLater(prev => prev.filter(s => s.id !== show.id)); }}
+                          className="flex h-6 w-6 items-center justify-center text-red-400 hover:scale-110 transition-transform active:scale-95"
+                          title="Drop Show"
+                        >
+                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
                         </button>
                       </div>
                     </div>
