@@ -354,9 +354,9 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                       className="flex items-start space-x-3 p-2.5 cursor-pointer select-none"
                     >
                       {posterUrl ? (
-                        <img src={posterUrl} alt={show.name} className="h-20 w-15 rounded-lg object-cover shrink-0 bg-slate-900 shadow-sm" />
+                        <img src={posterUrl} alt={show.name} className="h-20 w-12 rounded-lg object-cover shrink-0 bg-slate-900 shadow-sm" />
                       ) : (
-                        <div className="h-20 w-15 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600 shadow-sm">
+                        <div className="h-20 w-12 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600 shadow-sm">
                           N/A
                         </div>
                       )}
@@ -365,7 +365,16 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                         <div className="space-y-0.5">
                           {/* TITLE AND HIDE BUTTON WRAPPER */}
                           <div className="flex justify-between items-start gap-2">
-                            <h3 className="text-xs font-extrabold text-white truncate leading-snug">
+                            <h3 
+                              className="text-xs font-extrabold text-white leading-snug"
+                              style={{
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                                wordBreak: 'break-word',
+                              }}
+                            >
                               {show.name}
                             </h3>
                             <button
@@ -374,8 +383,8 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                               className="flex items-center justify-center text-rose-700 transition-transform active:scale-90 shrink-0"
                               title="Hide Show"
                             >
-                              <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
                                 <line x1="1" y1="1" x2="23" y2="23" />
                               </svg>
                             </button>
@@ -409,12 +418,12 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                           </div>
                         </div>
 
-                        {/* RIGHT-ANCHORED ACTION ICONS (HIDE REMOVED) */}
-                        <div className="flex items-center justify-end gap-3 mt-0 ml-auto">
+                        {/* RIGHT-ANCHORED ACTION ICONS */}
+                        <div className="flex items-center justify-end gap-3 mt-1 ml-auto">
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); handleSaveWatchLater(show); }}
-                            className="flex items-center justify-center text-[#8CFA96] hover:scale-110 transition-transform active:scale-95"
+                            className="flex items-center justify-center text-[#8CFA96] transition-transform active:scale-90"
                             title="Save for Watch Later"
                           >
                             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -425,13 +434,13 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); handleSaveAttic(show); }}
-                            className="flex items-center justify-center hover:scale-110 transition-transform active:scale-95"
+                            className="flex items-center justify-center transition-transform active:scale-90"
                             title="Move to RetroVision"
                           >
                             <img 
                               src={retroVisionLogo} 
                               alt="RetroVision" 
-                              className="h-6 w-6 rounded object-cover" 
+                              className="h-5 w-5 rounded object-cover" 
                             />
                           </button>
                         </div>
@@ -446,6 +455,12 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
                           </div>
                         )}
+                        
+                        {/* FULL UNTRUNCATED SHOW TITLE HEADER */}
+                        <h4 className="text-xs font-black text-white leading-snug">
+                          {show.name}
+                        </h4>
+
                         <p className="text-[11px] text-slate-300 leading-relaxed">
                           {show.overview || 'No overview available for this title.'}
                         </p>
@@ -497,9 +512,9 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                 <div key={show.id} className="rounded-xl border border-slate-800 bg-[#1E293B] overflow-hidden transition-all">
                   <div onClick={() => setExpandedShowId(isExpanded ? null : show.id)} className="flex items-start space-x-3 p-2.5 cursor-pointer select-none">
                     {posterUrl ? (
-                      <img src={posterUrl} alt={show.name} className="h-20 w-15 rounded-lg object-cover shrink-0 bg-slate-900 shadow-sm" />
+                      <img src={posterUrl} alt={show.name} className="h-20 w-12 rounded-lg object-cover shrink-0 bg-slate-900 shadow-sm" />
                     ) : (
-                      <div className="h-20 w-15 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600 shadow-sm">N/A</div>
+                      <div className="h-20 w-12 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600 shadow-sm">N/A</div>
                     )}
                     
                    <div className="w-0 flex-1 flex flex-col justify-between self-stretch">
