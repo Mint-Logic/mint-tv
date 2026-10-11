@@ -347,7 +347,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                       {posterUrl ? (
                         <img src={posterUrl} alt={show.name} className="h-20 w-15 rounded-lg object-cover shrink-0 bg-slate-900 shadow-sm" />
                       ) : (
-                        <div className="h-16 w-11 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600 shadow-sm">
+                        <div className="h-20 w-15 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600 shadow-sm">
                           N/A
                         </div>
                       )}
@@ -490,7 +490,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                     {posterUrl ? (
                       <img src={posterUrl} alt={show.name} className="h-20 w-15 rounded-lg object-cover shrink-0 bg-slate-900 shadow-sm" />
                     ) : (
-                      <div className="h-16 w-11 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600 shadow-sm">N/A</div>
+                      <div className="h-20 w-15 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600 shadow-sm">N/A</div>
                     )}
                     
                    <div className="w-0 flex-1 flex flex-col justify-between self-stretch">
