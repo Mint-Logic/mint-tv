@@ -173,7 +173,7 @@ export function MasterWatchlist({
     subTab === 'attic' ? 'bg-slate-800 text-[#8CFA96] shadow-sm' : 'text-slate-400 hover:text-white'
   }`}
 >
-  <img src={retroVisionLogo} alt="RetroVision" className="h-4 w-4 rounded-sm object-cover" />
+ 
   <span>RetroVision ({atticWithMeta.length})</span>
 </button>
         </div>
