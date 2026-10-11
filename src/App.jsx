@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
 import { SearchModal } from './components/SearchModal';
 import { WatchlistGrid } from './components/WatchlistGrid';
@@ -11,6 +11,8 @@ import { supabase } from './supabase';
 import { AuthModal } from './components/AuthModal';
 import { getShowMetadata } from './services/tmdb';
 
+const TAB_ORDER = ['ready', 'upcoming', 'watchlist', 'recommended'];
+
 export default function App() {
   const [selectedShowId, setSelectedShowId] = useState(null);
   const [activeTab, setActiveTab] = useState('ready');
@@ -20,6 +22,10 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
   
   const [hasLoadedFromCloud, setHasLoadedFromCloud] = useState(false);
+
+  // Swipe gesture tracking references
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
 
   // Active Watchlist
   const [watchlist, setWatchlist] = useState(() => {
@@ -142,6 +148,36 @@ export default function App() {
     };
   }, [selectedShowId, isSearchOpen, isProfileOpen, isAuthOpen]);
 
+  // Touch Swipe Gesture Handlers for Footer Tab Navigation
+  function handleTouchStart(e) {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }
+
+  function handleTouchEnd(e) {
+    if (selectedShowId || isSearchOpen || isProfileOpen || isAuthOpen) return;
+
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+
+    // Trigger tab switch if horizontal swipe exceeds 50px and dominates vertical movement
+    if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
+      const currentIndex = TAB_ORDER.indexOf(activeTab);
+
+      if (deltaX < 0) {
+        // Swipe Left -> Advance to next tab
+        if (currentIndex < TAB_ORDER.length - 1) {
+          setActiveTab(TAB_ORDER[currentIndex + 1]);
+        }
+      } else {
+        // Swipe Right -> Move to previous tab
+        if (currentIndex > 0) {
+          setActiveTab(TAB_ORDER[currentIndex - 1]);
+        }
+      }
+    }
+  }
+
   function handleAddShow(show) {
     if (!watchlist.some((s) => s.id === show.id)) {
       setWatchlist([...watchlist, show]);
@@ -225,7 +261,11 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0F172A] pb-24 text-white font-sans select-none">
+    <div 
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      className="min-h-screen bg-[#0F172A] pb-24 text-white font-sans select-none overflow-x-hidden"
+    >
       <Header 
         onOpenSearch={() => setIsSearchOpen(true)} 
         onOpenProfile={() => setIsProfileOpen(true)}

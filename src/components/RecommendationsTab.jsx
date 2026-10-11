@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { IMAGE_BASE_URL, getShowMetadata } from '../services/tmdb';
 import retroVisionLogo from '../assets/retro-vision-logo.png';
 
@@ -8,6 +8,9 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
   const [loading, setLoading] = useState(true);
   const [expandedShowId, setExpandedShowId] = useState(null);
   const [page, setPage] = useState(1);
+
+  // Session cache to prevent duplicate titles during a session
+  const sessionSeenIds = useRef(new Set());
 
   // Watch Later Queue
   const [watchLater, setWatchLater] = useState(() => {
@@ -64,30 +67,51 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
     const atticIds = new Set((atticShows || []).map((s) => s.id));
     const blacklistedIds = new Set(dislikedIds);
 
-    const targetPage = isLoadMore ? page + 1 : 1;
+    const startPage = isLoadMore ? page + 1 : 1;
 
     try {
-      let url = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=${targetPage}&vote_count.gte=30`;
+      const fetchPage = async (p) => {
+        let url = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=${p}&vote_count.gte=30`;
 
-      if (likedGenres.length > 0) url += `&with_genres=${likedGenres.join('|')}`;
-      if (mutedGenres.length > 0) url += `&without_genres=${mutedGenres.join(',')}`;
+        if (likedGenres.length > 0) url += `&with_genres=${likedGenres.join('|')}`;
+        if (mutedGenres.length > 0) url += `&without_genres=${mutedGenres.join(',')}`;
 
-      let res = await fetch(url);
-      let data = await res.json();
-      let rawResults = data.results || [];
+        let res = await fetch(url);
+        let data = await res.json();
+        let results = data.results || [];
 
-      if (rawResults.length === 0 && likedGenres.length > 0) {
-        const fallbackUrl = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=${targetPage}&vote_count.gte=30`;
-        res = await fetch(fallbackUrl);
-        data = await res.json();
-        rawResults = data.results || [];
-      }
+        if (results.length === 0 && likedGenres.length > 0) {
+          const fallbackUrl = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=${p}&vote_count.gte=30`;
+          res = await fetch(fallbackUrl);
+          data = await res.json();
+          results = data.results || [];
+        }
+        return results;
+      };
 
-      const filtered = rawResults.filter((show) => {
-        if (activeWatchlistIds.has(show.id) || watchLaterIds.has(show.id) || atticIds.has(show.id) || blacklistedIds.has(show.id)) return false;
+      // Fetch 2 pages at once for a robust 40-item candidate pool
+      const [p1Results, p2Results] = await Promise.all([
+        fetchPage(startPage),
+        fetchPage(startPage + 1),
+      ]);
+
+      const combinedRaw = [...p1Results, ...p2Results];
+
+      const filtered = combinedRaw.filter((show) => {
+        if (
+          activeWatchlistIds.has(show.id) ||
+          watchLaterIds.has(show.id) ||
+          atticIds.has(show.id) ||
+          blacklistedIds.has(show.id) ||
+          sessionSeenIds.current.has(show.id)
+        ) {
+          return false;
+        }
+
         const genreIds = show.genre_ids || [];
         if (excludeAnime && genreIds.includes(16) && show.origin_country?.includes('JP')) return false;
         if (excludeTrueCrime && genreIds.includes(80) && genreIds.includes(99)) return false;
+
         return true;
       });
 
@@ -100,6 +124,9 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
           return b.popularity - a.popularity;
         });
       }
+
+      // Record seen show IDs to guarantee no repeats
+      filtered.forEach((show) => sessionSeenIds.current.add(show.id));
 
       const itemsToHydrate = isLoadMore ? filtered : filtered.slice(0, 10);
       const hydratedShows = await Promise.all(
@@ -118,7 +145,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
 
       if (isLoadMore) {
         setFeedShows((prev) => [...prev, ...hydratedShows]);
-        setPage(targetPage);
+        setPage(startPage + 1);
       } else {
         setFeedShows(hydratedShows);
         setPage(1);
@@ -241,7 +268,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                         </div>
                       )}
 
-                      <div className="w-0 flex-1">
+                      <div className="w-0 flex-1 flex flex-col justify-between self-stretch">
                         <div className="space-y-0.5">
                           <h3 className="text-xs font-extrabold text-white truncate leading-snug">
                             {show.name}
@@ -274,13 +301,12 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                           </div>
                         </div>
 
-                        {/* BORDERLESS, SIZED-MATCHED ACTION ICONS */}
-                        <div className="flex items-center gap-4 mt-2.5 ml-28" >
-                          {/* Watch Later Clock Icon (h-6 w-6) */}
+                        {/* UNIVERSAL RIGHT-ANCHORED ACTION ICONS */}
+                        <div className="flex items-center justify-end gap-3 mt-2.5 ml-auto">
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); handleSaveWatchLater(show); }}
-                            className="flex h-5 w-5 items-center justify-center text-[#8CFA96] hover:scale-110 transition-transform active:scale-95"
+                            className="flex items-center justify-center text-[#8CFA96] hover:scale-110 transition-transform active:scale-95"
                             title="Save for Watch Later"
                           >
                             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -288,11 +314,10 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                             </svg>
                           </button>
 
-                          {/* RetroVision TV Logo (h-6 w-6) */}
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); handleSaveAttic(show); }}
-                            className="flex h-5 w-5 items-center justify-center hover:scale-110 transition-transform active:scale-95"
+                            className="flex items-center justify-center hover:scale-110 transition-transform active:scale-95"
                             title="Move to RetroVision"
                           >
                             <img 
@@ -302,11 +327,10 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                             />
                           </button>
 
-                          {/* Hide Eye-Off Icon (h-6 w-6) */}
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); handleBlacklist(show.id); }}
-                            className="flex h-6 w-6 items-center justify-center text-red-400 hover:scale-110 transition-transform active:scale-95"
+                            className="flex items-center justify-center text-red-400 hover:scale-110 transition-transform active:scale-95"
                             title="Hide Show"
                           >
                             <svg className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -345,7 +369,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
               })}
               <button
                 onClick={() => fetchDiscoverFeed(true)}
-                className="w-full py-2 rounded-lg border border-slate-800 bg-slate-900 text-xs font-bold text-slate-400 hover:text-white transition-all"
+                className="w-full py-2.5 rounded-lg border border-slate-800 bg-slate-900 text-xs font-bold text-slate-400 hover:text-white transition-all mt-2"
               >
                 More Suggestions
               </button>
@@ -378,7 +402,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                       <div className="h-16 w-11 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600 shadow-sm">N/A</div>
                     )}
                     
-                    <div className="w-0 flex-1">
+                    <div className="w-0 flex-1 flex flex-col justify-between self-stretch">
                       <div className="space-y-0.5">
                         <h4 className="text-xs font-extrabold text-white truncate leading-snug">{show.name}</h4>
                         <div className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-400 flex-wrap">
@@ -407,13 +431,12 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                         </div>
                       </div>
 
-                      {/* BORDERLESS, SIZED-MATCHED ACTION ICONS */}
-                      <div className="flex items-center gap-4 mt-2 ml-27" >
-                        {/* Promote to Watchlist Play Icon (h-6 w-6) */}
+                      {/* UNIVERSAL RIGHT-ANCHORED WATCH LATER ACTIONS */}
+                      <div className="flex items-center justify-end gap-3 mt-2.5 ml-auto">
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); handlePromoteToWatchlist(show); }}
-                          className="flex h-7 w-7 items-center justify-center text-[#8CFA96] hover:scale-110 transition-transform active:scale-95"
+                          className="flex items-center justify-center text-[#8CFA96] hover:scale-110 transition-transform active:scale-95"
                           title="Add to Watchlist"
                         >
                           <svg className="h-7 w-7 fill-current" viewBox="0 0 24 24">
@@ -421,25 +444,19 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                           </svg>
                         </button>
 
-                        {/* Move to RetroVision Logo (h-6 w-6) */}
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); handleMoveWLtoAttic(show); }}
-                          className="flex h-6 w-6 items-center justify-center hover:scale-110 transition-transform active:scale-95"
+                          className="flex items-center justify-center hover:scale-110 transition-transform active:scale-95"
                           title="Move to RetroVision"
                         >
-                          <img 
-                            src={retroVisionLogo} 
-                            alt="RetroVision" 
-                            className="h-6 w-6 rounded object-cover" 
-                          />
+                          <img src={retroVisionLogo} alt="RetroVision" className="h-6 w-6 rounded object-cover" />
                         </button>
 
-                        {/* Drop Trash Can Icon (h-6 w-6) */}
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setWatchLater(prev => prev.filter(s => s.id !== show.id)); }}
-                          className="flex h-6 w-6 items-center justify-center text-red-400 hover:scale-110 transition-transform active:scale-95"
+                          className="flex items-center justify-center text-red-400 hover:scale-110 transition-transform active:scale-95"
                           title="Drop Show"
                         >
                           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
