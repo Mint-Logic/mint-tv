@@ -300,7 +300,7 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
                         e.stopPropagation();
                         if (!isAdded) handleSelectShow(show);
                       }}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all active:scale-95 flex items-center self-center ${
+                      className={`px-1 py-1.5 pt-1 pb-1.5 pr-2 rounded-lg text-xs font-bold shrink-0 transition-all active:scale-95 flex items-center self-center ${
                         isAdded
                           ? 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed'
                           : 'bg-[#8CFA96] text-slate-950 hover:bg-[#7be385]'
@@ -311,7 +311,7 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
                         <span>Added ✓</span>
                       ) : (
                         <>
-                          <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 20">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" />
                           </svg>
                           <span>Add</span>
