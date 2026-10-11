@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import mintTvLogo from '../assets/mint-tv-logo.png';
+import mintTvLogo from './assets/icon.png';
 import { Header } from './components/Header';
 import { SearchModal } from './components/SearchModal';
 import { WatchlistGrid } from './components/WatchlistGrid';
