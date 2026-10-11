@@ -95,7 +95,6 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
       localStorage.setItem('mint_tv_exclude_true_crime', excludeTrueCrime);
       localStorage.setItem('mint_tv_boost_nature', boostNature);
       
-      // Dispatch event to instantly update Header without refresh
       window.dispatchEvent(new Event('mint_tv_profile_update'));
     } catch (e) {
       console.warn('LocalStorage limit reached while saving profile settings', e);
@@ -749,42 +748,63 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
             {/* Quick App Tips */}
             <div className="space-y-2.5">
               <span className="text-[10px] font-black uppercase tracking-wider text-[#8CFA96] block">
-                Quick Guide & Tips
+                Quick Guide & Feature Overview
               </span>
 
-              <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
-                  📺 Ready vs. Caught Up
-                </span>
+              <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1.5">
+                <div className="flex items-center space-x-1.5">
+                  <svg className="h-3.5 w-3.5 text-[#8CFA96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96]">
+                    Ready vs. Caught Up
+                  </span>
+                </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Active shows with unwatched episodes land in <strong className="text-white">Ready to Watch</strong>. Finishing all current episodes moves an active ongoing show into <strong className="text-white">Caught Up</strong> until a brand new season releases!
+                  Active shows with unwatched, currently aired episodes appear in <strong className="text-white">Ready to Watch</strong>. Once you finish all available episodes for an ongoing series, it automatically moves to <strong className="text-white">Caught Up</strong> until a new season premieres!
                 </p>
               </div>
 
-              <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
-                  🏛️ RetroVision Archive
-                </span>
+              <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1.5">
+                <div className="flex items-center space-x-1.5">
+                  <svg className="h-3.5 w-3.5 text-[#8CFA96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96]">
+                    RetroVision Museum
+                  </span>
+                </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                 <strong className="text-white">RetroVision</strong> acts as your personal TV museum—an auto-archive for recently finished series and lifetime shows you've watched.
+                  <strong className="text-white">RetroVision</strong> is your personal lifetime TV museum. It auto-archives finished series, but also serves as a permanent vault where you can store every show you've ever watched in your life as a reminder of all the great TV you've experienced.
                 </p>
               </div>
 
-              <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
-                  📋 Watch Later Queue
-                </span>
+              <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1.5">
+                <div className="flex items-center space-x-1.5">
+                  <svg className="h-3.5 w-3.5 text-[#8CFA96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96]">
+                    Watch Later Queue
+                  </span>
+                </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Located in the <strong className="text-white">For You</strong> tab, <strong className="text-white">Watch Later</strong> is a holding deck for new show discoveries you plan to start soon without cluttering your main active watchlist.
+                  Located in the <strong className="text-white">For You</strong> tab, <strong className="text-white">Watch Later</strong> serves as a holding deck for new show discoveries you plan to start soon without cluttering your main active watchlist.
                 </p>
               </div>
 
-              <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
-                  ⚡ Season Shortcuts
-                </span>
+              <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1.5">
+                <div className="flex items-center space-x-1.5">
+                  <svg className="h-3.5 w-3.5 text-[#8CFA96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96]">
+                    Episode & Season Shortcuts
+                  </span>
+                </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  In show details, tap <strong className="text-white">'Finale'</strong> on the last episode to mark the entire season as watched, or tap <strong className="text-white">'Premiere'</strong> on the first episode to unwatch the entire season.
+                  Inside any show's details, tap <strong className="text-white">'Finale'</strong> on the last episode to mark the entire season watched at once. Tap <strong className="text-white">'Premiere'</strong> on the first episode to reset the season as unwatched.
                 </p>
               </div>
             </div>
@@ -796,37 +816,44 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
               </span>
 
               <div className="space-y-1">
-                <h4 className="text-[11px] font-bold text-white">Why isn't my show appearing in "Ready to Watch"?</h4>
+                <h4 className="text-[11px] font-bold text-white">Why did my show move to "Caught Up"?</h4>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  If you are completely caught up on all currently released episodes for an active show, it automatically moves to the <strong className="text-slate-300">Caught Up</strong> sub-tab under Watchlist. Once a new season airs, it will return to Ready to Watch!
+                  When you complete all currently aired episodes for an ongoing series, Mint TV moves it to <strong className="text-slate-300">Caught Up</strong> to keep your active "Ready" queue clean. The moment a new episode airs, the show will pop back into Ready to Watch automatically!
                 </p>
               </div>
 
               <div className="space-y-1 pt-1 border-t border-slate-800/60">
-                <h4 className="text-[11px] font-bold text-white">How do shows end up in RetroVision?</h4>
+                <h4 className="text-[11px] font-bold text-white">What is RetroVision used for?</h4>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Shows auto-archive to <strong className="text-slate-300">RetroVision</strong> when TMDB metadata confirms the series has officially ended or been canceled, and you've completed all available seasons. You can also manually move any show into RetroVision at any time.
+                  It’s both an automatic archive for ended shows and your personal TV hall of fame. Use it to log every show you’ve ever watched throughout your life, preserving your complete watching history in one place without cluttering your active watchlist.
                 </p>
               </div>
 
               <div className="space-y-1 pt-1 border-t border-slate-800/60">
-                <h4 className="text-[11px] font-bold text-white">What is the difference between RetroVision and Watch Later?</h4>
+                <h4 className="text-[11px] font-bold text-white">How does the "Upcoming" tab work?</h4>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  <strong className="text-slate-300">RetroVision</strong> is a permanent vault/museum for completed or lifetime shows. <strong className="text-slate-300">Watch Later</strong> (found in the For You tab) is a temporary holding area for new recommendations you want to decide on or start soon.
+                  The <strong className="text-slate-300">Upcoming</strong> tab automatically tracks network release dates for shows on your Watchlist. Confirmed release dates appear at the top with countdown banners, while renewed series awaiting dates stay organized right below.
                 </p>
               </div>
 
               <div className="space-y-1 pt-1 border-t border-slate-800/60">
-                <h4 className="text-[11px] font-bold text-white">Does my data work offline?</h4>
+                <h4 className="text-[11px] font-bold text-white">How do Genre Preferences & Discovery Rules work?</h4>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Yes! All watchlist progress and custom profile changes save locally to your device instantly. When connected to your cloud account, it seamlessly syncs in the background whenever an internet connection is available.
+                  Your <strong className="text-slate-300">Genre Preferences</strong> customize the feed in the <strong className="text-slate-300">For You</strong> tab. Liked genres get boosted, muted genres are hidden, and custom rules (like Exclude Anime or True Crime) filter out specific sub-genres in real time.
                 </p>
               </div>
 
               <div className="space-y-1 pt-1 border-t border-slate-800/60">
-                <h4 className="text-[11px] font-bold text-white">How do I transfer data without an account?</h4>
+                <h4 className="text-[11px] font-bold text-white">Does my data work offline or sync across devices?</h4>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Use the <strong className="text-slate-300">Export Backup</strong> button below to save a `.json` backup file. You can import this file on any device (including iPhone Safari using Native Web Share) to transfer your entire watchlist and profile settings manually.
+                  Yes! All progress saves locally on your device instantly. When signed into a free cloud account, your watchlist and custom profile settings sync seamlessly across all your devices in real time.
+                </p>
+              </div>
+
+              <div className="space-y-1 pt-1 border-t border-slate-800/60">
+                <h4 className="text-[11px] font-bold text-white">How do I back up or transfer my data manually?</h4>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Tap <strong className="text-slate-300">Export Backup</strong> below to save a `.json` backup file. You can import this file on any device at any time to instantly restore your entire library and custom profile settings.
                 </p>
               </div>
             </div>
