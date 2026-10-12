@@ -84,6 +84,8 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
 
+  const [helpSubTab, setHelpSubTab] = useState('guide');
+
   useEffect(() => {
     try {
       localStorage.setItem('mint_tv_user_name', profileName);
@@ -602,7 +604,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                   className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
                 />
                 <span className="text-xs font-bold text-slate-200">
-                  Exclude Anime <span className="text-[10px] font-normal text-slate-400">(Block Japanese Anime, keep Western animation)</span>
+                  Exclude Anime <span className="text-[10px] font-normal text-slate-400">(Filter out Anime titles, keep General Animation)</span>
                 </span>
               </label>
 
@@ -626,7 +628,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                   className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
                 />
                 <span className="text-xs font-bold text-slate-200">
-                  Boost Nature & Wildlife <span className="text-[10px] font-normal text-slate-400">(Prioritize nature docs in recommendations)</span>
+                  Nature & Space Docs Only <span className="text-[10px] font-normal text-slate-400">(Limit documentaries strictly to nature, wildlife & space)</span>
                 </span>
               </label>
             </div>
@@ -730,14 +732,14 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
         )}
       </div>
 
-      {/* COMBINED HELP & FAQ ACCORDION */}
+    {/* COMBINED HELP & FAQ ACCORDION WITH REDESIGNED TABBED UI */}
       <div className="-mx-3 sm:-mx-4 overflow-hidden rounded-2xl border border-slate-800 bg-[#1E293B] shadow-lg">
         <button
           onClick={() => setIsHelpFaqDrawerOpen(!isHelpFaqDrawerOpen)}
           className="w-full flex justify-between items-center px-4 py-2.5 bg-slate-900/60 hover:bg-slate-900 transition-all cursor-pointer"
         >
           <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-            HELP & FAQ
+            HELP & USER GUIDE
           </span>
           <span className="text-[10px] font-bold text-[#8CFA96] transition-transform duration-200">
             {isHelpFaqDrawerOpen ? '▲' : '▼'}
@@ -746,121 +748,367 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
 
         {isHelpFaqDrawerOpen && (
           <div className="p-4 space-y-4 border-t border-slate-800 animate-in fade-in text-xs text-slate-300">
-            {/* Quick App Tips */}
-            <div className="space-y-2.5">
-              <span className="text-[10px] font-black uppercase tracking-wider text-[#8CFA96] block">
-                Quick Guide & Feature Overview
-              </span>
-
-              <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1.5">
-                <div className="flex items-center space-x-1.5">
-                  <svg className="h-3.5 w-3.5 fill-current text-[#8CFA96]" viewBox="0 0 24 24">
-  <path d="M8 5v14l11-7z" />
-</svg>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96]">
-                    Ready vs. Caught Up
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Active shows with unwatched, currently aired episodes appear in <strong className="text-white">Ready to Watch</strong>. Once you finish all available episodes for an ongoing series, it automatically moves to <strong className="text-white">Caught Up</strong> until a new season premieres!
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1.5">
-                <div className="flex items-center space-x-1.5">
-
-                  <img 
-      src={retroVisionLogo} 
-      alt="RetroVision" 
-      className="h-4 w-4 object-contain shrink-0" 
-    />
-    
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96]">
-                    RetroVision Museum
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  <strong className="text-white">RetroVision</strong> is your personal lifetime TV museum. It auto-archives finished series, but also serves as a permanent vault where you can store every show you've ever watched as a reminder of all the great TV you've experienced.
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1.5">
-                <div className="flex items-center space-x-1.5">
-                  <svg className="h-3.5 w-3.5 text-[#8CFA96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96]">
-                    Watch Later Queue
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Located in the <strong className="text-white">For You</strong> tab, <strong className="text-white">Watch Later</strong> serves as a holding deck for new show discoveries you plan to start soon without cluttering your main active watchlist.
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1.5">
-                <div className="flex items-center space-x-1.5">
-                  <svg className="h-3.5 w-3.5 text-[#8CFA96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96]">
-                    Episode & Season Shortcuts
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Inside any show's details, tap <strong className="text-white">'Finale'</strong> on the last episode to mark the entire season watched at once. Tap <strong className="text-white">'Premiere'</strong> on the first episode to reset the season as unwatched.
-                </p>
-              </div>
+            {/* SUB-HEADER / TAB SELECTOR */}
+            <div className="grid grid-cols-2 gap-1 rounded-xl bg-slate-950 p-1 border border-slate-800">
+              <button
+                type="button"
+                onClick={() => setHelpSubTab('guide')}
+                className={`py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider transition-all ${
+                  helpSubTab === 'guide'
+                    ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Feature Guide
+              </button>
+              <button
+                type="button"
+                onClick={() => setHelpSubTab('faq')}
+                className={`py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider transition-all ${
+                  helpSubTab === 'faq'
+                    ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                FAQ
+              </button>
             </div>
 
-            {/* Frequently Asked Questions */}
-            <div className="space-y-2.5 pt-2 border-t border-slate-800">
-              <span className="text-[10px] font-black uppercase tracking-wider text-[#8CFA96] block">
-                Frequently Asked Questions
-              </span>
+            {/* TAB 1: BEGINNER'S FEATURE GUIDE */}
+            {helpSubTab === 'guide' && (
+              <div className="space-y-4 animate-in fade-in">
+                {/* Hero Header Card */}
+                <div className="rounded-xl border border-[#8CFA96]/30 bg-[#8CFA96]/5 p-3.5 space-y-1">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-[#8CFA96]">
+                    Mint TV — Beginner’s Guide & Feature Overview
+                  </h3>
+                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                    Welcome to Mint TV! Whether you are keeping track of a few active shows or managing a massive lifetime collection, Mint TV makes it simple to log episodes, discover new series, and never miss a season premiere.
+                  </p>
+                </div>
 
-              <div className="space-y-1">
-                <h4 className="text-[11px] font-bold text-white">Why did my show move to "Caught Up"?</h4>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  When you complete all currently aired episodes for an ongoing series, Mint TV moves it to <strong className="text-slate-300">Caught Up</strong> to keep your active "Ready" queue clean. The moment a new episode airs, the show will pop back into Ready to Watch automatically!
-                </p>
-              </div>
+                {/* Section 1: Main Navigation & Adding Shows */}
+                <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3.5 space-y-2">
+                  <div className="flex items-center space-x-2 border-b border-slate-800 pb-1.5">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#8CFA96]/20 text-[10px] font-black text-[#8CFA96]">
+                      1
+                    </span>
+                    <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-white">
+                      Getting Started: Adding Shows & Navigation
+                    </h4>
+                  </div>
 
-              <div className="space-y-1 pt-1 border-t border-slate-800/60">
-                <h4 className="text-[11px] font-bold text-white">What is RetroVision used for?</h4>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  It’s both an automatic archive for ended shows and your personal TV hall of fame. Use it to log every show you’ve ever watched throughout your life, preserving your complete watching history in one place without cluttering your active watchlist.
-                </p>
-              </div>
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
+                      Adding Shows to Your Library
+                    </span>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      Tap the green <strong className="text-white">+ Add Show</strong> button in the top-right header at any time to search TMDB for any TV series. You can type titles (even with typos!), browse trending shows, and instantly tap <strong className="text-white">Add</strong> to start tracking them.
+                    </p>
+                  </div>
 
-              <div className="space-y-1 pt-1 border-t border-slate-800/60">
-                <h4 className="text-[11px] font-bold text-white">How does the "Upcoming" tab work?</h4>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  The <strong className="text-slate-300">Upcoming</strong> tab automatically tracks network release dates for shows on your Watchlist. Confirmed release dates appear at the top with countdown banners, while renewed series awaiting dates stay organized right below.
-                </p>
-              </div>
+                  <div className="space-y-1.5 pt-1 border-t border-slate-800/60">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
+                      Main Navigation Tabs
+                    </span>
+                    <p className="text-[11px] text-slate-400 leading-relaxed mb-1">
+                      At the bottom of your screen, you’ll find the four main tabs that drive the app:
+                    </p>
+                    <ul className="space-y-1.5 text-[11px] text-slate-400">
+                      <li className="flex items-start space-x-1.5">
+                        <span className="text-[#8CFA96] font-bold">•</span>
+                        <span><strong className="text-white">Ready (Play Icon):</strong> Your active dashboard. Shows with newly aired, unwatched episodes appear here first.</span>
+                      </li>
+                      <li className="flex items-start space-x-1.5">
+                        <span className="text-[#8CFA96] font-bold">•</span>
+                        <span><strong className="text-white">Upcoming (Calendar Icon):</strong> Your future schedule. Tracks confirmed release dates and shows currently in production.</span>
+                      </li>
+                      <li className="flex items-start space-x-1.5">
+                        <span className="text-[#8CFA96] font-bold">•</span>
+                        <span><strong className="text-white">Watchlist (List Icon):</strong> Your complete directory. Browse all active series or switch to your permanent RetroVision museum.</span>
+                      </li>
+                      <li className="flex items-start space-x-1.5">
+                        <span className="text-[#8CFA96] font-bold">•</span>
+                        <span><strong className="text-white">For You (Star Icon):</strong> Recommendation engine. Features your Feed of fresh recommendations and your Watch Later queue.</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
 
-              <div className="space-y-1 pt-1 border-t border-slate-800/60">
-                <h4 className="text-[11px] font-bold text-white">How do Genre Preferences & Discovery Rules work?</h4>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Your <strong className="text-slate-300">Genre Preferences</strong> customize the feed in the <strong className="text-slate-300">For You</strong> tab. Liked genres get boosted, muted genres are hidden, and custom rules (like Exclude Anime or True Crime) filter out specific sub-genres in real time.
-                </p>
-              </div>
+                {/* Section 2: Tracking & Watching Progress */}
+                <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3.5 space-y-2.5">
+                  <div className="flex items-center space-x-2 border-b border-slate-800 pb-1.5">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#8CFA96]/20 text-[10px] font-black text-[#8CFA96]">
+                      2
+                    </span>
+                    <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-white">
+                      Tracking & Watching Progress
+                    </h4>
+                  </div>
 
-              <div className="space-y-1 pt-1 border-t border-slate-800/60">
-                <h4 className="text-[11px] font-bold text-white">Does my data work offline or sync across devices?</h4>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Yes! All progress saves locally on your device instantly. When signed into a free cloud account, your watchlist and custom profile settings sync seamlessly across all your devices in real time.
-                </p>
-              </div>
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
+                      Tracking Episodes
+                    </span>
+                    <ul className="space-y-1 text-[11px] text-slate-400">
+                      <li className="flex items-start space-x-1.5">
+                        <span className="text-[#8CFA96] font-bold">•</span>
+                        <span>Tap any show in Ready to Watch to open its Show Details view and see its episode guide, summary, and air date.</span>
+                      </li>
+                      <li className="flex items-start space-x-1.5">
+                        <span className="text-[#8CFA96] font-bold">•</span>
+                        <span>Tap the green checkmark button on the right side of the card to mark your current episode as watched and advance your progress counter.</span>
+                      </li>
+                    </ul>
+                  </div>
 
-              <div className="space-y-1 pt-1 border-t border-slate-800/60">
-                <h4 className="text-[11px] font-bold text-white">How do I back up or transfer my data manually?</h4>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Tap <strong className="text-slate-300">Export Backup</strong> below to save a `.json` backup file. You can import this file on any device at any time to instantly restore your entire library and custom profile settings.
-                </p>
+                  <div className="space-y-1.5 pt-1 border-t border-slate-800/60">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
+                      Episode & Season Shortcuts
+                    </span>
+                    <p className="text-[11px] text-slate-400 leading-relaxed mb-1">
+                      When you tap on a show card to open its Show Details view:
+                    </p>
+                    <ul className="space-y-1 text-[11px] text-slate-400">
+                      <li className="flex items-start space-x-1.5">
+                        <span className="text-[#8CFA96] font-bold">•</span>
+                        <span><strong className="text-white">Season Tabs:</strong> Easily jump between seasons using the top scroll bar.</span>
+                      </li>
+                      <li className="flex items-start space-x-1.5">
+                        <span className="text-[#8CFA96] font-bold">•</span>
+                        <span><strong className="text-white">Season Finale Shortcut:</strong> Tap the Finale badge on the last episode of a season to mark the entire season as watched in one go.</span>
+                      </li>
+                      <li className="flex items-start space-x-1.5">
+                        <span className="text-[#8CFA96] font-bold">•</span>
+                        <span><strong className="text-white">Season Premiere Shortcut:</strong> Tap the Premiere badge on the first episode to reset that entire season back to episode 1.</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-1.5 pt-1 border-t border-slate-800/60">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
+                      "Ready" vs. "Caught Up"
+                    </span>
+                    <ul className="space-y-1 text-[11px] text-slate-400">
+                      <li className="flex items-start space-x-1.5">
+                        <span className="text-[#8CFA96] font-bold">•</span>
+                        <span><strong className="text-white">Ready to Watch:</strong> Contains shows that currently have aired, unwatched episodes waiting for you.</span>
+                      </li>
+                      <li className="flex items-start space-x-1.5">
+                        <span className="text-[#8CFA96] font-bold">•</span>
+                        <span><strong className="text-white">Caught Up:</strong> When you finish the last available episode of an ongoing show, it automatically moves to the Caught Up sub-tab. The moment a new episode airs in the real world, the show automatically moves back into Ready to Watch!</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Section 3: Organizing Library */}
+                <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3.5 space-y-2">
+                  <div className="flex items-center space-x-2 border-b border-slate-800 pb-1.5">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#8CFA96]/20 text-[10px] font-black text-[#8CFA96]">
+                      3
+                    </span>
+                    <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-white">
+                      Organizing Your Library: Active vs. RetroVision
+                    </h4>
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    Mint TV uses two distinct spaces to keep your library clean and uncluttered:
+                  </p>
+                  <ul className="space-y-1.5 text-[11px] text-slate-400">
+                    <li className="flex items-start space-x-1.5">
+                      <span className="text-[#8CFA96] font-bold">•</span>
+                      <span><strong className="text-white">Active Shows:</strong> Shows you are currently watching or waiting for new seasons to release.</span>
+                    </li>
+                    <li className="flex items-start space-x-1.5">
+                      <span className="text-[#8CFA96] font-bold">•</span>
+                      <span><strong className="text-white">RetroVision (Museum Vault):</strong> Your personal lifetime TV vault. When a series completely ends or gets canceled, it auto-archives here so it doesn't clutter your daily queue. You can also manually send any show here to maintain a complete history of every series you've ever finished without diluting your active tracking stats.</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Section 4: Discovering New Shows */}
+                <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3.5 space-y-2">
+                  <div className="flex items-center space-x-2 border-b border-slate-800 pb-1.5">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#8CFA96]/20 text-[10px] font-black text-[#8CFA96]">
+                      4
+                    </span>
+                    <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-white">
+                      Discovering New Shows ("For You" Tab)
+                    </h4>
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    The For You tab helps you find your next favorite show:
+                  </p>
+
+                  <div className="space-y-1.5 pt-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
+                      The Feed
+                    </span>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      A pipeline of 20 personalized show recommendations. Each card offers three quick actions:
+                    </p>
+                    <ul className="space-y-1 text-[11px] text-slate-400">
+                      <li className="flex items-start space-x-1.5">
+                        <span className="text-[#8CFA96] font-bold">•</span>
+                        <span><strong className="text-white">Watch Later (Clock):</strong> Saves the show to your temporary "Watch Later" queue.</span>
+                      </li>
+                      <li className="flex items-start space-x-1.5">
+                        <span className="text-[#8CFA96] font-bold">•</span>
+                        <span><strong className="text-white">Add to Watchlist (Play):</strong> Sends the show straight to your main active watchlist.</span>
+                      </li>
+                      <li className="flex items-start space-x-1.5">
+                        <span className="text-[#8CFA96] font-bold">•</span>
+                        <span><strong className="text-white">RetroVision (TV Logo):</strong> Logs the show directly into your archived history.</span>
+                      </li>
+                      <li className="flex items-start space-x-1.5">
+                        <span className="text-[#8CFA96] font-bold">•</span>
+                        <span><strong className="text-white">Hide (Top-Right Eye/X):</strong> Blacklists the title so it won't appear in your recommendations again.</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-1 pt-1.5 border-t border-slate-800/60">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
+                      Era Filter Pills
+                    </span>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      Filter recommendations by specific decades (e.g., 2020s, 2010s, 1990s, or Vintage 1950s–60s) using the pill buttons at the top.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Section 5: Personalizing Recommendations */}
+                <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3.5 space-y-2">
+                  <div className="flex items-center space-x-2 border-b border-slate-800 pb-1.5">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#8CFA96]/20 text-[10px] font-black text-[#8CFA96]">
+                      5
+                    </span>
+                    <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-white">
+                      Personalizing Your Recommendation Feed
+                    </h4>
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    You can fine-tune the recommendation algorithm to match your exact taste:
+                  </p>
+                  <ol className="space-y-1 text-[11px] text-slate-400 list-decimal list-inside">
+                    <li>Tap your Profile Avatar in the top-right corner of the header.</li>
+                    <li>Expand the Manage Genre Preferences drawer.</li>
+                    <li><strong className="text-white">Like (+):</strong> Boosts preferred genres in your feed.</li>
+                    <li><strong className="text-white">Mute (-):</strong> Hides specific genres completely.</li>
+                    <li><strong className="text-white">Discovery Tuning Rules:</strong> Toggle custom filters to exclude Anime, filter out True Crime docuseries, or boost Nature & Wildlife documentaries.</li>
+                  </ol>
+                </div>
+
+                {/* Section 6: Accounts, Cloud Sync & Leveling */}
+                <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3.5 space-y-2">
+                  <div className="flex items-center space-x-2 border-b border-slate-800 pb-1.5">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#8CFA96]/20 text-[10px] font-black text-[#8CFA96]">
+                      6
+                    </span>
+                    <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-white">
+                      Accounts, Cloud Sync & Leveling
+                    </h4>
+                  </div>
+                  <ul className="space-y-1.5 text-[11px] text-slate-400">
+                    <li className="flex items-start space-x-1.5">
+                      <span className="text-[#8CFA96] font-bold">•</span>
+                      <span><strong className="text-white">Collector Levels:</strong> As you mark episodes watched, you gain watch time and level up your profile rank—from Novice (Level 1) all the way up to Legend (Level 5).</span>
+                    </li>
+                    <li className="flex items-start space-x-1.5">
+                      <span className="text-[#8CFA96] font-bold">•</span>
+                      <span><strong className="text-white">Cloud Sync:</strong> Mint TV works completely offline out of the box. To sync your progress across multiple devices, tap your profile avatar and select Log In / Sign Up under Cloud Backup & Sync.</span>
+                    </li>
+                    <li className="flex items-start space-x-1.5">
+                      <span className="text-[#8CFA96] font-bold">•</span>
+                      <span><strong className="text-white">Manual Backups:</strong> You can export a .json backup file at any time from your profile menu to keep a local hard copy of your library.</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
-            </div>
+            )}
+
+           {/* TAB 2: BRAND-NEW USER FAQ */}
+            {helpSubTab === 'faq' && (
+              <div className="space-y-3 animate-in fade-in">
+                {/* Category 1: Getting Started & Clarifications */}
+                <div className="space-y-2">
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#8CFA96] block ml-2">
+                    Getting Started & Clarifications
+                  </span>
+
+                  <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
+                    <h4 className="text-[11px] font-bold text-white">Can I watch or stream TV episodes directly inside Mint TV?</h4>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      No. Mint TV is a dedicated progress tracker, release schedule guide, and discovery tool. It keeps track of what you’ve watched, when new episodes air, and where to find recommendations, but it does not host or stream video content.
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
+                    <h4 className="text-[11px] font-bold text-white">How do I set my progress if I’m already halfway through a show?</h4>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      When you add a show, tap its card to open <strong className="text-slate-300">Show Details</strong>. Select your current season using the top season tabs, then tap the <strong className="text-slate-300">Finale</strong> badge on any previous season to mark all its episodes completed in one tap. From there, simply adjust to your exact episode.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Category 2: Managing Your Queues & Lists */}
+                <div className="space-y-2 pt-2 border-t border-slate-800">
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#8CFA96] block ml-2">
+                    Managing Your Queues & Lists
+                  </span>
+
+                  <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
+                    <h4 className="text-[11px] font-bold text-white">What’s the difference between "Watch Later" and my main "Watchlist"?</h4>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      Think of <strong className="text-slate-300">Watch Later</strong> as a temporary holding deck for shows you might want to check out later without cluttering your main screen. Your <strong className="text-slate-300">Watchlist</strong> (and <strong className="text-slate-300">Ready to Watch</strong>) is for shows you are actively tracking and watching on a regular basis.
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
+                    <h4 className="text-[11px] font-bold text-white">Why did a show disappear from "Ready" and move to "Caught Up"?</h4>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      When you finish the latest available episode of an ongoing series, Mint TV moves it to <strong className="text-slate-300">Caught Up</strong> so your daily queue stays clean and manageable. You don't need to do anything - as soon as a brand-new episode airs, the show will automatically pop back into <strong className="text-slate-300">Ready to Watch</strong>!
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
+                    <h4 className="text-[11px] font-bold text-white">What should I send to the "RetroVision" museum vault?</h4>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      <strong className="text-slate-300">RetroVision</strong> acts as your personal lifetime TV archive. When an active series completely ends or gets canceled, it automatically moves here. You can also manually add older shows you finished years ago to maintain a full history of every series you've experienced without polluting your active queue or skewing your active tracking stats!
+                    </p>
+                  </div>
+                </div>
+
+                {/* Category 3: Fixing Mistakes & Customization */}
+                <div className="space-y-2 pt-2 border-t border-slate-800">
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#8CFA96] block ml-2">
+                    Fixing Mistakes & Customization
+                  </span>
+
+                  <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
+                    <h4 className="text-[11px] font-bold text-white">What if I accidentally mark an episode as watched?</h4>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      Simply tap the show card to open <strong className="text-slate-300">Show Details</strong>. You can tap any individual episode number to set your progress back, or tap <strong className="text-slate-300">Premiere</strong> on Episode 1 of a season if you want to reset that entire season back to the beginning.
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
+                    <h4 className="text-[11px] font-bold text-white">How do I stop seeing certain types of shows in my "For You" feed?</h4>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      Tap your <strong className="text-slate-300">Profile Avatar</strong> in the top header and open <strong className="text-slate-300">Manage Genre Preferences</strong>. You can tap <strong className="text-slate-300">–</strong> on genres you dislike to mute them, or use the <strong className="text-slate-300">Discovery Tuning Rules</strong> checkboxes to filter out specific content like Japanese Anime or True Crime docuseries.
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
+                    <h4 className="text-[11px] font-bold text-white">Do I need to create an account, and is my data safe?</h4>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      No account is required! Mint TV works 100% offline out of the box using your device's local storage. Creating a free cloud account is completely optional and simply allows you to both backup and sync your watchlist across multiple phones or tablets. You can also export a <code className="text-[#8CFA96]">.json</code> backup file at any time to keep a personal hard copy of your data.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
