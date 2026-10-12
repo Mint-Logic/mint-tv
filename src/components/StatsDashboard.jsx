@@ -654,7 +654,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                     className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
                   />
                   <span className="text-xs font-bold text-slate-200">
-                    Curate Documentary Topics <span className="text-[10px] font-normal text-slate-400">(Focus docs on Nature, Space & Science)</span>
+                    Educational Documentary Topics <span className="text-[10px] font-normal text-slate-400">(Focus docs on Nature, Space & Science)</span>
                   </span>
                 </label>
               </div>

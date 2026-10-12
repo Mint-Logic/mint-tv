@@ -7,6 +7,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
   const [feedShows, setFeedShows] = useState([]);
   const [bufferShows, setBufferShows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [expandedShowId, setExpandedShowId] = useState(null);
   const [page, setPage] = useState(1);
 
@@ -72,13 +73,18 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
 
-    if (!isLoadMore) setLoading(true);
+    if (!isLoadMore) {
+      setLoading(true);
+    } else {
+      setIsLoadingMore(true);
+    }
 
     const activeEra = eraOverride || selectedEra;
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     const likedGenres = JSON.parse(localStorage.getItem('mint_tv_liked_genres') || '[]');
     const mutedGenres = JSON.parse(localStorage.getItem('mint_tv_muted_genres') || '[]');
     const excludeAnime = localStorage.getItem('mint_tv_exclude_anime') === 'true';
+    const excludeReality = localStorage.getItem('mint_tv_exclude_reality') === 'true';
     const excludeTrueCrime = localStorage.getItem('mint_tv_exclude_true_crime') === 'true';
     const boostNature = localStorage.getItem('mint_tv_boost_nature') === 'true';
 
@@ -89,7 +95,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
 
     let currentPage = isLoadMore ? page + 2 : 1;
     let accumulatedFiltered = [];
-    let maxAttempts = 5; // Safety limit to prevent endless fetching loops
+    let maxAttempts = 5;
 
     try {
       const fetchPage = async (p) => {
@@ -120,7 +126,6 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
         return results;
       };
 
-      // Loop until we collect at least 20 shows or reach max attempts
       while (accumulatedFiltered.length < 20 && maxAttempts > 0) {
         const [p1Results, p2Results] = await Promise.all([
           fetchPage(currentPage),
@@ -128,7 +133,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
         ]);
 
         const combinedRaw = [...p1Results, ...p2Results];
-        if (combinedRaw.length === 0) break; // End of API results
+        if (combinedRaw.length === 0) break;
 
         const filtered = combinedRaw.filter((show) => {
           if (
@@ -143,6 +148,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
 
           const genreIds = show.genre_ids || [];
           if (excludeAnime && genreIds.includes(16) && show.origin_country?.includes('JP')) return false;
+          if (excludeReality && (genreIds.includes(10764) || genreIds.includes(10767))) return false;
           if (excludeTrueCrime && genreIds.includes(80) && genreIds.includes(99)) return false;
 
           return true;
@@ -157,15 +163,15 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
 
       if (boostNature) {
         accumulatedFiltered.sort((a, b) => {
-          const aNature = (a.genre_ids || []).includes(99) && /nature|wildlife|planet|animal/i.test(a.overview);
-          const bNature = (b.genre_ids || []).includes(99) && /nature|wildlife|planet|animal/i.test(b.overview);
+          const aNature = (a.genre_ids || []).includes(99) && /nature|wildlife|planet|animal|space|cosmos|universe/i.test(a.overview);
+          const bNature = (b.genre_ids || []).includes(99) && /nature|wildlife|planet|animal|space|cosmos|universe/i.test(b.overview);
           if (aNature && !bNature) return -1;
           if (!aNature && bNature) return 1;
           return b.popularity - a.popularity;
         });
       }
 
-      const itemsToHydrate = accumulatedFiltered.slice(0, 40); 
+      const itemsToHydrate = accumulatedFiltered.slice(0, 40);
       const hydratedShows = await Promise.all(
         itemsToHydrate.map(async (show) => {
           const meta = await getShowMetadata(show.id);
@@ -181,7 +187,9 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
       );
 
       if (isLoadMore) {
-        setBufferShows((prev) => [...prev, ...hydratedShows]);
+        // Appends new suggestions directly into the visible feed
+        setFeedShows((prev) => [...prev, ...hydratedShows.slice(0, 20)]);
+        setBufferShows((prev) => [...prev, ...hydratedShows.slice(20)]);
         setPage(currentPage);
       } else {
         setFeedShows(hydratedShows.slice(0, 20));
@@ -192,6 +200,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
       console.error('Error fetching discovery feed:', err);
     } finally {
       setLoading(false);
+      setIsLoadingMore(false);
       isFetchingRef.current = false;
     }
   }
@@ -209,7 +218,6 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
     }
   }, [feedShows.length, bufferShows.length, subTab]);
 
-  // 2. Fetch more shows silently when the hidden buffer gets low (under 10)
   useEffect(() => {
     if (!loading && subTab === 'feed' && bufferShows.length < 10 && !isFetchingRef.current) {
       fetchDiscoverFeed(true);
@@ -220,15 +228,16 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
     setSelectedEra(eraId);
     sessionSeenIds.current.clear();
     setFeedShows([]);
-    setBufferShows([]); // <-- Clear the buffer so old eras don't bleed in
+    setBufferShows([]);
     fetchDiscoverFeed(false, eraId);
   }
 
   function handleSaveWatchLater(show) {
     setWatchLater((prev) => [...prev, show]);
     setFeedShows((prev) => prev.filter((s) => s.id !== show.id));
+  }
 
-    function handleDirectToWatchlist(show) {
+  function handleDirectToWatchlist(show) {
     onAddShow({
       id: show.id,
       name: show.name,
@@ -239,7 +248,6 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
       completed: false,
     });
     setFeedShows((prev) => prev.filter((s) => s.id !== show.id));
-  }
   }
 
   function handleSaveAttic(show) {
@@ -270,7 +278,20 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
     setWatchLater((prev) => prev.filter((s) => s.id !== show.id));
   }
 
-  // Filter Watch Later Queue by Selected Era
+  const handleMoreSuggestionsClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // If we already have items buffered, dump them straight to the feed first
+    if (bufferShows.length > 0) {
+      const toAdd = bufferShows.slice(0, 20);
+      setFeedShows((prev) => [...prev, ...toAdd]);
+      setBufferShows((prev) => prev.slice(toAdd.length));
+    } else {
+      fetchDiscoverFeed(true);
+    }
+  };
+
   const filteredWatchLater = watchLater.filter((show) => {
     if (selectedEra === 'all') return true;
     const year = show.first_air_date ? parseInt(show.first_air_date.split('-')[0], 10) : 0;
@@ -316,7 +337,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
           </button>
         </div>
 
-        {/* PERMANENT ERA FILTER PILLS ACCESSIBLE BY BOTH SUB-TABS */}
+        {/* ERA FILTER PILLS */}
         <div className="flex space-x-1.5 overflow-x-auto pb-1 pt-1 scrollbar-none">
           {ERAS.map((era) => (
             <button
@@ -376,7 +397,6 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
 
                       <div className="w-0 flex-1 flex flex-col justify-between self-stretch">
                         <div className="space-y-0.5">
-                          {/* TITLE AND HIDE BUTTON WRAPPER */}
                           <div className="flex justify-between items-start gap-2">
                             <h3 
                               className="text-xs font-extrabold text-white leading-snug"
@@ -435,9 +455,8 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                           </div>
                         </div>
 
-                        {/* RIGHT-ANCHORED ACTION ICONS (Watch Later, Direct to Watchlist, RetroVision) */}
+                        {/* ACTION BUTTONS */}
                         <div className="flex items-center justify-end gap-3 mt-1 ml-auto">
-                          {/* 1. Save for Watch Later */}
                           <button
                             type="button"
                             onClick={(e) => { 
@@ -453,7 +472,6 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                             </svg>
                           </button>
 
-                          {/* 2. Direct to Watchlist (CENTER) */}
                           <button
                             type="button"
                             onClick={(e) => { 
@@ -469,7 +487,6 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                             </svg>
                           </button>
 
-                          {/* 3. Move to RetroVision */}
                           <button
                             type="button"
                             onClick={(e) => { 
@@ -520,11 +537,21 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                   </div>
                 );
               })}
+
               <button
-                onClick={() => fetchDiscoverFeed(true)}
-                className="w-full py-2.5 rounded-lg border border-slate-800 bg-slate-900 text-xs font-bold text-slate-400 hover:text-white transition-all mt-2"
+                type="button"
+                onClick={handleMoreSuggestionsClick}
+                disabled={isLoadingMore}
+                className="w-full py-2.5 rounded-lg border border-slate-800 bg-slate-900 text-xs font-bold text-slate-400 hover:text-white transition-all mt-2 disabled:opacity-50 cursor-pointer flex items-center justify-center space-x-2"
               >
-                More Suggestions
+                {isLoadingMore ? (
+                  <>
+                    <span className="animate-spin">↻</span>
+                    <span>Loading Suggestions...</span>
+                  </>
+                ) : (
+                  <span>More Suggestions</span>
+                )}
               </button>
             </>
           )}
@@ -561,7 +588,6 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                     
                     <div className="w-0 flex-1 flex flex-col justify-between self-stretch">
                       <div className="space-y-0.5">
-                        {/* TITLE AND DROP BUTTON WRAPPER */}
                         <div className="flex justify-between items-start gap-2">
                           <h4 
                             className="text-xs font-extrabold text-white leading-snug"
@@ -617,7 +643,6 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                         </div>
                       </div>
 
-                      {/* WATCH LATER ACTIONS */}
                       <div className="flex items-center justify-end gap-3 mt-1 ml-auto">
                         <button
                           type="button"
