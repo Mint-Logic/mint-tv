@@ -851,7 +851,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                       </li>
                       <li className="flex items-start space-x-1.5">
                         <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Watchlist (List Icon):</strong> Your complete directory. Browse all active series or switch to your permanent RetroVision museum.</span>
+                        <span><strong className="text-white">Watchlist (List Icon):</strong> Your complete directory. Browse all active series or switch to your RetroVision museum.</span>
                       </li>
                       <li className="flex items-start space-x-1.5">
                         <span className="text-[#8CFA96] font-bold">•</span>
@@ -954,7 +954,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                 </div>
 
                 {/* Section 4: Discovering New Shows */}
-                <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3.5 space-y-2">
+                <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3.5 space-y-2.5">
                   <div className="flex items-center space-x-2 border-b border-slate-800 pb-1.5">
                     <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#8CFA96]/20 text-[10px] font-black text-[#8CFA96]">
                       4
@@ -964,15 +964,15 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                     </h4>
                   </div>
                   <p className="text-[11px] text-slate-400 leading-relaxed">
-                    The For You tab helps you find your next favorite show:
+                    The For You tab helps you find your next favorite show across two primary views:
                   </p>
 
                   <div className="space-y-1.5 pt-1">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
-                      The Feed
+                      1. Feed
                     </span>
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      A pipeline of 20 personalized show recommendations. Each card offers three quick actions:
+                      A personalized pipeline of show recommendations tailored to your taste. Each card offers instant actions:
                     </p>
                     <ul className="space-y-1 text-[11px] text-slate-400">
                       <li className="flex items-start space-x-1.5">
@@ -989,9 +989,18 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                       </li>
                       <li className="flex items-start space-x-1.5">
                         <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Hide (Top-Right Eye/X):</strong> Blacklists the title so it won't appear in your recommendations again.</span>
+                        <span><strong className="text-white">Hide (Top-Right Eye/X):</strong> Blacklists the title so it won't appear in recommendations again.</span>
                       </li>
                     </ul>
+                  </div>
+
+                  <div className="space-y-1.5 pt-1.5 border-t border-slate-800/60">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
+                      2. Watch Later
+                    </span>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      Your personal holding deck for saved discoveries. Switch to this sub-tab at the top of the screen to review saved shows, check their details, or officially move them to your Watchlist or RetroVision whenever you're ready to start watching.
+                    </p>
                   </div>
 
                   <div className="space-y-1 pt-1.5 border-t border-slate-800/60">
@@ -999,7 +1008,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                       Era Filter Pills
                     </span>
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Filter recommendations by specific decades (e.g., 2020s, 2010s, 1990s, or Vintage 1950s–60s) using the pill buttons at the top.
+                      Filter feed recommendations by specific decades (e.g., 2020s, 2010s, 1990s, or Vintage 1950s–60s) using the pill buttons at the top of the Feed.
                     </p>
                   </div>
                 </div>
@@ -1017,12 +1026,11 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                   <p className="text-[11px] text-slate-400 leading-relaxed">
                     You can fine-tune the recommendation algorithm to match your exact taste:
                   </p>
-                  <ol className="space-y-1 text-[11px] text-slate-400 list-decimal list-inside">
-                    <li>Tap your Profile Avatar in the top-right corner of the header.</li>
-                    <li>Expand the Manage Genre Preferences drawer.</li>
-                    <li><strong className="text-white">Like (+):</strong> Boosts preferred genres in your feed.</li>
-                    <li><strong className="text-white">Mute (-):</strong> Hides specific genres completely.</li>
-                    <li><strong className="text-white">Discovery Tuning Rules:</strong> Toggle custom filters to exclude Anime, filter out True Crime docuseries, or limit documentaries strictly to Nature, Wildlife & Space topics.</li>
+                  <ol className="space-y-1.5 text-[11px] text-slate-400 ">
+                    
+                    <li><strong className="text-white">Content & Sub-Genre Guardrails:</strong><br></br>Enable content filters at the top to refine your feed without muting entire broad categories. Toggle specific sub-genre guardrails (such as Anime, Reality TV, or True Crime) or focus documentary suggestions on Nature, Space & Science topics.</li>
+                    <li><strong className="text-white">Like (+):</strong><br></br> Boosts preferred broad genres in your feed.</li>
+                    <li><strong className="text-white">Mute (-):</strong><br></br> Hides specific broad genres completely.</li>
                   </ol>
                 </div>
 
