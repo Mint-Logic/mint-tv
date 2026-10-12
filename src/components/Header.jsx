@@ -57,8 +57,8 @@ export function Header({ onOpenSearch, onOpenProfile }) {
 
         <button
           onClick={onOpenProfile}
-          title="User Profile & Stats"
-          aria-label="User profile and stats"
+          title="Dashboard & Settings"
+          aria-label="Dashboard & Settings"
           className="relative flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#8CFA96]/50 bg-slate-900 text-xs font-black text-[#8CFA96] shadow-sm hover:border-[#8CFA96] transition-all"
         >
           {customPhoto ? (
