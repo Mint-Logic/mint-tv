@@ -119,7 +119,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
   return (
     <div className="space-y-4 pb-12">
       {/* STICKY BACK BUTTON CONTAINER (ALIGNED TOP RIGHT) */}
-      <div className="sticky top-[49px] z-40 bg-[#0F172A] pt-1 pb-2 flex justify-end">
+      <div className="sticky top-[70px] z-40 bg-[#0F172A] pt-1 pb-2 flex justify-end">
         <button
           onClick={onBack}
           className="flex items-center space-x-2 text-xs font-bold text-[#8CFA96] bg-slate-800/90 px-3 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-700 transition-all shadow-md active:scale-95"
