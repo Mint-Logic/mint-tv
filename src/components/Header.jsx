@@ -44,7 +44,7 @@ export function Header({ onOpenSearch, onOpenProfile }) {
       </div>
 
       {/* Action Controls & Compact Profile Avatar */}
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-8">
         <button
           onClick={onOpenSearch}
           className="flex items-center space-x-1 rounded-md border border-[#8CFA96]/40 bg-[#8CFA96]/10 px-2.5 py-1 text-xs font-extrabold text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-950 transition-all"
