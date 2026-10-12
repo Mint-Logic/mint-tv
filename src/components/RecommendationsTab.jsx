@@ -227,6 +227,19 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
   function handleSaveWatchLater(show) {
     setWatchLater((prev) => [...prev, show]);
     setFeedShows((prev) => prev.filter((s) => s.id !== show.id));
+
+    function handleDirectToWatchlist(show) {
+    onAddShow({
+      id: show.id,
+      name: show.name,
+      poster: show.poster_path || show.poster,
+      backdrop: show.backdrop_path || show.backdrop,
+      currentSeason: 1,
+      currentEpisode: 1,
+      completed: false,
+    });
+    setFeedShows((prev) => prev.filter((s) => s.id !== show.id));
+  }
   }
 
   function handleSaveAttic(show) {
@@ -422,8 +435,9 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                           </div>
                         </div>
 
-                        {/* RIGHT-ANCHORED ACTION ICONS */}
+                        {/* RIGHT-ANCHORED ACTION ICONS (Watch Later, Direct to Watchlist, RetroVision) */}
                         <div className="flex items-center justify-end gap-3 mt-1 ml-auto">
+                          {/* 1. Save for Watch Later */}
                           <button
                             type="button"
                             onClick={(e) => { 
@@ -431,14 +445,31 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                               e.stopPropagation(); 
                               handleSaveWatchLater(show); 
                             }}
-                            className="p-1 flex items-center justify-center text-[#8CFA96] transition-transform active:scale-90"
+                            className="p-1 flex items-center justify-center text-slate-300 hover:text-white transition-transform active:scale-90"
                             title="Save for Watch Later"
                           >
-                            <svg className="h-5 w-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="h-4.5 w-4.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                           </button>
 
+                          {/* 2. Direct to Watchlist (CENTER) */}
+                          <button
+                            type="button"
+                            onClick={(e) => { 
+                              e.preventDefault();
+                              e.stopPropagation(); 
+                              handleDirectToWatchlist(show); 
+                            }}
+                            className="p-1 flex items-center justify-center text-[#8CFA96] transition-transform active:scale-90"
+                            title="Add directly to Watchlist"
+                          >
+                            <svg className="h-6 w-6 fill-current pointer-events-none" viewBox="0 0 24 24">
+                              <path d="M8 5v14l11-7z" />
+                            </svg>
+                          </button>
+
+                          {/* 3. Move to RetroVision */}
                           <button
                             type="button"
                             onClick={(e) => { 
@@ -452,7 +483,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                             <img 
                               src={retroVisionLogo} 
                               alt="RetroVision" 
-                              className="h-5 w-5 rounded object-cover pointer-events-none" 
+                              className="h-5.5 w-5.5 rounded object-cover pointer-events-none" 
                             />
                           </button>
                         </div>
@@ -613,7 +644,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                           className="p-1 flex items-center justify-center transition-transform active:scale-90"
                           title="Move to RetroVision"
                         >
-                          <img src={retroVisionLogo} alt="RetroVision" className="h-5 w-5 rounded object-cover pointer-events-none" />
+                          <img src={retroVisionLogo} alt="RetroVision" className="h-5.5 w-5.5 rounded object-cover pointer-events-none" />
                         </button>
                       </div>
                     </div>

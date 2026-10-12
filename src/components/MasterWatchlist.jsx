@@ -411,7 +411,7 @@ function ShowCard({
             title="Move to RetroVision"
             className="flex h-6 w-6 items-center justify-center transition-transform active:scale-90"
           >
-            <img src={retroVisionLogo} alt="Send to RetroVision" className="h-6 w-6 rounded object-cover" />
+            <img src={retroVisionLogo} alt="Send to RetroVision" className="h-5.5 w-5.5 rounded object-cover" />
           </button>
         )}
       </div>
