@@ -114,7 +114,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
   return (
     <div className="space-y-2">
       {/* Sticky Sub-Tab Header */}
-      <div className="sticky top-[49px] z-30 bg-[#0F172A] pt-1 pb-2">
+      <div className="sticky top-[70px] z-30 bg-[#0F172A] pt-0 pb-2">
         <div className="flex w-full items-center justify-evenly rounded-xl border border-slate-800 bg-[#1E293B] py-2.5 text-[11px] sm:text-xs font-bold shadow-md">
           <button
             type="button"
