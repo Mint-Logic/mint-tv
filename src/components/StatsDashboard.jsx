@@ -75,6 +75,10 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
     return localStorage.getItem('mint_tv_boost_nature') === 'true';
   });
 
+  const [excludeReality, setExcludeReality] = useState(() => {
+    return localStorage.getItem('mint_tv_exclude_reality') === 'true';
+  });
+
   // Accordion states
   const [isGenreDrawerOpen, setIsGenreDrawerOpen] = useState(false);
   const [isHelpFaqDrawerOpen, setIsHelpFaqDrawerOpen] = useState(false);
@@ -97,6 +101,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
       localStorage.setItem('mint_tv_exclude_anime', excludeAnime);
       localStorage.setItem('mint_tv_exclude_true_crime', excludeTrueCrime);
       localStorage.setItem('mint_tv_boost_nature', boostNature);
+      localStorage.setItem('mint_tv_exclude_reality', excludeReality);
       
       window.dispatchEvent(new Event('mint_tv_profile_update'));
     } catch (e) {
@@ -590,48 +595,69 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
 
         {isGenreDrawerOpen && (
           <div className="p-4 space-y-4 border-t border-slate-800 animate-in fade-in">
-            {/* SPECIALIZED DISCOVERY TUNING RULES */}
-            <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-3 space-y-2.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
-                Discovery Tuning Rules
-              </span>
+            {/* CONTENT & SUB-GENRE GUARDRAILS */}
+              <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-3 space-y-2.5">
+                <div>
+  <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
+    Content & Sub-Genre Guardrails
+  </span>
+  <span className="text-[9px] text-slate-400 block mt-0.5">
+    Fine-tune recommendations
+  </span>
+</div>
 
-              <label className="flex items-center space-x-2.5 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={excludeAnime}
-                  onChange={(e) => setExcludeAnime(e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
-                />
-                <span className="text-xs font-bold text-slate-200">
-                  Exclude Anime <span className="text-[10px] font-normal text-slate-400">(Filter out Anime titles, keep General Animation)</span>
-                </span>
-              </label>
+                {/* 1. Anime Filter */}
+                <label className="flex items-center space-x-2.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={excludeAnime}
+                    onChange={(e) => setExcludeAnime(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
+                  />
+                  <span className="text-xs font-bold text-slate-200">
+                    Filter Anime Titles <span className="text-[10px] font-normal text-slate-400">(Keep general animated series)</span>
+                  </span>
+                </label>
 
-              <label className="flex items-center space-x-2.5 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={excludeTrueCrime}
-                  onChange={(e) => setExcludeTrueCrime(e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
-                />
-                <span className="text-xs font-bold text-slate-200">
-                  Exclude True Crime <span className="text-[10px] font-normal text-slate-400">(Filter out murder/serial killer docuseries)</span>
-                </span>
-              </label>
+                {/* 2. Reality TV Filter */}
+                <label className="flex items-center space-x-2.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={excludeReality}
+                    onChange={(e) => setExcludeReality(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
+                  />
+                  <span className="text-xs font-bold text-slate-200">
+                    Filter Reality & Talk Shows <span className="text-[10px] font-normal text-slate-400">(Exclude unscripted & competition TV)</span>
+                  </span>
+                </label>
 
-              <label className="flex items-center space-x-2.5 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={boostNature}
-                  onChange={(e) => setBoostNature(e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
-                />
-                <span className="text-xs font-bold text-slate-200">
-                  Nature & Space Docs Only <span className="text-[10px] font-normal text-slate-400">(Limit documentaries strictly to nature, wildlife & space)</span>
-                </span>
-              </label>
-            </div>
+                {/* 3. True Crime Filter */}
+                <label className="flex items-center space-x-2.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={excludeTrueCrime}
+                    onChange={(e) => setExcludeTrueCrime(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
+                  />
+                  <span className="text-xs font-bold text-slate-200">
+                    Filter True Crime & Investigation <span className="text-[10px] font-normal text-slate-400">(Exclude crime docuseries)</span>
+                  </span>
+                </label>
+
+                {/* 4. Documentary Curation Filter */}
+                <label className="flex items-center space-x-2.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={boostNature}
+                    onChange={(e) => setBoostNature(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
+                  />
+                  <span className="text-xs font-bold text-slate-200">
+                    Curate Documentary Topics <span className="text-[10px] font-normal text-slate-400">(Focus docs on Nature, Space & Science)</span>
+                  </span>
+                </label>
+              </div>
 
             {/* LIKED CATEGORY */}
             <div className="rounded-xl border border-[#8CFA96]/30 bg-[#8CFA96]/5 p-3 space-y-2">
