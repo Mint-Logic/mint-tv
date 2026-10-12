@@ -996,7 +996,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                     <li>Expand the Manage Genre Preferences drawer.</li>
                     <li><strong className="text-white">Like (+):</strong> Boosts preferred genres in your feed.</li>
                     <li><strong className="text-white">Mute (-):</strong> Hides specific genres completely.</li>
-                    <li><strong className="text-white">Discovery Tuning Rules:</strong> Toggle custom filters to exclude Anime, filter out True Crime docuseries, or boost Nature & Wildlife documentaries.</li>
+                    <li><strong className="text-white">Discovery Tuning Rules:</strong> Toggle custom filters to exclude Anime, filter out True Crime docuseries, or limit documentaries strictly to Nature, Wildlife & Space topics.</li>
                   </ol>
                 </div>
 
