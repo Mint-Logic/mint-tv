@@ -1051,7 +1051,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                     </li>
                     <li className="flex items-start space-x-1.5">
                       <span className="text-[#8CFA96] font-bold">•</span>
-                      <span><strong className="text-white">Cloud Sync:</strong> Mint TV works completely offline out of the box. To sync your progress across multiple devices, tap your profile avatar and select Log In / Sign Up under Cloud Backup & Sync.</span>
+                      <span><strong className="text-white">Cloud Sync:</strong> Mint TV works completely offline out of the box. To backup and sync your progress across multiple devices, tap your profile avatar and select Log In / Sign Up under Cloud Backup & Sync.</span>
                     </li>
                     <li className="flex items-start space-x-1.5">
                       <span className="text-[#8CFA96] font-bold">•</span>
