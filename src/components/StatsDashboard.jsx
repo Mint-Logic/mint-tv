@@ -2,6 +2,76 @@ import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabase';
 import retroVisionLogo from '../assets/retro-vision-logo.png';
 
+// ==========================================
+// PUSH NOTIFICATION HELPERS
+// ==========================================
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+async function subscribeUserToPush(currentUser) {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    alert('Push notifications are not supported on this browser.');
+    return false;
+  }
+  if (!currentUser) {
+    alert('Please sign in to enable push notifications.');
+    return false;
+  }
+  const permission = await Notification.requestPermission();
+  if (permission !== 'granted') {
+    alert('Notification permission was denied.');
+    return false;
+  }
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    const publicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+    if (!publicKey) {
+      console.error('VITE_VAPID_PUBLIC_KEY is missing in .env');
+      return false;
+    }
+    const convertedKey = urlBase64ToUint8Array(publicKey);
+    const subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: convertedKey,
+    });
+    const { error } = await supabase.from('push_subscriptions').upsert(
+      {
+        user_id: currentUser.id,
+        subscription: subscription.toJSON(),
+      },
+      { onConflict: 'user_id' }
+    );
+    if (error) console.error('Error saving subscription to Supabase:', error);
+    return !error;
+  } catch (err) {
+    console.error('Push subscription failed:', err);
+    return false;
+  }
+}
+
+async function unsubscribeUserFromPush(currentUser) {
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.getSubscription();
+    if (subscription) await subscription.unsubscribe();
+    if (currentUser) {
+      await supabase.from('push_subscriptions').delete().eq('user_id', currentUser.id);
+    }
+    return true;
+  } catch (err) {
+    console.error('Push unsubscribe failed:', err);
+    return false;
+  }
+}
+
 const PRESET_TITLES = [
   'TV & Movie Collector',
   'Binge Architect',
@@ -86,6 +156,30 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
   // Accordion states
   const [isGenreDrawerOpen, setIsGenreDrawerOpen] = useState(false);
   const [isHelpFaqDrawerOpen, setIsHelpFaqDrawerOpen] = useState(false);
+
+  // Push Notification State
+  const [pushEnabled, setPushEnabled] = useState(false);
+
+  useEffect(() => {
+    async function checkPushStatus() {
+      if ('serviceWorker' in navigator && Notification.permission === 'granted') {
+        const registration = await navigator.serviceWorker.ready;
+        const sub = await registration.pushManager.getSubscription();
+        setPushEnabled(!!sub);
+      }
+    }
+    checkPushStatus();
+  }, [currentUser]);
+
+  async function handlePushToggle() {
+    if (pushEnabled) {
+      const ok = await unsubscribeUserFromPush(currentUser);
+      if (ok) setPushEnabled(false);
+    } else {
+      const ok = await subscribeUserToPush(currentUser);
+      if (ok) setPushEnabled(true);
+    }
+  }
 
   const [isEditing, setIsEditing] = useState(false);
   const [showLevelInfo, setShowLevelInfo] = useState(false);
@@ -1257,6 +1351,32 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
               Log In / Sign Up
             </button>
           )}
+        </div>
+
+        {/* PUSH NOTIFICATION SETTING ROW */}
+        <div className="px-4 py-3 border-b border-slate-800 bg-slate-900/30 flex justify-between items-center">
+          <div className="space-y-0.5 pr-4">
+            <span className="text-xs font-bold text-slate-200 block">
+              Episode Air Date Alerts
+            </span>
+            <span className="text-[10px] text-slate-400 block">
+              Get notified when shows on your watchlist release new episodes
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handlePushToggle}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+              pushEnabled ? 'bg-[#8CFA96]' : 'bg-slate-800'
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-slate-950 shadow transition duration-200 ease-in-out ${
+                pushEnabled ? 'translate-x-4' : 'translate-x-0'
+              }`}
+            />
+          </button>
         </div>
 
         {/* MANUAL BACKUP SECTION */}

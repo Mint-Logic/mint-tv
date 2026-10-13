@@ -20,3 +20,47 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
+/* ==========================================
+   PUSH NOTIFICATION LISTENERS
+   ========================================== */
+
+self.addEventListener('push', (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (e) {
+    data = { title: 'MintTV Update', body: event.data ? event.data.text() : 'New episode available!' };
+  }
+
+  const title = data.title || 'MintTV';
+  const options = {
+    body: data.body || 'A show on your watchlist has a new update!',
+    icon: '/icon-192.png',
+    badge: '/badge-96.png',
+    data: {
+      url: data.url || '/',
+    },
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  // Focus existing open tab or open a new window when notification is tapped
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      const targetUrl = event.notification.data?.url || '/';
+      for (const client of clientList) {
+        if (client.url.includes(targetUrl) && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
+  );
+});
