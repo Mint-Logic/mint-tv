@@ -79,6 +79,10 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
     return localStorage.getItem('mint_tv_exclude_reality') === 'true';
   });
 
+  const [excludeForeign, setExcludeForeign] = useState(() => {
+    return localStorage.getItem('mint_tv_exclude_foreign') === 'true';
+  });
+
   // Accordion states
   const [isGenreDrawerOpen, setIsGenreDrawerOpen] = useState(false);
   const [isHelpFaqDrawerOpen, setIsHelpFaqDrawerOpen] = useState(false);
@@ -102,12 +106,13 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
       localStorage.setItem('mint_tv_exclude_true_crime', excludeTrueCrime);
       localStorage.setItem('mint_tv_boost_nature', boostNature);
       localStorage.setItem('mint_tv_exclude_reality', excludeReality);
+      localStorage.setItem('mint_tv_exclude_foreign', excludeForeign); 
       
       window.dispatchEvent(new Event('mint_tv_profile_update'));
     } catch (e) {
       console.warn('LocalStorage limit reached while saving profile settings', e);
     }
-  }, [profileName, profileTitle, customPhoto, photoPos, likedGenres, mutedGenres, excludeAnime, excludeTrueCrime, boostNature]);
+  }, [profileName, profileTitle, customPhoto, photoPos, likedGenres, mutedGenres, excludeAnime, excludeTrueCrime, boostNature, excludeReality, excludeForeign]); 
 
   function moveGenre(genreId, targetState) {
     setLikedGenres((prev) => prev.filter((id) => id !== genreId));
@@ -598,13 +603,13 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
             {/* CONTENT & SUB-GENRE GUARDRAILS */}
               <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-3 space-y-2.5">
                 <div>
-  <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
-    Content & Sub-Genre Guardrails
-  </span>
-  <span className="text-[9px] text-slate-400 block mt-0.5">
-    Fine-tune recommendations
-  </span>
-</div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
+                    Content & Sub-Genre Guardrails
+                  </span>
+                  <span className="text-[9px] text-slate-400 block mt-0.5">
+                    Fine-tune recommendations
+                  </span>
+                </div>
 
                 {/* 1. Anime Filter */}
                 <label className="flex items-center space-x-2.5 cursor-pointer select-none">
@@ -615,7 +620,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                     className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
                   />
                   <span className="text-xs font-bold text-slate-200">
-                    Filter Anime Titles <span className="text-[10px] font-normal text-slate-400">(Keep general animated series)</span>
+                    Filter Anime Titles <span className="text-[10px] font-normal text-slate-400"><br></br>(Keep general animated series)</span>
                   </span>
                 </label>
 
@@ -628,7 +633,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                     className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
                   />
                   <span className="text-xs font-bold text-slate-200">
-                    Filter Reality & Talk Shows <span className="text-[10px] font-normal text-slate-400">(Exclude unscripted & competition TV)</span>
+                    Filter Reality & Talk Shows <span className="text-[10px] font-normal text-slate-400"><br></br>(Exclude unscripted & competition TV)</span>
                   </span>
                 </label>
 
@@ -641,7 +646,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                     className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
                   />
                   <span className="text-xs font-bold text-slate-200">
-                    Filter True Crime & Investigation <span className="text-[10px] font-normal text-slate-400">(Exclude crime docuseries)</span>
+                    Filter True Crime & Investigation <span className="text-[10px] font-normal text-slate-400"><br></br>(Exclude crime docuseries)</span>
                   </span>
                 </label>
 
@@ -654,10 +659,23 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                     className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
                   />
                   <span className="text-xs font-bold text-slate-200">
-                    Educational Documentary Topics <span className="text-[10px] font-normal text-slate-400">(Focus docs on Nature, Space & Science)</span>
+                    Educational Documentary Topics <span className="text-[10px] font-normal text-slate-400"><br></br>(Focus docs on Nature, Space & Science)</span>
                   </span>
                 </label>
-              </div>
+
+                {/* 5. Primary Language / Subtitle Guardrail */}
+                <label className="flex items-center space-x-2.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={excludeForeign}
+                    onChange={(e) => setExcludeForeign(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
+                  />
+                  <span className="text-xs font-bold text-slate-200">
+                    English Audio Only <span className="text-[10px] font-normal text-slate-400"><br></br>(Hide titles requiring subtitles)</span>
+                  </span>
+                </label>
+              </div> 
 
             {/* LIKED CATEGORY */}
             <div className="rounded-xl border border-[#8CFA96]/30 bg-[#8CFA96]/5 p-3 space-y-2">
@@ -1026,11 +1044,22 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                   <p className="text-[11px] text-slate-400 leading-relaxed">
                     You can fine-tune the recommendation algorithm to match your exact taste:
                   </p>
-                  <ol className="space-y-1.5 text-[11px] text-slate-400 ">
-                    
-                    <li><strong className="text-white">Content & Sub-Genre Guardrails:</strong><br></br>Enable content filters at the top to refine your feed without muting entire broad categories. Toggle specific sub-genre guardrails (such as Anime, Reality TV, or True Crime) or focus documentary suggestions on Nature, Space & Science topics.</li>
-                    <li><strong className="text-white">Like (+):</strong><br></br> Boosts preferred broad genres in your feed.</li>
-                    <li><strong className="text-white">Mute (-):</strong><br></br> Hides specific broad genres completely.</li>
+                  <ol className="space-y-1.5 text-[11px] text-slate-400">
+                    <li>
+                      <strong className="text-white">Content & Sub-Genre Guardrails:</strong>
+                      <br />
+                      Enable content filters at the top to refine your feed without muting entire broad categories. Toggle specific guardrails (such as Anime, Reality TV, True Crime, or English Audio Only to hide subtitle-dependent shows) or focus documentary suggestions on Nature, Space & Science topics.
+                    </li>
+                    <li>
+                      <strong className="text-white">Like (+):</strong>
+                      <br />
+                      Boosts preferred broad genres in your feed.
+                    </li>
+                    <li>
+                      <strong className="text-white">Mute (-):</strong>
+                      <br />
+                      Hides specific broad genres completely.
+                    </li>
                   </ol>
                 </div>
 

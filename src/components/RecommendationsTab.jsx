@@ -79,6 +79,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
       setIsLoadingMore(true);
     }
 
+    const englishOnly = localStorage.getItem('mint_tv_english_only') === 'true';
     const activeEra = eraOverride || selectedEra;
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     const likedGenres = JSON.parse(localStorage.getItem('mint_tv_liked_genres') || '[]');
@@ -87,6 +88,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
     const excludeReality = localStorage.getItem('mint_tv_exclude_reality') === 'true';
     const excludeTrueCrime = localStorage.getItem('mint_tv_exclude_true_crime') === 'true';
     const boostNature = localStorage.getItem('mint_tv_boost_nature') === 'true';
+    const excludeForeign = localStorage.getItem('mint_tv_exclude_foreign') === 'true'; 
 
     const activeWatchlistIds = new Set(watchlist.map((s) => s.id));
     const watchLaterIds = new Set(watchLater.map((s) => s.id));
@@ -135,7 +137,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
         const combinedRaw = [...p1Results, ...p2Results];
         if (combinedRaw.length === 0) break;
 
-        const filtered = combinedRaw.filter((show) => {
+        const pageFiltered = combinedRaw.filter((show) => {
           if (
             activeWatchlistIds.has(show.id) ||
             watchLaterIds.has(show.id) ||
@@ -146,16 +148,30 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
             return false;
           }
 
+          // English Audio Guardrail
+          if (excludeForeign && show.original_language && show.original_language !== 'en') {
+            return false;
+          }
+
           const genreIds = show.genre_ids || [];
-          if (excludeAnime && genreIds.includes(16) && show.origin_country?.includes('JP')) return false;
+          const isAnimation = genreIds.includes(16);
+          const isJapanese = 
+            show.original_language === 'ja' || 
+            (show.origin_country && show.origin_country.includes('JP'));
+
+          // Strict Anime Filter: Excludes any Animated show that is Japanese
+          if (excludeAnime && isAnimation && isJapanese) {
+            return false;
+          }
+
           if (excludeReality && (genreIds.includes(10764) || genreIds.includes(10767))) return false;
           if (excludeTrueCrime && genreIds.includes(80) && genreIds.includes(99)) return false;
 
           return true;
         });
 
-        filtered.forEach((show) => sessionSeenIds.current.add(show.id));
-        accumulatedFiltered.push(...filtered);
+        pageFiltered.forEach((show) => sessionSeenIds.current.add(show.id));
+        accumulatedFiltered.push(...pageFiltered);
 
         currentPage += 2;
         maxAttempts--;
@@ -338,25 +354,25 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
         </div>
 
         {/* PERMANENT ERA FILTER PILLS */}
-<div 
-  onTouchStart={(e) => e.stopPropagation()}
-  onTouchEnd={(e) => e.stopPropagation()}
-  className="flex space-x-1.5 overflow-x-auto pb-1 pt-1 scrollbar-none touch-pan-x"
->
-  {ERAS.map((era) => (
-    <button
-      key={era.id}
-      onClick={() => handleEraSelect(era.id)}
-      className={`px-3 py-1 rounded-full text-[10px] font-bold whitespace-nowrap shrink-0 transition-all ${
-        selectedEra === era.id
-          ? 'bg-[#8CFA96] text-slate-900 shadow-sm'
-          : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'
-      }`}
-    >
-      {era.label}
-    </button>
-  ))}
-</div>
+        <div 
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
+          className="flex space-x-1.5 overflow-x-auto pb-1 pt-1 scrollbar-none touch-pan-x"
+        >
+          {ERAS.map((era) => (
+            <button
+              key={era.id}
+              onClick={() => handleEraSelect(era.id)}
+              className={`px-3 py-1 rounded-full text-[10px] font-bold whitespace-nowrap shrink-0 transition-all ${
+                selectedEra === era.id
+                  ? 'bg-[#8CFA96] text-slate-900 shadow-sm'
+                  : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'
+              }`}
+            >
+              {era.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* FEED TAB */}
