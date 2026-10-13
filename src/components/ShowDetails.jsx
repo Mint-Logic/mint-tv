@@ -162,7 +162,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
       </div>
 
       {/* STICKY SEASON SELECTION TABS */}
-      <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-2 pb-2 space-y-2 border-b border-slate-800">
+      <div className="sticky top-[87px] z-30 bg-[#0F172A] -mt-[3px]  pt-2 pb-2 space-y-2 border-b border-slate-800">
         <div className="flex space-x-2 overflow-x-auto pb-0.5 scrollbar-none touch-pan-x">
           {details.seasons
             ?.filter((s) => s.season_number > 0)
