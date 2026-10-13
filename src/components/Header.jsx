@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import mintTvLogo from '../assets/mint-tv-logo.png';
 
-export function Header({ onOpenSearch, onOpenProfile }) {
+export function Header({ onOpenSearch, onOpenProfile, hasSeenProfileOnboarding }) {
   const [profileName, setProfileName] = useState('TV Collector');
   const [customPhoto, setCustomPhoto] = useState('');
 
@@ -59,12 +59,20 @@ export function Header({ onOpenSearch, onOpenProfile }) {
           onClick={onOpenProfile}
           title="Dashboard & Settings"
           aria-label="Dashboard & Settings"
-          className="relative flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#8CFA96]/50 bg-slate-900 text-xs font-black text-[#8CFA96] shadow-sm hover:border-[#8CFA96] transition-all"
+          className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#8CFA96]/50 bg-slate-900 text-xs font-black text-[#8CFA96] shadow-sm hover:border-[#8CFA96] transition-all"
         >
           {customPhoto ? (
-            <img src={customPhoto} alt="Profile" className="h-full w-full object-cover" />
+            <img src={customPhoto} alt="Profile" className="h-full w-full object-cover rounded-full" />
           ) : (
             <span className="leading-none">{initials}</span>
+          )}
+
+          {/* PULSING ONBOARDING BADGE */}
+          {!hasSeenProfileOnboarding && (
+            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#8CFA96] opacity-75" />
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-[#8CFA96] border-2 border-[#0F172A]" />
+            </span>
           )}
         </button>
       </div>

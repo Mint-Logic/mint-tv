@@ -20,8 +20,20 @@ export default function App() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  
   const [hasLoadedFromCloud, setHasLoadedFromCloud] = useState(false);
+
+  // ONBOARDING STATE
+  const [hasSeenProfileOnboarding, setHasSeenProfileOnboarding] = useState(() => {
+    return localStorage.getItem('mint_tv_profile_onboarded') === 'true';
+  });
+
+  function handleOpenProfile() {
+    if (!hasSeenProfileOnboarding) {
+      localStorage.setItem('mint_tv_profile_onboarded', 'true');
+      setHasSeenProfileOnboarding(true);
+    }
+    setIsProfileOpen(true);
+  }
 
   // Swipe gesture tracking references
   const touchStartX = useRef(0);
@@ -253,7 +265,7 @@ export default function App() {
     setAtticShows(atticShows.filter((s) => s.id !== show.id));
   }
 
-  return (
+ return (
     <div 
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
@@ -261,12 +273,13 @@ export default function App() {
     >
       <Header 
         onOpenSearch={() => setIsSearchOpen(true)} 
-        onOpenProfile={() => setIsProfileOpen(true)}
+        onOpenProfile={handleOpenProfile}
+        hasSeenProfileOnboarding={hasSeenProfileOnboarding}
       />
 
       {isProfileOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
-          <div className="relative w-full max-w-md rounded-2xl border border-slate-800 bg-[#1E293B] p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="relative w-full max-w-md rounded-2xl border border-slate-800 bg-[#1E293B] p-5 shadow-2xl space-y-1 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center border-b border-slate-800 pb-3">
               <h2 className="text-sm font-extrabold text-white uppercase tracking-wider">Dashboard & Settings</h2>
               <button

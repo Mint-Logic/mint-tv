@@ -21,27 +21,42 @@ async function subscribeUserToPush(currentUser) {
     alert('Push notifications are not supported on this browser.');
     return false;
   }
-  if (!currentUser) {
-    alert('Please sign in to enable push notifications.');
+
+  // 1. Check if user is logged in
+  if (!currentUser || !currentUser.id) {
+    alert('Please log in or sign up below to enable push notifications.');
     return false;
   }
+
+  // 2. Request permission
   const permission = await Notification.requestPermission();
   if (permission !== 'granted') {
-    alert('Notification permission was denied.');
+    alert('Notification permission was denied in your browser settings.');
     return false;
   }
+
   try {
     const registration = await navigator.serviceWorker.ready;
     const publicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+
     if (!publicKey) {
       console.error('VITE_VAPID_PUBLIC_KEY is missing in .env');
+      alert('Missing VAPID Public Key in environment configuration.');
       return false;
     }
+
     const convertedKey = urlBase64ToUint8Array(publicKey);
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: convertedKey,
-    });
+
+    // 3. Subscribe with browser
+    let subscription = await registration.pushManager.getSubscription();
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: convertedKey,
+      });
+    }
+
+    // 4. Save to Supabase
     const { error } = await supabase.from('push_subscriptions').upsert(
       {
         user_id: currentUser.id,
@@ -49,10 +64,17 @@ async function subscribeUserToPush(currentUser) {
       },
       { onConflict: 'user_id' }
     );
-    if (error) console.error('Error saving subscription to Supabase:', error);
-    return !error;
+
+    if (error) {
+      console.error('Error saving subscription to Supabase:', error);
+      alert(`Database error: ${error.message}`);
+      return false;
+    }
+
+    return true;
   } catch (err) {
     console.error('Push subscription failed:', err);
+    alert(`Push subscription error: ${err.message || err}`);
     return false;
   }
 }
@@ -156,6 +178,16 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
   // Accordion states
   const [isGenreDrawerOpen, setIsGenreDrawerOpen] = useState(false);
   const [isHelpFaqDrawerOpen, setIsHelpFaqDrawerOpen] = useState(false);
+
+  // Welcome Banner Dismissed State
+  const [isBannerDismissed, setIsBannerDismissed] = useState(() => {
+    return localStorage.getItem('mint_tv_profile_onboarded_dismissed') === 'true';
+  });
+
+  function handleDismissBanner() {
+    localStorage.setItem('mint_tv_profile_onboarded_dismissed', 'true');
+    setIsBannerDismissed(true);
+  }
 
   // Push Notification State
   const [pushEnabled, setPushEnabled] = useState(false);
@@ -459,6 +491,30 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
 
   return (
     <div className="space-y-3 relative">
+      {/* FIRST-TIME WELCOME BANNER */}
+      {!isBannerDismissed && (
+        <div className="rounded-2xl border border-[#8CFA96]/40 bg-[#8CFA96]/10 p-2.5 space-y-1 shadow-lg">
+          <div className="space-y-1 w-full">
+            <span className="text-[10px] font-black uppercase tracking-wider text-[#8CFA96] block">
+              Welcome to Mint TV!
+            </span>
+            <p className="text-[10px] text-slate-300 leading-relaxed w-full">
+              Tailor recommendations in <strong className="text-white">Genre Preferences</strong>, turn on <strong className="text-white">Episode Alerts</strong> for push notifications, sign in to sync across devices, or check out the <strong className="text-white">Help & User Guide</strong> below to learn more!
+            </p>
+          </div>
+
+          <div className="flex justify-end pt-1">
+            <button
+              type="button"
+              onClick={handleDismissBanner}
+              className="rounded-lg border border-[#8CFA96]/40 bg-[#8CFA96]/10 px-3 py-1 text-[8px] font-black uppercase tracking-widest text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-950 transition-all"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* PROFILE HEADER HERO */}
       <div className="flex flex-col items-center text-center pt-0 pb-0">
         <div
@@ -917,8 +973,8 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
               <div className="space-y-4 animate-in fade-in">
                 {/* Hero Header Card */}
                 <div className="rounded-xl border border-[#8CFA96]/30 bg-[#8CFA96]/5 p-3.5 space-y-1">
-                  <h3 className="text-xs font-black uppercase tracking-wider text-[#8CFA96]">
-                    Mint TV — Beginner’s Guide & Feature Overview
+                  <h3 className="text-[11px] font-black uppercase tracking-wider text-[#8CFA96]">
+                    Mint TV — User Guide & Feature Overview
                   </h3>
                   <p className="text-[11px] text-slate-300 leading-relaxed">
                     Welcome to Mint TV! Whether you are keeping track of a few active shows or managing a massive lifetime collection, Mint TV makes it simple to log episodes, discover new series, and never miss a season premiere.
@@ -1253,14 +1309,14 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                   <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
                     <h4 className="text-[11px] font-bold text-white">How do I stop seeing certain types of shows in my "For You" feed?</h4>
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Tap your <strong className="text-slate-300">Profile Avatar</strong> in the top header and open <strong className="text-slate-300">Manage Genre Preferences</strong>. You can tap <strong className="text-slate-300">–</strong> on genres you dislike to mute them, or use the <strong className="text-slate-300">Discovery Tuning Rules</strong> checkboxes to filter out specific content like Japanese Anime or True Crime docuseries.
+                      Tap your <strong className="text-slate-300">Profile Avatar</strong> in the top header and open <strong className="text-slate-300">Manage Genre Preferences</strong>. You can tap <strong className="text-slate-300">–</strong> on genres you dislike to mute them, or use the <strong className="text-slate-300">Discovery Tuning Rules</strong> checkboxes to filter out specific content like Reality TV or True Crime docuseries.
                     </p>
                   </div>
 
                   <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
                     <h4 className="text-[11px] font-bold text-white">Do I need to create an account, and is my data safe?</h4>
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      No account is required! Mint TV works 100% offline out of the box using your device's local storage. Creating a free cloud account is completely optional and simply allows you to both backup and sync your watchlist across multiple phones or tablets. You can also export a <code className="text-[#8CFA96]">.json</code> backup file at any time to keep a personal hard copy of your data.
+                      No account is required! Mint TV works 100% offline out of the box using your device's local storage. Creating a free cloud account is completely optional and simply allows you to backup and sync your watchlist across multiple phones or tablets. You can also manually export a <code className="text-[#8CFA96]">.json</code> backup file at any time to keep a personal hard copy of your data.
                     </p>
                   </div>
                 </div>
