@@ -95,9 +95,9 @@ export function UpcomingQueue({ watchlist, onRemoveShow, onSelectShow }) {
   const totalUpcoming = scheduledShows.length + inProductionShows.length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {/* Header Bar with Clapperboard SVG */}
-      <div className="sticky top-[52px] z-30 bg-[#0F172A] pt-2 pb-2 space-y-2 before:absolute before:-top-2 before:left-0 before:right-0 before:h-2 before:bg-[#0F172A]">
+      <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-2 space-y-2">
         <div className="flex w-full items-center justify-between rounded-xl border border-slate-800 bg-[#1E293B] px-4 py-2.5 text-xs font-bold shadow-md text-slate-300">
           <div className="flex items-center space-x-1">
             {/* Vector Clapperboard Icon */}

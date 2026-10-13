@@ -310,7 +310,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
   return (
     <div className="space-y-3">
       {/* Header Structure */}
-      <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-2 pb-1 space-y-2">
+      <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-1 space-y-2">
         <div className="flex w-full items-center justify-evenly rounded-xl border border-slate-800 bg-[#1E293B] py-2.5 text-[11px] sm:text-xs font-bold shadow-md">
           <button
             onClick={() => setSubTab('feed')}

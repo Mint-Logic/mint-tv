@@ -156,7 +156,7 @@ export function MasterWatchlist({
   return (
     <div className={`space-y-2 ${showAlphabetIndex ? 'pr-5' : ''}`}>
       {/* STICKY CONTROLS CONTAINER */}
-     <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-2 pb-2 space-y-2">
+     <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-2 space-y-2">
         {/* Clean Sub-Tab Header */}
         <div className="flex w-full items-center justify-evenly rounded-xl border border-slate-800 bg-[#1E293B] py-2.5 text-[11px] sm:text-xs font-bold shadow-md">
           <button
