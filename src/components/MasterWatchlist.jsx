@@ -312,18 +312,18 @@ function ShowCard({
   return (
     <div
       onClick={() => onSelectShow(show.id)}
-      className="flex items-stretch justify-between gap-3 rounded-2xl border border-slate-800 bg-[#1E293B] p-2.5 shadow-md cursor-pointer hover:border-slate-700 transition-all overflow-hidden"
+      className="flex items-stretch justify-between gap-3 rounded-2xl border border-slate-800 bg-[#1E293B] p-2 shadow-md cursor-pointer hover:border-slate-700 transition-all overflow-hidden"
     >
       {/* Left Content (Image & Details) vertically centered */}
-      <div className="flex items-center space-x-3 w-0 flex-1 py-0.5">
+      <div className="flex items-center space-x-3 w-0 flex-1 py-0">
         {posterUrl ? (
           <img
             src={posterUrl}
             alt={show.name}
-            className={`h-14 w-10 rounded-lg object-cover shrink-0 bg-slate-900 shadow ${isAttic ? 'opacity-80' : ''}`}
+            className={`h-15 w-10 rounded-lg object-cover shrink-0 bg-slate-900 shadow ${isAttic ? 'opacity-80' : ''}`}
           />
         ) : (
-          <div className="h-14 w-10 rounded-lg bg-slate-900 shrink-0 flex items-center justify-center text-[9px] text-slate-600">
+          <div className="h-15 w-10 rounded-lg bg-slate-900 shrink-0 flex items-center justify-center text-[9px] text-slate-600">
             No Image
           </div>
         )}

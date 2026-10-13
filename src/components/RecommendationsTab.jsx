@@ -338,7 +338,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
         </div>
 
         {/* ERA FILTER PILLS */}
-        <div className="flex space-x-1.5 overflow-x-auto pb-1 pt-0 scrollbar-none">
+        <div className="flex space-x-1.5 overflow-x-auto pb-1.5 pt-0 -mb-1.5 scrollbar-none">
           {ERAS.map((era) => (
             <button
               key={era.id}
@@ -385,12 +385,12 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                   <div key={show.id} className="rounded-xl border border-slate-800 bg-[#1E293B] overflow-hidden transition-all">
                     <div
                       onClick={() => setExpandedShowId(isExpanded ? null : show.id)}
-                      className="flex items-start space-x-3 p-2.5 cursor-pointer select-none"
+                      className="flex items-start space-x-3 p-2 cursor-pointer select-none"
                     >
                       {posterUrl ? (
-                        <img src={posterUrl} alt={show.name} className="h-20 w-12 rounded-lg object-cover shrink-0 bg-slate-900 shadow-sm" />
+                        <img src={posterUrl} alt={show.name} className="h-22 w-14 rounded-lg object-cover shrink-0 bg-slate-900 shadow-sm" />
                       ) : (
-                        <div className="h-20 w-12 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600 shadow-sm">
+                        <div className="h-22 w-14 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600 shadow-sm">
                           N/A
                         </div>
                       )}
@@ -456,7 +456,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                         </div>
 
                         {/* ACTION BUTTONS */}
-                        <div className="flex items-center justify-end gap-3 mt-1 ml-auto">
+                        <div className="flex items-center justify-end gap-3 mt-1 -mb-2 ml-auto">
                           <button
                             type="button"
                             onClick={(e) => { 

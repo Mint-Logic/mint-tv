@@ -119,7 +119,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
   return (
     <div className="space-y-4 pb-12">
       {/* STICKY BACK BUTTON CONTAINER (ALIGNED TOP RIGHT) */}
-      <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-2 flex justify-end">
+      <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-3 flex justify-end">
         <button
           onClick={onBack}
           className="flex items-center space-x-2 text-xs font-bold text-[#8CFA96] bg-slate-800/90 px-3 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-700 transition-all shadow-md active:scale-95"
@@ -131,10 +131,10 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
       {/* Hero Backdrop & Show Info */}
       <div 
   onClick={() => setIsOverviewExpanded(!isOverviewExpanded)}
-  className="-mt-2 relative z-0 min-h-[14rem] rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl cursor-pointer"
+  className="-mt-3 relative z-0 min-h-[14rem] rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl cursor-pointer"
 >
         {backdropUrl && (
-          <img src={backdropUrl} alt={details.name} className="absolute inset-0 w-full h-full object-cover" />
+          <img src={backdropUrl} alt={details.name} className="absolute inset-0 -w-90 -h-90 object-cover" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/60 to-transparent"></div>
         <div className="relative p-4 pt-20 flex flex-col justify-end min-h-[14rem]">
