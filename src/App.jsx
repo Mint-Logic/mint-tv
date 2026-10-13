@@ -292,7 +292,7 @@ export default function App() {
         onAuthSuccess={(user) => setCurrentUser(user)}
       />
 
-      <main className="mx-auto max-w-md p-4">
+      <main className="mx-auto max-w-md px-4 pt-0 pb-24">
         {selectedShowId ? (
           <ShowDetails
             showId={selectedShowId}

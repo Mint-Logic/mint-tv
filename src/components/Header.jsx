@@ -30,21 +30,21 @@ export function Header({ onOpenSearch, onOpenProfile }) {
   return (
     <header 
       style={{
-        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)',
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 8px)',
       }}
-      className="sticky top-0 z-50 flex items-center justify-between border-b border-slate-800 bg-[#0F172A] px-3.5 pb-2.5 backdrop-blur-md transition-all"
+      className="sticky top-0 z-50 flex h-[46px] items-center justify-between border-b border-slate-800 bg-[#0F172A] px-3.5 pb-2 backdrop-blur-md transition-all box-border"
     >
       {/* Brand Logo */}
       <div className="flex items-center">
         <img 
           src={mintTvLogo} 
           alt="Mint TV" 
-          className="h-12 w-auto max-w-[160px] object-contain drop-shadow-[0_0_8px_rgba(140,250,150,0.25)]"
+          className="h-7 w-auto max-w-[150px] object-contain drop-shadow-[0_0_8px_rgba(140,250,150,0.25)]"
         />
       </div>
 
       {/* Action Controls & Compact Profile Avatar */}
-      <div className="flex items-center space-x-8">
+      <div className="flex items-center space-x-4">
         <button
           onClick={onOpenSearch}
           className="flex items-center space-x-1 rounded-md border border-[#8CFA96]/40 bg-[#8CFA96]/10 px-2.5 py-1 text-xs font-extrabold text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-950 transition-all"
