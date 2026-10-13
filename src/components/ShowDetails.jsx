@@ -124,7 +124,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
           onClick={onBack}
           className="flex items-center space-x-2 text-xs font-bold text-[#8CFA96] bg-slate-800/90 px-3 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-700 transition-all shadow-md active:scale-95"
         >
-          <span>← Back to Queue</span>
+          <span>← Back to Ready</span>
         </button>
       </div>
 
