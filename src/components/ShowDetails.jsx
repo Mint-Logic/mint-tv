@@ -119,7 +119,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
   return (
     <div className="space-y-4 pb-12">
       {/* STICKY BACK BUTTON CONTAINER (ALIGNED TOP RIGHT) */}
-      <div className="sticky top-[49px] z-40 bg-[#0F172A] pt-2 pb-2 flex justify-end">
+      <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-2 flex justify-end">
         <button
           onClick={onBack}
           className="flex items-center space-x-2 text-xs font-bold text-[#8CFA96] bg-slate-800/90 px-3 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-700 transition-all shadow-md active:scale-95"
@@ -130,9 +130,9 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
 
       {/* Hero Backdrop & Show Info */}
       <div 
-        onClick={() => setIsOverviewExpanded(!isOverviewExpanded)}
-        className="relative z-0 min-h-[14rem] rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl cursor-pointer"
-      >
+  onClick={() => setIsOverviewExpanded(!isOverviewExpanded)}
+  className="-mt-2 relative z-0 min-h-[14rem] rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl cursor-pointer"
+>
         {backdropUrl && (
           <img src={backdropUrl} alt={details.name} className="absolute inset-0 w-full h-full object-cover" />
         )}
@@ -162,7 +162,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
       </div>
 
       {/* STICKY SEASON SELECTION TABS */}
-      <div className="sticky top-[92px] z-30 bg-[#0F172A] py-2 border-b border-slate-800">
+      <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-2 pb-2 space-y-2 border-b border-slate-800">
         <div className="flex space-x-2 overflow-x-auto pb-0.5 scrollbar-none touch-pan-x">
           {details.seasons
             ?.filter((s) => s.season_number > 0)
@@ -249,7 +249,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
                       E{String(ep.episode_number).padStart(2, '0')}
                     </span>
                     <span
-                      className={`text-sm font-bold text-white min-w-0 ${
+                      className={`text-xs font-bold text-white min-w-0 ${
                         isExpanded ? 'whitespace-normal break-words' : 'truncate'
                       }`}
                     >
