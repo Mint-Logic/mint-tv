@@ -337,22 +337,26 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
           </button>
         </div>
 
-        {/* ERA FILTER PILLS */}
-        <div className="flex space-x-1.5 overflow-x-auto pb-1.5 pt-0 -mb-1.5 scrollbar-none">
-          {ERAS.map((era) => (
-            <button
-              key={era.id}
-              onClick={() => handleEraSelect(era.id)}
-              className={`px-3 py-1 rounded-full text-[10px] font-bold whitespace-nowrap shrink-0 transition-all ${
-                selectedEra === era.id
-                  ? 'bg-[#8CFA96] text-slate-900 shadow-sm'
-                  : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'
-              }`}
-            >
-              {era.label}
-            </button>
-          ))}
-        </div>
+        {/* PERMANENT ERA FILTER PILLS */}
+<div 
+  onTouchStart={(e) => e.stopPropagation()}
+  onTouchEnd={(e) => e.stopPropagation()}
+  className="flex space-x-1.5 overflow-x-auto pb-1 pt-1 scrollbar-none touch-pan-x"
+>
+  {ERAS.map((era) => (
+    <button
+      key={era.id}
+      onClick={() => handleEraSelect(era.id)}
+      className={`px-3 py-1 rounded-full text-[10px] font-bold whitespace-nowrap shrink-0 transition-all ${
+        selectedEra === era.id
+          ? 'bg-[#8CFA96] text-slate-900 shadow-sm'
+          : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'
+      }`}
+    >
+      {era.label}
+    </button>
+  ))}
+</div>
       </div>
 
       {/* FEED TAB */}
