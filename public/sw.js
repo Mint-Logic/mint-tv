@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mint-tv-v1';
+const CACHE_NAME = 'mint-tv-v2';
 
 self.addEventListener('install', () => {
   self.skipWaiting();
@@ -36,8 +36,13 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'MintTV';
   const options = {
     body: data.body || 'A show on your watchlist has a new update!',
-    icon: '/icon-192.png',
+    // Show poster thumbnail (falls back to app icon)
+    icon: data.icon || '/icon-192.png',
+    // Expanded show poster image banner (Android / Desktop)
+    image: data.image || null,
+    // Custom status bar monochrome TV badge
     badge: '/badge-96.png',
+    vibrate: [100, 50, 100],
     data: {
       url: data.url || '/',
     },
