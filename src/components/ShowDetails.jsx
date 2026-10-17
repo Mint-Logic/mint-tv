@@ -326,6 +326,24 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
           );
         })}
       </div>
+      {/* Minimalist TMDB Legal Credit */}
+<div className="pt-8 pb-6 flex flex-col items-center justify-center gap-2 text-center opacity-40 hover:opacity-100 transition-opacity">
+  <a 
+    href="https://www.themoviedb.org" 
+    target="_blank" 
+    rel="noreferrer"
+    className="flex items-center justify-center"
+  >
+    <img
+      src="/tmdb-logo.svg"
+      alt="The Movie Database"
+      className="w-12 h-auto object-contain grayscale brightness-200"
+    />
+  </a>
+  <p className="text-[8px] leading-tight text-slate-400 max-w-[150px]">
+    This product uses the TMDB API but is not endorsed or certified by TMDB.
+  </p>
+</div>
     </div>
   );
 }
