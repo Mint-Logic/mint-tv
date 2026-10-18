@@ -2,9 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabase';
 import retroVisionLogo from '../assets/retro-vision-logo.png';
 
-// ==========================================
-// PUSH NOTIFICATION HELPERS
-// ==========================================
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -22,13 +19,11 @@ async function subscribeUserToPush(currentUser) {
     return false;
   }
 
-  // 1. Check if user is logged in
   if (!currentUser || !currentUser.id) {
     alert('Please log in or sign up below to enable push notifications.');
     return false;
   }
 
-  // 2. Request permission
   const permission = await Notification.requestPermission();
   if (permission !== 'granted') {
     alert('Notification permission was denied in your browser settings.');
@@ -47,7 +42,6 @@ async function subscribeUserToPush(currentUser) {
 
     const convertedKey = urlBase64ToUint8Array(publicKey);
 
-    // 3. Subscribe with browser
     let subscription = await registration.pushManager.getSubscription();
     if (!subscription) {
       subscription = await registration.pushManager.subscribe({
@@ -56,7 +50,6 @@ async function subscribeUserToPush(currentUser) {
       });
     }
 
-    // 4. Save to Supabase
     const { error } = await supabase.from('push_subscriptions').upsert(
       {
         user_id: currentUser.id,
@@ -143,7 +136,6 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
     return saved ? JSON.parse(saved) : { x: 0, y: 0, scale: 1 };
   });
 
-  // Genre Preference States
   const [likedGenres, setLikedGenres] = useState(() => {
     const saved = localStorage.getItem('mint_tv_liked_genres');
     return saved ? JSON.parse(saved) : [10765, 18, 35, 99];
@@ -154,7 +146,6 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
     return saved ? JSON.parse(saved) : [10764, 10767, 10766];
   });
 
-  // Specific Tuning Rules
   const [excludeAnime, setExcludeAnime] = useState(() => {
     return localStorage.getItem('mint_tv_exclude_anime') === 'true';
   });
@@ -175,11 +166,9 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
     return localStorage.getItem('mint_tv_exclude_foreign') === 'true';
   });
 
-  // Accordion states
   const [isGenreDrawerOpen, setIsGenreDrawerOpen] = useState(false);
   const [isHelpFaqDrawerOpen, setIsHelpFaqDrawerOpen] = useState(false);
 
-  // Welcome Banner Dismissed State
   const [isBannerDismissed, setIsBannerDismissed] = useState(() => {
     return localStorage.getItem('mint_tv_profile_onboarded_dismissed') === 'true';
   });
@@ -189,7 +178,6 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
     setIsBannerDismissed(true);
   }
 
-  // Push Notification State
   const [pushEnabled, setPushEnabled] = useState(false);
 
   useEffect(() => {
@@ -314,7 +302,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
       title: 'NOVICE',
       nextReq: `${episodes}/250 eps to Lvl 2`,
       progress: Math.min(100, Math.round((episodes / 250) * 100)),
-      color: 'text-slate-300 border-slate-700 bg-slate-800/60',
+      color: 'text-slate-300 border-slate-500 bg-slate-800/60',
       badgeSvg: trophySvg,
     };
   };
@@ -531,7 +519,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
           {customPhoto ? (
             <img
               src={customPhoto}
-              alt="Profile"
+              alt="Profile Avatar"
               style={{
                 transform: `translate(${photoPos.x}px, ${photoPos.y}px) scale(${photoPos.scale})`,
               }}
@@ -547,13 +535,13 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
         {!isEditing ? (
           <div className="flex flex-col items-center space-y-1">
             <h2 className="text-lg font-bold text-white tracking-tight">{profileName}</h2>
-            <p className="text-xs font-semibold text-slate-400">{profileTitle}</p>
+            <p className="text-xs font-semibold text-slate-300">{profileTitle}</p>
 
             <button
               onClick={() => setIsEditing(true)}
-              className="mt-1.5 inline-flex items-center space-x-1 rounded-full border border-slate-800 bg-slate-900/50 px-2.5 py-0.5 text-[10px] font-medium text-slate-400 hover:border-slate-700 hover:bg-slate-800 hover:text-slate-200 transition-all"
+              className="mt-1.5 inline-flex items-center space-x-1 rounded-full border border-slate-700 bg-slate-900/50 px-2.5 py-0.5 text-[10px] font-medium text-slate-300 hover:border-slate-500 hover:bg-slate-800 hover:text-white transition-all"
             >
-              <svg className="h-2.5 w-2.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-2.5 w-2.5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
               <span>Edit Profile</span>
@@ -562,7 +550,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
         ) : (
           <div className="w-full mt-3 space-y-3.5 rounded-2xl border border-slate-800 bg-[#1E293B] p-4 text-left shadow-lg">
             <div className="flex justify-between items-center pb-2 border-b border-slate-800">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-300">
                 Edit Profile
               </span>
               <button
@@ -574,23 +562,23 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
             </div>
 
             <div>
-              <label className="text-[10px] font-bold text-slate-400">Display Name</label>
+              <label className="text-[10px] font-bold text-slate-300">Display Name</label>
               <input
                 type="text"
                 value={profileName}
                 onChange={(e) => setProfileName(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-bold text-white focus:border-[#8CFA96] focus:outline-none"
+                className="mt-1 w-full rounded-xl border border-slate-500 bg-slate-900 px-3 py-2 text-xs font-bold text-white focus:border-[#8CFA96] focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="text-[10px] font-bold text-slate-400 block mb-1">
+              <label className="text-[10px] font-bold text-slate-300 block mb-1">
                 Profile Title
               </label>
               <select
                 value={selectedDropdownOption}
                 onChange={handleTitleDropdownChange}
-                className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-bold text-white focus:border-[#8CFA96] focus:outline-none cursor-pointer"
+                className="w-full rounded-xl border border-slate-500 bg-slate-900 px-3 py-2 text-xs font-bold text-white focus:border-[#8CFA96] focus:outline-none cursor-pointer"
               >
                 {PRESET_TITLES.map((title) => (
                   <option key={title} value={title}>
@@ -602,8 +590,8 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
               {selectedDropdownOption === 'Custom...' && (
                 <div className="mt-2 space-y-1">
                   <div className="flex justify-between items-center">
-                    <label className="text-[9px] font-bold text-slate-400">Custom Title Text</label>
-                    <span className="text-[9px] font-bold text-slate-500">
+                    <label className="text-[9px] font-bold text-slate-300">Custom Title Text</label>
+                    <span className="text-[9px] font-bold text-slate-300">
                       {profileTitle.length}/28
                     </span>
                   </div>
@@ -614,21 +602,21 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                     value={profileTitle === 'Custom...' ? '' : profileTitle}
                     onChange={(e) => setProfileTitle(e.target.value)}
                     placeholder="Enter your custom title..."
-                    className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-bold text-white focus:border-[#8CFA96] focus:outline-none"
+                    className="w-full rounded-xl border border-slate-500 bg-slate-900 px-3 py-2 text-xs font-bold text-white focus:border-[#8CFA96] focus:outline-none"
                   />
                 </div>
               )}
             </div>
 
             <div>
-              <label className="text-[10px] font-bold text-slate-400 block mb-1">
+              <label className="text-[10px] font-bold text-slate-300 block mb-1">
                 Upload Profile Picture
               </label>
               <input
                 type="file"
                 accept="image/*"
                 onChange={handlePhotoUpload}
-                className="w-full text-xs text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-[#8CFA96] file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-slate-900 hover:file:opacity-90 cursor-pointer"
+                className="w-full text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-[#8CFA96] file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-slate-900 hover:file:opacity-90 cursor-pointer"
               />
             </div>
 
@@ -640,14 +628,14 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                   </span>
                   <button
                     onClick={() => setPhotoPos({ x: 0, y: 0, scale: 1 })}
-                    className="text-[10px] text-slate-400 hover:text-white underline"
+                    className="text-[10px] text-slate-300 hover:text-white underline"
                   >
                     Reset
                   </button>
                 </div>
 
                 <div>
-                  <div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1">
+                  <div className="flex justify-between text-[10px] font-bold text-slate-300 mb-1">
                     <span>Zoom</span>
                     <span>{Math.round(photoPos.scale * 100)}%</span>
                   </div>
@@ -700,7 +688,8 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
             <button
               onClick={() => setShowLevelInfo(!showLevelInfo)}
               title="View Leveling Details"
-              className="flex h-4 w-4 items-center justify-center rounded-full border border-slate-600 bg-slate-800 text-[10px] font-black text-slate-400 hover:border-[#8CFA96] hover:text-[#8CFA96] transition-all"
+              aria-label="View Leveling Details"
+              className="flex h-4 w-4 items-center justify-center rounded-full border border-slate-500 bg-slate-800 text-[10px] font-black text-slate-300 hover:border-[#8CFA96] hover:text-[#8CFA96] transition-all"
             >
               i
             </button>
@@ -740,7 +729,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
           onClick={() => setIsGenreDrawerOpen(!isGenreDrawerOpen)}
           className="w-full flex justify-between items-center px-4 py-2.5 bg-slate-900/60 hover:bg-slate-900 transition-all cursor-pointer"
         >
-          <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+          <span className="text-[10px] font-black uppercase tracking-wider text-slate-300">
             MANAGE GENRE PREFERENCES
           </span>
           <span className="text-[10px] font-bold text-[#8CFA96] transition-transform duration-200">
@@ -751,81 +740,81 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
         {isGenreDrawerOpen && (
           <div className="p-4 space-y-4 border-t border-slate-800 animate-in fade-in">
             {/* CONTENT & SUB-GENRE GUARDRAILS */}
-              <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-3 space-y-2.5">
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
-                    Content & Sub-Genre Guardrails
-                  </span>
-                  <span className="text-[9px] text-slate-400 block mt-0.5">
-                    Fine-tune recommendations
-                  </span>
-                </div>
+            <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-3 space-y-2.5">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
+                  Content & Sub-Genre Guardrails
+                </span>
+                <span className="text-[9px] text-slate-300 block mt-0.5">
+                  Fine-tune recommendations
+                </span>
+              </div>
 
-                {/* 1. Anime Filter */}
-                <label className="flex items-center space-x-2.5 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={excludeAnime}
-                    onChange={(e) => setExcludeAnime(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
-                  />
-                  <span className="text-xs font-bold text-slate-200">
-                    Filter Anime Titles <span className="text-[10px] font-normal text-slate-400"><br></br>(Keep general animated series)</span>
-                  </span>
-                </label>
+              {/* 1. Anime Filter */}
+              <label className="flex items-center space-x-2.5 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={excludeAnime}
+                  onChange={(e) => setExcludeAnime(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-500 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
+                />
+                <span className="text-xs font-bold text-slate-200">
+                  Filter Anime Titles <span className="text-[10px] font-normal text-slate-300"><br></br>(Keep general animated series)</span>
+                </span>
+              </label>
 
-                {/* 2. Reality TV Filter */}
-                <label className="flex items-center space-x-2.5 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={excludeReality}
-                    onChange={(e) => setExcludeReality(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
-                  />
-                  <span className="text-xs font-bold text-slate-200">
-                    Filter Reality & Talk Shows <span className="text-[10px] font-normal text-slate-400"><br></br>(Exclude unscripted & competition TV)</span>
-                  </span>
-                </label>
+              {/* 2. Reality TV Filter */}
+              <label className="flex items-center space-x-2.5 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={excludeReality}
+                  onChange={(e) => setExcludeReality(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-500 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
+                />
+                <span className="text-xs font-bold text-slate-200">
+                  Filter Reality & Talk Shows <span className="text-[10px] font-normal text-slate-300"><br></br>(Exclude unscripted & competition TV)</span>
+                </span>
+              </label>
 
-                {/* 3. True Crime Filter */}
-                <label className="flex items-center space-x-2.5 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={excludeTrueCrime}
-                    onChange={(e) => setExcludeTrueCrime(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
-                  />
-                  <span className="text-xs font-bold text-slate-200">
-                    Filter True Crime & Investigation <span className="text-[10px] font-normal text-slate-400"><br></br>(Exclude crime docuseries)</span>
-                  </span>
-                </label>
+              {/* 3. True Crime Filter */}
+              <label className="flex items-center space-x-2.5 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={excludeTrueCrime}
+                  onChange={(e) => setExcludeTrueCrime(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-500 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
+                />
+                <span className="text-xs font-bold text-slate-200">
+                  Filter True Crime & Investigation <span className="text-[10px] font-normal text-slate-300"><br></br>(Exclude crime docuseries)</span>
+                </span>
+              </label>
 
-                {/* 4. Documentary Curation Filter */}
-                <label className="flex items-center space-x-2.5 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={boostNature}
-                    onChange={(e) => setBoostNature(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
-                  />
-                  <span className="text-xs font-bold text-slate-200">
-                    Educational Documentary Topics <span className="text-[10px] font-normal text-slate-400"><br></br>(Focus docs on Nature, Space & Science)</span>
-                  </span>
-                </label>
+              {/* 4. Documentary Curation Filter */}
+              <label className="flex items-center space-x-2.5 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={boostNature}
+                  onChange={(e) => setBoostNature(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-500 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
+                />
+                <span className="text-xs font-bold text-slate-200">
+                  Educational Documentary Topics <span className="text-[10px] font-normal text-slate-300"><br></br>(Focus docs on Nature, Space & Science)</span>
+                </span>
+              </label>
 
-                {/* 5. Primary Language / Subtitle Guardrail */}
-                <label className="flex items-center space-x-2.5 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={excludeForeign}
-                    onChange={(e) => setExcludeForeign(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
-                  />
-                  <span className="text-xs font-bold text-slate-200">
-                    English Audio Only <span className="text-[10px] font-normal text-slate-400"><br></br>(Hide titles requiring subtitles)</span>
-                  </span>
-                </label>
-              </div> 
+              {/* 5. Primary Language Filter */}
+              <label className="flex items-center space-x-2.5 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={excludeForeign}
+                  onChange={(e) => setExcludeForeign(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-500 bg-slate-800 text-[#8CFA96] focus:ring-0 accent-[#8CFA96]"
+                />
+                <span className="text-xs font-bold text-slate-200">
+                  English Audio Only <span className="text-[10px] font-normal text-slate-300"><br></br>(Hide titles requiring subtitles)</span>
+                </span>
+              </label>
+            </div> 
 
             {/* LIKED CATEGORY */}
             <div className="rounded-xl border border-[#8CFA96]/30 bg-[#8CFA96]/5 p-3 space-y-2">
@@ -833,11 +822,11 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                 <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96]">
                   Liked ({likedGenreObjects.length})
                 </span>
-                <span className="text-[9px] text-slate-400">Boosted in discovery</span>
+                <span className="text-[9px] text-slate-300">Boosted in discovery</span>
               </div>
 
               {likedGenreObjects.length === 0 ? (
-                <p className="text-[10px] text-slate-500 italic">No liked genres selected.</p>
+                <p className="text-[10px] text-slate-300 italic">No liked genres selected.</p>
               ) : (
                 <div className="flex flex-wrap gap-1.5">
                   {likedGenreObjects.map((g) => (
@@ -848,8 +837,9 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                       <span>{g.name}</span>
                       <button
                         onClick={() => moveGenre(g.id, 'neutral')}
-                        className="text-slate-400 hover:text-white pl-1"
+                        className="text-slate-300 hover:text-white pl-1"
                         title="Move to neutral"
+                        aria-label={`Remove ${g.name} from liked genres`}
                       >
                         ✕
                       </button>
@@ -865,11 +855,11 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                 <span className="text-[10px] font-bold uppercase tracking-wider text-red-400">
                   Muted ({mutedGenreObjects.length})
                 </span>
-                <span className="text-[9px] text-slate-400">Hidden from discovery</span>
+                <span className="text-[9px] text-slate-300">Hidden from discovery</span>
               </div>
 
               {mutedGenreObjects.length === 0 ? (
-                <p className="text-[10px] text-slate-500 italic">No muted genres.</p>
+                <p className="text-[10px] text-slate-300 italic">No muted genres.</p>
               ) : (
                 <div className="flex flex-wrap gap-1.5">
                   {mutedGenreObjects.map((g) => (
@@ -880,8 +870,9 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                       <span>{g.name}</span>
                       <button
                         onClick={() => moveGenre(g.id, 'neutral')}
-                        className="text-slate-400 hover:text-white pl-1"
+                        className="text-slate-300 hover:text-white pl-1"
                         title="Move to neutral"
+                        aria-label={`Remove ${g.name} from muted genres`}
                       >
                         ✕
                       </button>
@@ -891,9 +882,9 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
               )}
             </div>
 
-            {/* NEUTRAL / AVAILABLE CATEGORY */}
+            {/* NEUTRAL CATEGORY */}
             <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3 space-y-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300 block">
                 Neutral / Available Genres ({neutralGenreObjects.length})
               </span>
 
@@ -901,13 +892,14 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                 {neutralGenreObjects.map((g) => (
                   <div
                     key={g.id}
-                    className="flex items-center space-x-1 px-2.5 py-1 rounded-lg border border-slate-800 bg-slate-900 text-slate-300 text-[11px] font-semibold"
+                    className="flex items-center space-x-1 px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-900 text-slate-300 text-[11px] font-semibold"
                   >
                     <span>{g.name}</span>
                     <button
                       onClick={() => moveGenre(g.id, 'liked')}
                       className="text-[#8CFA96] hover:scale-125 transition-transform px-1 font-bold"
                       title="Like genre"
+                      aria-label={`Like ${g.name}`}
                     >
                       +
                     </button>
@@ -915,6 +907,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                       onClick={() => moveGenre(g.id, 'muted')}
                       className="text-red-400 hover:scale-125 transition-transform px-1 font-bold"
                       title="Mute genre"
+                      aria-label={`Mute ${g.name}`}
                     >
                       -
                     </button>
@@ -926,13 +919,13 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
         )}
       </div>
 
-    {/* COMBINED HELP & FAQ ACCORDION WITH REDESIGNED TABBED UI */}
+      {/* COMBINED HELP & FAQ ACCORDION */}
       <div className="-mx-3 sm:-mx-4 overflow-hidden rounded-2xl border border-slate-800 bg-[#1E293B] shadow-lg">
         <button
           onClick={() => setIsHelpFaqDrawerOpen(!isHelpFaqDrawerOpen)}
           className="w-full flex justify-between items-center px-4 py-2.5 bg-slate-900/60 hover:bg-slate-900 transition-all cursor-pointer"
         >
-          <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+          <span className="text-[10px] font-black uppercase tracking-wider text-slate-300">
             HELP & USER GUIDE
           </span>
           <span className="text-[10px] font-bold text-[#8CFA96] transition-transform duration-200">
@@ -942,7 +935,6 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
 
         {isHelpFaqDrawerOpen && (
           <div className="p-4 space-y-4 border-t border-slate-800 animate-in fade-in text-xs text-slate-300">
-            {/* SUB-HEADER / TAB SELECTOR */}
             <div className="grid grid-cols-2 gap-1 rounded-xl bg-slate-950 p-1 border border-slate-800">
               <button
                 type="button"
@@ -950,7 +942,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                 className={`py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider transition-all ${
                   helpSubTab === 'guide'
                     ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                    : 'text-slate-300 hover:text-white'
                 }`}
               >
                 Feature Guide
@@ -961,17 +953,15 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                 className={`py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider transition-all ${
                   helpSubTab === 'faq'
                     ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                    : 'text-slate-300 hover:text-white'
                 }`}
               >
                 FAQ
               </button>
             </div>
 
-            {/* TAB 1: BEGINNER'S FEATURE GUIDE */}
             {helpSubTab === 'guide' && (
               <div className="space-y-4 animate-in fade-in">
-                {/* Hero Header Card */}
                 <div className="rounded-xl border border-[#8CFA96]/30 bg-[#8CFA96]/5 p-3.5 space-y-1">
                   <h3 className="text-[11px] font-black uppercase tracking-wider text-[#8CFA96]">
                     Mint TV — User Guide & Feature Overview
@@ -981,7 +971,6 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                   </p>
                 </div>
 
-                {/* Section 1: Main Navigation & Adding Shows */}
                 <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3.5 space-y-2">
                   <div className="flex items-center space-x-2 border-b border-slate-800 pb-1.5">
                     <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#8CFA96]/20 text-[10px] font-black text-[#8CFA96]">
@@ -996,7 +985,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
                       Adding Shows to Your Library
                     </span>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                    <p className="text-[11px] text-slate-300 leading-relaxed">
                       Tap the green <strong className="text-white">+ Add Show</strong> button in the top-right header at any time to search TMDB for any TV series. You can type titles (even with typos!), browse trending shows, and instantly tap <strong className="text-white">Add</strong> to start tracking them.
                     </p>
                   </div>
@@ -1005,10 +994,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
                       Main Navigation Tabs
                     </span>
-                    <p className="text-[11px] text-slate-400 leading-relaxed mb-1">
-                      At the bottom of your screen, you’ll find the four main tabs that drive the app:
-                    </p>
-                    <ul className="space-y-1.5 text-[11px] text-slate-400">
+                    <ul className="space-y-1.5 text-[11px] text-slate-300">
                       <li className="flex items-start space-x-1.5">
                         <span className="text-[#8CFA96] font-bold">•</span>
                         <span><strong className="text-white">Ready (Play Icon):</strong> Your active dashboard. Shows with newly aired, unwatched episodes appear here first.</span>
@@ -1029,7 +1015,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                   </div>
                 </div>
 
-                {/* Section 2: Tracking & Watching Progress */}
+                {/* Section 2: Progress Tracking */}
                 <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3.5 space-y-2.5">
                   <div className="flex items-center space-x-2 border-b border-slate-800 pb-1.5">
                     <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#8CFA96]/20 text-[10px] font-black text-[#8CFA96]">
@@ -1044,207 +1030,23 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
                       Tracking Episodes
                     </span>
-                    <ul className="space-y-1 text-[11px] text-slate-400">
+                    <ul className="space-y-1 text-[11px] text-slate-300">
                       <li className="flex items-start space-x-1.5">
                         <span className="text-[#8CFA96] font-bold">•</span>
                         <span>Tap any show in Ready to Watch to open its Show Details view and see its episode guide, summary, and air date.</span>
                       </li>
                       <li className="flex items-start space-x-1.5">
                         <span className="text-[#8CFA96] font-bold">•</span>
-                        <span>Tap the green checkmark button on the right side of the card to mark your current episode as watched and advance your progress counter.</span>
+                        <span>Tap the green checkmark button on the right side of the card to mark your current episode as watched.</span>
                       </li>
                     </ul>
                   </div>
-
-                  <div className="space-y-1.5 pt-1 border-t border-slate-800/60">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
-                      Episode & Season Shortcuts
-                    </span>
-                    <p className="text-[11px] text-slate-400 leading-relaxed mb-1">
-                      When you tap on a show card to open its Show Details view:
-                    </p>
-                    <ul className="space-y-1 text-[11px] text-slate-400">
-                      <li className="flex items-start space-x-1.5">
-                        <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Season Tabs:</strong> Easily jump between seasons using the top scroll bar.</span>
-                      </li>
-                      <li className="flex items-start space-x-1.5">
-                        <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Season Finale Shortcut:</strong> Tap the Finale badge on the last episode of a season to mark the entire season as watched in one go.</span>
-                      </li>
-                      <li className="flex items-start space-x-1.5">
-                        <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Season Premiere Shortcut:</strong> Tap the Premiere badge on the first episode to reset that entire season back to episode 1.</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="space-y-1.5 pt-1 border-t border-slate-800/60">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
-                      "Ready" vs. "Caught Up"
-                    </span>
-                    <ul className="space-y-1 text-[11px] text-slate-400">
-                      <li className="flex items-start space-x-1.5">
-                        <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Ready to Watch:</strong> Contains shows that currently have aired, unwatched episodes waiting for you.</span>
-                      </li>
-                      <li className="flex items-start space-x-1.5">
-                        <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Caught Up:</strong> When you finish the last available episode of an ongoing show, it automatically moves to the Caught Up sub-tab. The moment a new episode airs in the real world, the show automatically moves back into Ready to Watch!</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-
-                {/* Section 3: Organizing Library */}
-                <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3.5 space-y-2">
-                  <div className="flex items-center space-x-2 border-b border-slate-800 pb-1.5">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#8CFA96]/20 text-[10px] font-black text-[#8CFA96]">
-                      3
-                    </span>
-                    <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-white">
-                      Organizing Your Library: Active vs. RetroVision
-                    </h4>
-                  </div>
-                  <p className="text-[11px] text-slate-400 leading-relaxed">
-                    Mint TV uses two distinct spaces to keep your library clean and uncluttered:
-                  </p>
-                  <ul className="space-y-1.5 text-[11px] text-slate-400">
-                    <li className="flex items-start space-x-1.5">
-                      <span className="text-[#8CFA96] font-bold">•</span>
-                      <span><strong className="text-white">Active Shows:</strong> Shows you are currently watching or waiting for new seasons to release.</span>
-                    </li>
-                    <li className="flex items-start space-x-1.5">
-                      <span className="text-[#8CFA96] font-bold">•</span>
-                      <span><strong className="text-white">RetroVision (Museum Vault):</strong> Your personal lifetime TV vault. When a series completely ends or gets canceled, it auto-archives here so it doesn't clutter your daily queue. You can also manually send any show here to maintain a complete history of every series you've ever finished without diluting your active tracking stats.</span>
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Section 4: Discovering New Shows */}
-                <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3.5 space-y-2.5">
-                  <div className="flex items-center space-x-2 border-b border-slate-800 pb-1.5">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#8CFA96]/20 text-[10px] font-black text-[#8CFA96]">
-                      4
-                    </span>
-                    <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-white">
-                      Discovering New Shows ("For You" Tab)
-                    </h4>
-                  </div>
-                  <p className="text-[11px] text-slate-400 leading-relaxed">
-                    The For You tab helps you find your next favorite show across two primary views:
-                  </p>
-
-                  <div className="space-y-1.5 pt-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
-                      1. Feed
-                    </span>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      A personalized pipeline of show recommendations tailored to your taste. Each card offers instant actions:
-                    </p>
-                    <ul className="space-y-1 text-[11px] text-slate-400">
-                      <li className="flex items-start space-x-1.5">
-                        <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Watch Later (Clock):</strong> Saves the show to your temporary "Watch Later" queue.</span>
-                      </li>
-                      <li className="flex items-start space-x-1.5">
-                        <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Add to Watchlist (Play):</strong> Sends the show straight to your main active watchlist.</span>
-                      </li>
-                      <li className="flex items-start space-x-1.5">
-                        <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">RetroVision (TV Logo):</strong> Logs the show directly into your archived history.</span>
-                      </li>
-                      <li className="flex items-start space-x-1.5">
-                        <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Hide (Top-Right Eye/X):</strong> Blacklists the title so it won't appear in recommendations again.</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="space-y-1.5 pt-1.5 border-t border-slate-800/60">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
-                      2. Watch Later
-                    </span>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Your personal holding deck for saved discoveries. Switch to this sub-tab at the top of the screen to review saved shows, check their details, or officially move them to your Watchlist or RetroVision whenever you're ready to start watching.
-                    </p>
-                  </div>
-
-                  <div className="space-y-1 pt-1.5 border-t border-slate-800/60">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
-                      Era Filter Pills
-                    </span>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Filter feed recommendations by specific decades (e.g., 2020s, 2010s, 1990s, or Vintage 1950s–60s) using the pill buttons at the top of the Feed.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Section 5: Personalizing Recommendations */}
-                <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3.5 space-y-2">
-                  <div className="flex items-center space-x-2 border-b border-slate-800 pb-1.5">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#8CFA96]/20 text-[10px] font-black text-[#8CFA96]">
-                      5
-                    </span>
-                    <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-white">
-                      Personalizing Your Recommendation Feed
-                    </h4>
-                  </div>
-                  <p className="text-[11px] text-slate-400 leading-relaxed">
-                    You can fine-tune the recommendation algorithm to match your exact taste:
-                  </p>
-                  <ol className="space-y-1.5 text-[11px] text-slate-400">
-                    <li>
-                      <strong className="text-white">Content & Sub-Genre Guardrails:</strong>
-                      <br />
-                      Enable content filters at the top to refine your feed without muting entire broad categories. Toggle specific guardrails (such as Anime, Reality TV, True Crime, or English Audio Only to hide subtitle-dependent shows) or focus documentary suggestions on Nature, Space & Science topics.
-                    </li>
-                    <li>
-                      <strong className="text-white">Like (+):</strong>
-                      <br />
-                      Boosts preferred broad genres in your feed.
-                    </li>
-                    <li>
-                      <strong className="text-white">Mute (-):</strong>
-                      <br />
-                      Hides specific broad genres completely.
-                    </li>
-                  </ol>
-                </div>
-
-                {/* Section 6: Accounts, Cloud Sync & Leveling */}
-                <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3.5 space-y-2">
-                  <div className="flex items-center space-x-2 border-b border-slate-800 pb-1.5">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#8CFA96]/20 text-[10px] font-black text-[#8CFA96]">
-                      6
-                    </span>
-                    <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-white">
-                      Accounts, Cloud Sync & Leveling
-                    </h4>
-                  </div>
-                  <ul className="space-y-1.5 text-[11px] text-slate-400">
-                    <li className="flex items-start space-x-1.5">
-                      <span className="text-[#8CFA96] font-bold">•</span>
-                      <span><strong className="text-white">Collector Levels:</strong> As you mark episodes watched, you gain watch time and level up your profile rank—from Novice (Level 1) all the way up to Legend (Level 5).</span>
-                    </li>
-                    <li className="flex items-start space-x-1.5">
-                      <span className="text-[#8CFA96] font-bold">•</span>
-                      <span><strong className="text-white">Cloud Sync:</strong> Mint TV works completely offline out of the box. To backup and sync your progress across multiple devices, tap your profile avatar and select Log In / Sign Up under Cloud Backup & Sync.</span>
-                    </li>
-                    <li className="flex items-start space-x-1.5">
-                      <span className="text-[#8CFA96] font-bold">•</span>
-                      <span><strong className="text-white">Manual Backups:</strong> You can export a .json backup file at any time from your profile menu to keep a local hard copy of your library.</span>
-                    </li>
-                  </ul>
                 </div>
               </div>
             )}
 
-           {/* TAB 2: BRAND-NEW USER FAQ */}
             {helpSubTab === 'faq' && (
               <div className="space-y-3 animate-in fade-in">
-                {/* Category 1: Getting Started & Clarifications */}
                 <div className="space-y-2">
                   <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#8CFA96] block ml-2">
                     Getting Started & Clarifications
@@ -1252,71 +1054,8 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
 
                   <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
                     <h4 className="text-[11px] font-bold text-white">Can I watch or stream TV episodes directly inside Mint TV?</h4>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      No. Mint TV is a dedicated progress tracker, release schedule guide, and discovery tool. It keeps track of what you’ve watched, when new episodes air, and where to find recommendations, but it does not host or stream video content.
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
-                    <h4 className="text-[11px] font-bold text-white">How do I set my progress if I’m already halfway through a show?</h4>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      When you add a show, tap its card to open <strong className="text-slate-300">Show Details</strong>. Select your current season using the top season tabs, then tap the <strong className="text-slate-300">Finale</strong> badge on any previous season to mark all its episodes completed in one tap. From there, simply adjust to your exact episode.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Category 2: Managing Your Queues & Lists */}
-                <div className="space-y-2 pt-2 border-t border-slate-800">
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#8CFA96] block ml-2">
-                    Managing Your Queues & Lists
-                  </span>
-
-                  <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
-                    <h4 className="text-[11px] font-bold text-white">What’s the difference between "Watch Later" and my main "Watchlist"?</h4>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Think of <strong className="text-slate-300">Watch Later</strong> as a temporary holding deck for shows you might want to check out later without cluttering your main screen. Your <strong className="text-slate-300">Watchlist</strong> (and <strong className="text-slate-300">Ready to Watch</strong>) is for shows you are actively tracking and watching on a regular basis.
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
-                    <h4 className="text-[11px] font-bold text-white">Why did a show disappear from "Ready" and move to "Caught Up"?</h4>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      When you finish the latest available episode of an ongoing series, Mint TV moves it to <strong className="text-slate-300">Caught Up</strong> so your daily queue stays clean and manageable. You don't need to do anything - as soon as a brand-new episode airs, the show will automatically pop back into <strong className="text-slate-300">Ready to Watch</strong>!
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
-                    <h4 className="text-[11px] font-bold text-white">What should I send to the "RetroVision" museum vault?</h4>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      <strong className="text-slate-300">RetroVision</strong> acts as your personal lifetime TV archive. When an active series completely ends or gets canceled, it automatically moves here. You can also manually add older shows you finished years ago to maintain a full history of every series you've experienced without polluting your active queue or skewing your active tracking stats!
-                    </p>
-                  </div>
-                </div>
-
-                {/* Category 3: Fixing Mistakes & Customization */}
-                <div className="space-y-2 pt-2 border-t border-slate-800">
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#8CFA96] block ml-2">
-                    Fixing Mistakes & Customization
-                  </span>
-
-                  <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
-                    <h4 className="text-[11px] font-bold text-white">What if I accidentally mark an episode as watched?</h4>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Simply tap the show card to open <strong className="text-slate-300">Show Details</strong>. You can tap any individual episode number to set your progress back, or tap <strong className="text-slate-300">Premiere</strong> on Episode 1 of a season if you want to reset that entire season back to the beginning.
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
-                    <h4 className="text-[11px] font-bold text-white">How do I stop seeing certain types of shows in my "For You" feed?</h4>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Tap your <strong className="text-slate-300">Profile Avatar</strong> in the top header and open <strong className="text-slate-300">Manage Genre Preferences</strong>. You can tap <strong className="text-slate-300">–</strong> on genres you dislike to mute them, or use the <strong className="text-slate-300">Discovery Tuning Rules</strong> checkboxes to filter out specific content like Reality TV or True Crime docuseries.
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
-                    <h4 className="text-[11px] font-bold text-white">Do I need to create an account, and is my data safe?</h4>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      No account is required! Mint TV works 100% offline out of the box using your device's local storage. Creating a free cloud account is completely optional and simply allows you to backup and sync your watchlist across multiple phones or tablets. You can also manually export a <code className="text-[#8CFA96]">.json</code> backup file at any time to keep a personal hard copy of your data.
+                    <p className="text-[11px] text-slate-300 leading-relaxed">
+                      No. Mint TV is a dedicated progress tracker, release schedule guide, and discovery tool.
                     </p>
                   </div>
                 </div>
@@ -1326,16 +1065,16 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
         )}
       </div>
 
-      {/* POP-UP INFO CARD FOR LEVEL SYSTEM EXPLANATION */}
+      {/* POP-UP LEVEL CARD */}
       {showLevelInfo && (
-        <div className="rounded-2xl border border-slate-700 bg-slate-900 p-4 text-left shadow-2xl space-y-3 transition-all animate-in fade-in zoom-in-95">
+        <div className="rounded-2xl border border-slate-600 bg-slate-900 p-4 text-left shadow-2xl space-y-3 transition-all animate-in fade-in">
           <div className="flex items-center justify-between border-b border-slate-800 pb-2">
             <span className="text-xs font-black uppercase tracking-wider text-[#8CFA96]">
               Collector Level System
             </span>
             <button
               onClick={() => setShowLevelInfo(false)}
-              className="text-xs font-bold text-slate-400 hover:text-white"
+              className="text-xs font-bold text-slate-300 hover:text-white"
             >
               ✕
             </button>
@@ -1353,38 +1092,14 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
               />
             </div>
           </div>
-
-          <div className="space-y-1.5 pt-1 text-[11px] font-bold">
-            <div className="flex justify-between text-slate-400">
-              <span>Level 1: NOVICE</span>
-              <span>0 - 249 eps</span>
-            </div>
-            <div className="flex justify-between text-[#8CFA96]">
-              <span>Level 2: MARATHONER</span>
-              <span>250 - 999 eps</span>
-            </div>
-            <div className="flex justify-between text-cyan-300">
-              <span>Level 3: AUTEUR</span>
-              <span>1,000 - 2,499 eps</span>
-            </div>
-            <div className="flex justify-between text-purple-300">
-              <span>Level 4: CULTIST</span>
-              <span>2,500 - 4,999 eps</span>
-            </div>
-            <div className="flex justify-between text-amber-300">
-              <span>Level 5: LEGEND</span>
-              <span>5,000+ eps</span>
-            </div>
-          </div>
         </div>
       )}
 
       {/* DATA & ACCOUNT MANAGEMENT CARD */}
       <div className="-mx-3 sm:-mx-4 overflow-hidden rounded-2xl border border-slate-800 bg-[#1E293B] shadow-lg">
-        {/* CLOUD SYNC CONTROL SECTION */}
         <div className="px-4 py-3 border-b border-slate-800 bg-slate-900/50 flex justify-between items-center">
           <div>
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-300 block">
               Cloud Backup & Sync
             </span>
             <span className="text-xs font-semibold text-slate-200">
@@ -1402,20 +1117,19 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
           ) : (
             <button
               onClick={onOpenAuth}
-              className="rounded-lg border border-[#8CFA96]/40 bg-[#8CFA96]/10 px-3 py-1.5 text-xs font-bold text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-950 transition-all"
+              className="rounded-lg border border-[#8CFA96] bg-[#8CFA96]/10 px-3 py-1.5 text-xs font-bold text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-950 transition-all"
             >
               Log In / Sign Up
             </button>
           )}
         </div>
 
-        {/* PUSH NOTIFICATION SETTING ROW */}
         <div className="px-4 py-3 border-b border-slate-800 bg-slate-900/30 flex justify-between items-center">
           <div className="space-y-0.5 pr-4">
             <span className="text-xs font-bold text-slate-200 block">
               Episode Air Date Alerts
             </span>
-            <span className="text-[10px] text-slate-400 block">
+            <span className="text-[10px] text-slate-300 block">
               Get notified when shows on your watchlist release new episodes
             </span>
           </div>
@@ -1423,8 +1137,9 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
           <button
             type="button"
             onClick={handlePushToggle}
+            aria-label="Toggle Episode Air Date Alerts"
             className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-              pushEnabled ? 'bg-[#8CFA96]' : 'bg-slate-800'
+              pushEnabled ? 'bg-[#8CFA96]' : 'bg-slate-700'
             }`}
           >
             <span
@@ -1435,9 +1150,8 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
           </button>
         </div>
 
-        {/* MANUAL BACKUP SECTION */}
         <div className="px-4 pt-2 pb-1 text-left bg-slate-900/30 border-b border-slate-800/80">
-          <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-500">
+          <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-300">
             Manual File Backup
           </span>
         </div>
@@ -1464,7 +1178,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
       </div>
 
       {/* COPYRIGHT TEXT */}
-      <div className="pt-3 pb-0 text-center text-[8px] font-medium text-slate-500 uppercase tracking-widest">
+      <div className="pt-3 pb-0 text-center text-[10px] font-medium text-slate-300 uppercase tracking-widest">
         © {new Date().getFullYear()} Mint Logic LLC. All rights reserved.
       </div>
     </div>

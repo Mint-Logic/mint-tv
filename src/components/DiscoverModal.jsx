@@ -51,7 +51,7 @@ export function DiscoverModal({ isOpen, onClose, onAddShow }) {
           </h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white text-xs font-bold p-1"
+            className="text-slate-300 hover:text-white text-xs font-bold p-1"
           >
             ✕ Close
           </button>
@@ -108,7 +108,7 @@ export function DiscoverModal({ isOpen, onClose, onAddShow }) {
                         >
                           {show.name}
                         </h3>
-                        <div className="flex items-center space-x-2 text-[10px] text-slate-400 mt-0.5">
+                        <div className="flex items-center space-x-2 text-[10px] text-slate-300 mt-0.5">
                           <span className="text-amber-400 font-bold">★ {show.vote_average?.toFixed(1) || 'N/A'}</span>
                           <span>•</span>
                           <span>{show.first_air_date ? show.first_air_date.split('-')[0] : 'N/A'}</span>
@@ -170,7 +170,7 @@ export function DiscoverModal({ isOpen, onClose, onAddShow }) {
                           </a>
                         </div>
 
-                        <span className="text-[10px] text-slate-400">
+                        <span className="text-[10px] text-slate-300">
                           Aired: {show.first_air_date || 'N/A'}
                         </span>
                       </div>

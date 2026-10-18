@@ -105,7 +105,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
 
   if (loading) {
     return (
-      <div className="py-20 text-center text-xs font-bold text-slate-500">
+      <div className="py-20 text-center text-xs font-bold text-slate-300">
         Checking episode progress...
       </div>
     );
@@ -119,10 +119,11 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
           <button
             type="button"
             onClick={() => setSubTab('ready')}
+            aria-label={`View Ready to Watch shows (${airedQueue.length})`}
             className={`flex items-center justify-center space-x-1 px-4 transition-colors ${
               subTab === 'ready'
                 ? 'text-[#8CFA96]'
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-300 hover:text-white'
             }`}
           >
             <svg className="h-4 w-4 fill-current shrink-0" viewBox="0 0 24 24">
@@ -134,10 +135,11 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
           <button
             type="button"
             onClick={() => setSubTab('caughtup')}
+            aria-label={`View Caught Up shows (${completedQueue.length})`}
             className={`flex items-center justify-center space-x-1 px-2 transition-colors ${
               subTab === 'caughtup'
                 ? 'text-[#8CFA96]'
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-300 hover:text-white'
             }`}
           >
             <svg className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -153,8 +155,8 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
         <div className="space-y-2">
           {airedQueue.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-800 py-12 px-4 text-center">
-              <p className="text-sm font-medium text-slate-400">All caught up!</p>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="text-sm font-medium text-slate-300">All caught up!</p>
+              <p className="mt-1 text-xs text-slate-300">
                 No unwatched episodes waiting in your queue.
               </p>
             </div>
@@ -185,7 +187,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
                         S{String(season).padStart(2, '0')} • E{String(episode).padStart(2, '0')}
                       </span>
                       {show.network && (
-                        <span className="rounded-md border border-slate-700/80 bg-slate-900/90 px-2 py-0.5 text-[10px] font-extrabold uppercase text-slate-300 backdrop-blur-md shadow-md">
+                        <span className="rounded-md border border-slate-700 bg-slate-900/90 px-2 py-0.5 text-[10px] font-extrabold uppercase text-slate-300 backdrop-blur-md shadow-md">
                           {show.network}
                         </span>
                       )}
@@ -194,7 +196,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
                     <button
                       type="button"
                       title="Remove show from watchlist"
-                      aria-label="Remove show from watchlist"
+                      aria-label={`Remove ${show.name} from watchlist`}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -229,7 +231,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
                         onAdvanceEpisode(show.id);
                       }}
                       title="Mark episode as watched"
-                      aria-label="Mark episode as watched"
+                      aria-label={`Mark Season ${season} Episode ${episode} of ${show.name} as watched`}
                       className="group flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-[#8CFA96] transition-all hover:bg-[#8CFA96]"
                     >
                       <svg
@@ -254,8 +256,8 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
         <div className="space-y-2">
           {completedQueue.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-800 py-12 px-4 text-center">
-              <p className="text-sm font-medium text-slate-400">No completed active shows!</p>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="text-sm font-medium text-slate-300">No completed active shows!</p>
+              <p className="mt-1 text-xs text-slate-300">
                 Shows in ongoing series move here automatically when caught up. Ended series auto-archive to RetroVision.
               </p>
             </div>
@@ -277,7 +279,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
                         className="h-12 w-9 rounded object-cover shrink-0"
                       />
                     ) : (
-                      <div className="h-12 w-9 rounded bg-slate-800 shrink-0 flex items-center justify-center text-[8px] text-slate-600">
+                      <div className="h-12 w-9 rounded bg-slate-800 shrink-0 flex items-center justify-center text-[8px] text-slate-300">
                         No Image
                       </div>
                     )}
@@ -294,7 +296,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
                     </div>
                   </div>
 
-                  <span className="text-[10px] font-bold text-slate-400 bg-slate-800 px-2.5 py-0.5 rounded border border-slate-700 shrink-0">
+                  <span className="text-[10px] font-bold text-slate-300 bg-slate-800 px-2.5 py-0.5 rounded border border-slate-700 shrink-0">
                     Caught Up
                   </span>
                 </div>

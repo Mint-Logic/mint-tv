@@ -86,7 +86,7 @@ export function UpcomingQueue({ watchlist, onRemoveShow, onSelectShow }) {
 
   if (loading) {
     return (
-      <div className="py-20 text-center text-xs font-bold text-slate-500">
+      <div className="py-20 text-center text-xs font-bold text-slate-300">
         Checking upcoming air dates & production status...
       </div>
     );
@@ -96,11 +96,10 @@ export function UpcomingQueue({ watchlist, onRemoveShow, onSelectShow }) {
 
   return (
     <div className="space-y-2">
-      {/* Header Bar with Clapperboard SVG */}
+      {/* Header Bar */}
       <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-2 space-y-2">
         <div className="flex w-full items-center justify-between rounded-xl border border-slate-800 bg-[#1E293B] px-4 py-2.5 text-xs font-bold shadow-md text-slate-300">
           <div className="flex items-center space-x-1">
-            {/* Vector Clapperboard Icon */}
             <svg className="h-3.5 w-3.5 shrink-0 text-[#8CFA96]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
               <path d="M4 11v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8H4z" />
               <path d="M4 11V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4H4z" />
@@ -115,8 +114,8 @@ export function UpcomingQueue({ watchlist, onRemoveShow, onSelectShow }) {
 
       {totalUpcoming === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-800 py-12 px-4 text-center">
-          <p className="text-sm font-medium text-slate-400">No upcoming air dates or renewed series</p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="text-sm font-medium text-slate-300">No upcoming air dates or renewed series</p>
+          <p className="mt-1 text-xs text-slate-300">
             Shows on hiatus or with scheduled release dates will appear here automatically.
           </p>
         </div>
@@ -143,7 +142,7 @@ export function UpcomingQueue({ watchlist, onRemoveShow, onSelectShow }) {
           {inProductionShows.length > 0 && (
             <div className="space-y-2 pt-2">
               <h3 className="text-[11px] font-black uppercase tracking-wider text-amber-400 px-1">
-              Renewed & In Production ({inProductionShows.length})
+                Renewed & In Production ({inProductionShows.length})
               </h3>
               {inProductionShows.map((show) => (
                 <InProductionCompactCard
@@ -185,7 +184,7 @@ function ScheduledCard({ show, onSelectShow, onRemoveShow }) {
           <span className="rounded-md border border-slate-700 bg-slate-900/90 px-2.5 py-1 text-xs font-extrabold text-[#8CFA96] backdrop-blur-md shadow-md">
             Airs: {show.airDate}
           </span>
-          <span className="rounded-md border border-slate-700/80 bg-slate-900/90 px-2 py-0.5 text-[10px] font-extrabold uppercase text-slate-300 backdrop-blur-md shadow-md">
+          <span className="rounded-md border border-slate-700 bg-slate-900/90 px-2 py-0.5 text-[10px] font-extrabold uppercase text-slate-300 backdrop-blur-md shadow-md">
             S{String(season).padStart(2, '0')} • E{String(episode).padStart(2, '0')}
           </span>
         </div>
@@ -193,7 +192,7 @@ function ScheduledCard({ show, onSelectShow, onRemoveShow }) {
         <button
           type="button"
           title="Remove show from watchlist"
-          aria-label="Remove show from watchlist"
+          aria-label={`Remove ${show.name} from upcoming queue`}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -210,7 +209,7 @@ function ScheduledCard({ show, onSelectShow, onRemoveShow }) {
       <div className="p-3">
         <div className="flex items-center justify-between">
           <span className="text-xs font-extrabold text-slate-300 truncate">{show.name}</span>
-          <span className="rounded bg-slate-800 border border-slate-700 px-2 py-0.5 text-[9px] font-bold text-slate-400 shrink-0">
+          <span className="rounded bg-slate-800 border border-slate-700 px-2 py-0.5 text-[9px] font-bold text-slate-300 shrink-0">
             {show.network}
           </span>
         </div>
@@ -238,7 +237,7 @@ function InProductionCompactCard({ show, onSelectShow, onRemoveShow }) {
             className="h-10 w-7 rounded object-cover shrink-0 shadow-sm"
           />
         ) : (
-          <div className="h-10 w-7 rounded bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600">
+          <div className="h-10 w-7 rounded bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-300">
             N/A
           </div>
         )}
@@ -249,7 +248,7 @@ function InProductionCompactCard({ show, onSelectShow, onRemoveShow }) {
             <span className="text-[9px] font-bold text-amber-400 bg-amber-400/10 px-1.5 py-0.2 rounded border border-amber-400/20 shrink-0">
               In Production
             </span>
-            <span className="text-[9px] text-slate-400 truncate">
+            <span className="text-[9px] text-slate-300 truncate">
               {show.network}
             </span>
           </div>
@@ -259,6 +258,7 @@ function InProductionCompactCard({ show, onSelectShow, onRemoveShow }) {
       <button
         type="button"
         title="Remove show"
+        aria-label={`Remove ${show.name}`}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();

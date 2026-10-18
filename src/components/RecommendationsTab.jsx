@@ -11,10 +11,8 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
   const [expandedShowId, setExpandedShowId] = useState(null);
   const [page, setPage] = useState(1);
 
-  // Global Era Filter State
   const [selectedEra, setSelectedEra] = useState('all');
 
-  // Session cache to prevent duplicate titles during a session
   const sessionSeenIds = useRef(new Set());
   const isFetchingRef = useRef(false);
 
@@ -29,7 +27,6 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
     { id: 'vintage', label: '1950s–60s' },
   ];
 
-  // Watch Later Queue
   const [watchLater, setWatchLater] = useState(() => {
     const saved = localStorage.getItem('mint_tv_watch_later_new');
     return saved ? JSON.parse(saved) : [];
@@ -79,7 +76,6 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
       setIsLoadingMore(true);
     }
 
-    const englishOnly = localStorage.getItem('mint_tv_english_only') === 'true';
     const activeEra = eraOverride || selectedEra;
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     const likedGenres = JSON.parse(localStorage.getItem('mint_tv_liked_genres') || '[]');
@@ -106,7 +102,6 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
         if (likedGenres.length > 0) url += `&with_genres=${likedGenres.join('|')}`;
         if (mutedGenres.length > 0) url += `&without_genres=${mutedGenres.join(',')}`;
 
-        // Apply Era Bounds
         if (activeEra === '2020s') url += '&first_air_date.gte=2020-01-01';
         else if (activeEra === '2010s') url += '&first_air_date.gte=2010-01-01&first_air_date.lte=2019-12-31';
         else if (activeEra === '2000s') url += '&first_air_date.gte=2000-01-01&first_air_date.lte=2009-12-31';
@@ -148,7 +143,6 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
             return false;
           }
 
-          // English Audio Guardrail
           if (excludeForeign && show.original_language && show.original_language !== 'en') {
             return false;
           }
@@ -159,7 +153,6 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
             show.original_language === 'ja' || 
             (show.origin_country && show.origin_country.includes('JP'));
 
-          // Strict Anime Filter: Excludes any Animated show that is Japanese
           if (excludeAnime && isAnimation && isJapanese) {
             return false;
           }
@@ -203,7 +196,6 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
       );
 
       if (isLoadMore) {
-        // Appends new suggestions directly into the visible feed
         setFeedShows((prev) => [...prev, ...hydratedShows.slice(0, 20)]);
         setBufferShows((prev) => [...prev, ...hydratedShows.slice(20)]);
         setPage(currentPage);
@@ -298,7 +290,6 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
     e.preventDefault();
     e.stopPropagation();
 
-    // If we already have items buffered, dump them straight to the feed first
     if (bufferShows.length > 0) {
       const toAdd = bufferShows.slice(0, 20);
       setFeedShows((prev) => [...prev, ...toAdd]);
@@ -330,8 +321,9 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
         <div className="flex w-full items-center justify-evenly rounded-xl border border-slate-800 bg-[#1E293B] py-2.5 text-[11px] sm:text-xs font-bold shadow-md">
           <button
             onClick={() => setSubTab('feed')}
+            aria-label="View Recommendation Feed"
             className={`flex items-center justify-center space-x-1 px-4 transition-colors ${
-              subTab === 'feed' ? 'text-[#8CFA96]' : 'text-slate-400 hover:text-white'
+              subTab === 'feed' ? 'text-[#8CFA96]' : 'text-slate-300 hover:text-white'
             }`}
           >
             <svg className="h-3 w-3 fill-current shrink-0" viewBox="0 0 24 24">
@@ -342,8 +334,9 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
 
           <button
             onClick={() => setSubTab('watchlater')}
+            aria-label={`View Watch Later Queue (${watchLater.length})`}
             className={`flex items-center justify-center space-x-1 px-4 transition-colors ${
-              subTab === 'watchlater' ? 'text-[#8CFA96]' : 'text-slate-400 hover:text-white'
+              subTab === 'watchlater' ? 'text-[#8CFA96]' : 'text-slate-300 hover:text-white'
             }`}
           >
             <svg className="h-3 w-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -363,10 +356,11 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
             <button
               key={era.id}
               onClick={() => handleEraSelect(era.id)}
+              aria-label={`Filter feed by era ${era.label}`}
               className={`px-3 py-1 rounded-full text-[10px] font-bold whitespace-nowrap shrink-0 transition-all ${
                 selectedEra === era.id
                   ? 'bg-[#8CFA96] text-slate-900 shadow-sm'
-                  : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'
+                  : 'bg-slate-800 text-slate-300 hover:text-white border border-slate-700'
               }`}
             >
               {era.label}
@@ -379,12 +373,12 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
       {subTab === 'feed' && (
         <div className="space-y-2">
           {loading ? (
-            <div className="py-12 text-center text-[11px] font-bold text-slate-500 animate-pulse">
+            <div className="py-12 text-center text-[11px] font-bold text-slate-300 animate-pulse">
               Curating feed...
             </div>
           ) : feedShows.length === 0 ? (
             <div className="rounded-xl border border-dashed border-slate-800 py-8 text-center space-y-2">
-              <p className="text-xs text-slate-400">End of recommendations for this era.</p>
+              <p className="text-xs text-slate-300">End of recommendations for this era.</p>
               <button onClick={() => handleEraSelect('all')} className="text-xs font-bold text-[#8CFA96] underline">
                 Show All Eras
               </button>
@@ -410,7 +404,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                       {posterUrl ? (
                         <img src={posterUrl} alt={show.name} className="h-22 w-14 rounded-lg object-cover shrink-0 bg-slate-900 shadow-sm" />
                       ) : (
-                        <div className="h-22 w-14 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600 shadow-sm">
+                        <div className="h-22 w-14 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-300 shadow-sm">
                           N/A
                         </div>
                       )}
@@ -437,6 +431,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                                 e.stopPropagation(); 
                                 handleBlacklist(show.id); 
                               }}
+                              aria-label={`Hide ${show.name} from feed`}
                               className="p-1 -mr-1 flex items-center justify-center text-rose-700 transition-transform active:scale-90 shrink-0"
                               title="Hide Show"
                             >
@@ -447,7 +442,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                             </button>
                           </div>
 
-                          <div className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-400 flex-wrap">
+                          <div className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-300 flex-wrap">
                             <span className="text-amber-400 font-bold shrink-0">★ {show.vote_average?.toFixed(1) || 'N/A'}</span>
                             <span className="shrink-0">•</span>
                             <span className="shrink-0">{show.first_air_date ? show.first_air_date.split('-')[0] : 'N/A'}</span>
@@ -463,7 +458,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                             <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-tight border ${
                               isOnAir
                                 ? 'bg-emerald-500/10 text-[#8CFA96] border-[#8CFA96]/30'
-                                : 'bg-slate-800 text-slate-400 border-slate-700'
+                                : 'bg-slate-800 text-slate-300 border-slate-700'
                             }`}>
                               {isOnAir ? 'On Air' : show.status || 'Ended'}
                             </span>
@@ -484,6 +479,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                               e.stopPropagation(); 
                               handleSaveWatchLater(show); 
                             }}
+                            aria-label={`Save ${show.name} for Watch Later`}
                             className="p-1 flex items-center justify-center text-slate-300 hover:text-white transition-transform active:scale-90"
                             title="Save for Watch Later"
                           >
@@ -499,6 +495,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                               e.stopPropagation(); 
                               handleDirectToWatchlist(show); 
                             }}
+                            aria-label={`Add ${show.name} directly to Watchlist`}
                             className="p-1 flex items-center justify-center text-[#8CFA96] transition-transform active:scale-90"
                             title="Add directly to Watchlist"
                           >
@@ -514,6 +511,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                               e.stopPropagation(); 
                               handleSaveAttic(show); 
                             }}
+                            aria-label={`Move ${show.name} to RetroVision`}
                             className="p-1 flex items-center justify-center transition-transform active:scale-90"
                             title="Move to RetroVision"
                           >
@@ -548,7 +546,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                             <a href={imdbSearchUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-[9px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 px-2 py-.5 rounded border border-amber-400/30 transition-all whitespace-nowrap">IMDB</a>
                             <a href={rtSearchUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-[9px] font-black uppercase tracking-wider text-red-400 bg-red-500/10 hover:bg-red-500/20 px-2 py-.5 rounded border border-red-500/30 transition-all whitespace-nowrap">ROTTEN TOMATOES</a>
                           </div>
-                          <span className="text-[9px] text-slate-400 font-medium shrink-0 ml-auto whitespace-nowrap">
+                          <span className="text-[9px] text-slate-300 font-medium shrink-0 ml-auto whitespace-nowrap">
                             Aired: {show.first_air_date || 'N/A'}
                           </span>
                         </div>
@@ -562,7 +560,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                 type="button"
                 onClick={handleMoreSuggestionsClick}
                 disabled={isLoadingMore}
-                className="w-full py-2.5 rounded-lg border border-slate-800 bg-slate-900 text-xs font-bold text-slate-400 hover:text-white transition-all mt-2 disabled:opacity-50 cursor-pointer flex items-center justify-center space-x-2"
+                className="w-full py-2.5 rounded-lg border border-slate-800 bg-slate-900 text-xs font-bold text-slate-300 hover:text-white transition-all mt-2 disabled:opacity-50 cursor-pointer flex items-center justify-center space-x-2"
               >
                 {isLoadingMore ? (
                   <>
@@ -583,10 +581,10 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
         <div className="space-y-2 mt-2">
           {filteredWatchLater.length === 0 ? (
             <div className="rounded-xl border border-dashed border-slate-800 py-10 text-center space-y-1">
-              <p className="text-sm font-medium text-slate-400">
+              <p className="text-sm font-medium text-slate-300">
                 {selectedEra === 'all' ? 'Your queue is empty' : `No items in Watch Later for ${selectedEra}`}
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-300">
                 {selectedEra === 'all' ? 'Save shows here to decide on them later.' : 'Try selecting "All Eras" to view your saved queue.'}
               </p>
             </div>
@@ -603,7 +601,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                     {posterUrl ? (
                       <img src={posterUrl} alt={show.name} className="h-16 w-11 rounded-lg object-cover shrink-0 bg-slate-900 shadow-sm" />
                     ) : (
-                      <div className="h-16 w-11 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-600 shadow-sm">N/A</div>
+                      <div className="h-16 w-11 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-300 shadow-sm">N/A</div>
                     )}
                     
                     <div className="w-0 flex-1 flex flex-col justify-between self-stretch">
@@ -628,6 +626,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                               e.stopPropagation(); 
                               setWatchLater(prev => prev.filter(s => s.id !== show.id)); 
                             }}
+                            aria-label={`Drop ${show.name} from Watch Later`}
                             className="p-1 -mr-1 flex items-center justify-center text-rose-700 transition-transform active:scale-90 shrink-0"
                             title="Drop Show"
                           >
@@ -637,7 +636,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                           </button>
                         </div>
 
-                        <div className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-400 flex-wrap">
+                        <div className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-300 flex-wrap">
                           <span className="text-amber-400 font-bold shrink-0">★ {show.vote_average?.toFixed(1) || 'N/A'}</span>
                           {show.network && (
                             <>
@@ -651,7 +650,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                           <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-tight border ${
                             isOnAir
                               ? 'bg-emerald-500/10 text-[#8CFA96] border-[#8CFA96]/30'
-                              : 'bg-slate-800 text-slate-400 border-slate-700'
+                              : 'bg-slate-800 text-slate-300 border-slate-700'
                           }`}>
                             {isOnAir ? 'On Air' : show.status || 'Ended'}
                           </span>
@@ -671,6 +670,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                             e.stopPropagation(); 
                             handlePromoteToWatchlist(show); 
                           }}
+                          aria-label={`Promote ${show.name} to Watchlist`}
                           className="p-1 flex items-center justify-center text-[#8CFA96] transition-transform active:scale-90"
                           title="Add to Watchlist"
                         >
@@ -686,6 +686,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                             e.stopPropagation(); 
                             handleMoveWLtoAttic(show); 
                           }}
+                          aria-label={`Move ${show.name} to RetroVision`}
                           className="p-1 flex items-center justify-center transition-transform active:scale-90"
                           title="Move to RetroVision"
                         >
@@ -706,7 +707,7 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                         <div className="flex items-center gap-1.5 shrink-0">
                           <a href={imdbSearchUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 px-2 py-1 rounded border border-amber-400/30 whitespace-nowrap">IMDB</a>
                         </div>
-                        <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">Aired: {show.first_air_date || 'N/A'}</span>
+                        <span className="text-[10px] text-slate-300 font-medium whitespace-nowrap">Aired: {show.first_air_date || 'N/A'}</span>
                       </div>
                     </div>
                   )}

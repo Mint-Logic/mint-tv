@@ -41,7 +41,11 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess }) {
           <h2 className="text-sm font-extrabold text-white uppercase tracking-wider">
             {isSignUp ? 'Create Cloud Account' : 'Cloud Sync Login'}
           </h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-white text-xs font-bold p-1">
+          <button 
+            onClick={onClose} 
+            aria-label="Close modal"
+            className="text-slate-300 hover:text-white text-xs font-bold p-1 focus:outline-none focus:ring-2 focus:ring-[#8CFA96] rounded"
+          >
             ✕ Close
           </button>
         </div>
@@ -54,19 +58,19 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess }) {
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="text-[10px] font-bold text-slate-400 block mb-1">Email Address</label>
+            <label className="text-[10px] font-bold text-slate-300 block mb-1">Email Address</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-bold text-white focus:border-[#8CFA96] focus:outline-none"
+              className="w-full rounded-xl border border-slate-500 bg-slate-900 px-3 py-2 text-xs font-bold text-white focus:border-[#8CFA96] focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="text-[10px] font-bold text-slate-400 block mb-1">Password</label>
+            <label className="text-[10px] font-bold text-slate-300 block mb-1">Password</label>
             <div className="relative flex items-center">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -75,22 +79,21 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full rounded-xl border border-slate-700 bg-slate-900 pl-3 pr-10 py-2 text-xs font-bold text-white focus:border-[#8CFA96] focus:outline-none"
+                className="w-full rounded-xl border border-slate-500 bg-slate-900 pl-3 pr-10 py-2 text-xs font-bold text-white focus:border-[#8CFA96] focus:outline-none"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 text-slate-400 hover:text-[#8CFA96] transition-colors p-1 flex items-center justify-center select-none"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute right-3 text-slate-300 hover:text-[#8CFA96] transition-colors p-1 flex items-center justify-center select-none"
                 title={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
-                  /* Clean, Balanced Eye-Off Icon */
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                     <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
                     <line x1="1" y1="1" x2="23" y2="23" />
                   </svg>
                 ) : (
-                  /* Clean Eye Icon */
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                     <circle cx="12" cy="12" r="3" />
@@ -103,7 +106,7 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-[#8CFA96] py-2.5 text-xs font-black text-slate-950 hover:bg-[#7be685] transition-all disabled:opacity-50"
+            className="w-full rounded-xl bg-[#8CFA96] py-2.5 text-xs font-black text-slate-950 hover:bg-[#7be685] transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[#8CFA96]"
           >
             {loading ? 'Processing...' : isSignUp ? 'Create Account' : 'Sign In'}
           </button>

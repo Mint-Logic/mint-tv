@@ -63,7 +63,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
 
   if (loading) {
     return (
-      <div className="py-20 text-center text-slate-400 text-sm font-medium">
+      <div className="py-20 text-center text-slate-300 text-sm font-medium">
         Loading show details from TMDB...
       </div>
     );
@@ -71,7 +71,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
 
   if (!details) {
     return (
-      <div className="py-20 text-center text-slate-400 text-sm font-medium space-y-3">
+      <div className="py-20 text-center text-slate-300 text-sm font-medium space-y-3">
         <p>Unable to load show details.</p>
         <button onClick={onBack} className="text-[#8CFA96] font-bold text-xs underline">
           Go Back
@@ -118,7 +118,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
 
   return (
     <div className="space-y-4 pb-12">
-      {/* STICKY BACK BUTTON CONTAINER (ALIGNED TOP RIGHT) */}
+      {/* STICKY BACK BUTTON CONTAINER */}
       <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-3 flex justify-end">
         <button
           onClick={onBack}
@@ -130,9 +130,9 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
 
       {/* Hero Backdrop & Show Info */}
       <div 
-  onClick={() => setIsOverviewExpanded(!isOverviewExpanded)}
-  className="-mt-3 relative z-0 min-h-[14rem] rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl cursor-pointer"
->
+        onClick={() => setIsOverviewExpanded(!isOverviewExpanded)}
+        className="-mt-3 relative z-0 min-h-[14rem] rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl cursor-pointer"
+      >
         {backdropUrl && (
           <img src={backdropUrl} alt={details.name} className="absolute inset-0 -w-90 -h-90 object-cover" />
         )}
@@ -162,7 +162,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
       </div>
 
       {/* STICKY SEASON SELECTION TABS */}
-      <div className="sticky top-[87px] z-30 bg-[#0F172A] -mt-[3px]  pt-2 pb-2 space-y-2 border-b border-slate-800">
+      <div className="sticky top-[87px] z-30 bg-[#0F172A] -mt-[3px] pt-2 pb-2 space-y-2 border-b border-slate-800">
         <div className="flex space-x-2 overflow-x-auto pb-0.5 scrollbar-none touch-pan-x">
           {details.seasons
             ?.filter((s) => s.season_number > 0)
@@ -176,7 +176,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
                   className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
                     isSelected
                       ? 'bg-[#8CFA96] text-slate-900 shadow-sm'
-                      : 'bg-slate-800 text-slate-400 hover:text-white'
+                      : 'bg-slate-800 text-slate-300 hover:text-white'
                   }`}
                 >
                   Season {s.season_number}
@@ -189,14 +189,15 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
       {/* Episode Checklist */}
       <div className="space-y-3">
         <div className="flex justify-between items-center px-1 relative">
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+          <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
             Season {selectedSeason} Episodes ({episodes.length})
           </h3>
 
           <button
             onClick={() => setShowGestureInfo(!showGestureInfo)}
-            className="flex h-5 w-5 items-center justify-center rounded-full border border-slate-700 bg-slate-900 text-[10px] font-black text-slate-400 hover:border-[#8CFA96] hover:text-[#8CFA96] transition-all"
+            className="flex h-5 w-5 items-center justify-center rounded-full border border-slate-600 bg-slate-900 text-[10px] font-black text-slate-300 hover:border-[#8CFA96] hover:text-[#8CFA96] transition-all"
             title="Shortcut Info"
+            aria-label="Shortcut Info"
           >
             i
           </button>
@@ -205,12 +206,12 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
             <div className="absolute right-0 top-7 w-64 rounded-xl border border-slate-700 bg-slate-900 p-3 shadow-2xl z-20 text-[11px] text-slate-300 space-y-1.5">
               <div className="flex justify-between items-center font-bold text-[#8CFA96]">
                 <span>Season Shortcuts</span>
-                <button onClick={() => setShowGestureInfo(false)} className="text-slate-400 hover:text-white">✕</button>
+                <button onClick={() => setShowGestureInfo(false)} className="text-slate-300 hover:text-white">✕</button>
               </div>
-              <p className="text-slate-400 leading-snug">
+              <p className="text-slate-300 leading-snug">
                 <strong className="text-white">Tap 'Finale' Badge</strong> to mark all episodes in this season as watched.
               </p>
-              <p className="text-slate-400 leading-snug">
+              <p className="text-slate-300 leading-snug">
                 <strong className="text-white">Tap 'Premiere' Badge</strong> to mark all episodes in this season as unwatched.
               </p>
             </div>
@@ -286,7 +287,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
                   </div>
 
                   {!isExpanded && (
-                    <p className="text-xs text-slate-400 line-clamp-1 mt-0.5 truncate">
+                    <p className="text-xs text-slate-300 line-clamp-1 mt-0.5 truncate">
                       {ep.overview || 'No overview available.'}
                     </p>
                   )}
@@ -307,7 +308,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
                   className={`w-9 h-9 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
                     isWatched
                       ? 'bg-[#8CFA96] border-[#8CFA96] text-slate-900 font-bold'
-                      : 'border-slate-600 text-slate-500 hover:border-[#8CFA96]'
+                      : 'border-slate-400 text-slate-300 hover:border-[#8CFA96]'
                   }`}
                 >
                   ✓
@@ -326,24 +327,25 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
           );
         })}
       </div>
-      {/* Minimalist TMDB Legal Credit */}
-<div className="pt-8 pb-6 flex flex-col items-center justify-center gap-2 text-center opacity-40 hover:opacity-100 transition-opacity">
-  <a 
-    href="https://www.themoviedb.org" 
-    target="_blank" 
-    rel="noreferrer"
-    className="flex items-center justify-center"
-  >
-    <img
-      src="/tmdb-logo.svg"
-      alt="The Movie Database"
-      className="w-12 h-auto object-contain grayscale brightness-200"
-    />
-  </a>
-  <p className="text-[8px] leading-tight text-slate-400 max-w-[150px]">
-    This product uses the TMDB API but is not endorsed or certified by TMDB.
-  </p>
-</div>
+
+      {/* 508-Compliant TMDB Legal Credit */}
+      <footer className="pt-8 pb-6 flex flex-col items-center justify-center gap-2 text-center">
+        <a 
+          href="https://www.themoviedb.org" 
+          target="_blank" 
+          rel="noreferrer"
+          className="flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#8CFA96] rounded p-0.5"
+        >
+          <img
+            src="/tmdb-logo.svg"
+            alt="The Movie Database"
+            className="w-12 h-auto object-contain brightness-200"
+          />
+        </a>
+        <p className="text-[10px] leading-tight text-slate-300 max-w-[220px]">
+          This product uses the TMDB API but is not endorsed or certified by TMDB.
+        </p>
+      </footer>
     </div>
   );
 }

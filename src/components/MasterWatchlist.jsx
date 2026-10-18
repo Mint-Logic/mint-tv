@@ -31,7 +31,6 @@ export function MasterWatchlist({
     { id: 'completed', label: 'Completed Series Only' },
   ];
 
-  // Hydrate metadata for Active Watchlist
   useEffect(() => {
     async function loadActiveMetadata() {
       const hydrated = await Promise.all(
@@ -62,7 +61,6 @@ export function MasterWatchlist({
     }
   }, [watchlist]);
 
-  // Hydrate metadata for RetroVision
   useEffect(() => {
     async function loadAtticMetadata() {
       const hydrated = await Promise.all(
@@ -93,7 +91,7 @@ export function MasterWatchlist({
 
   if (loading) {
     return (
-      <div className="py-20 text-center text-xs font-bold text-slate-500">
+      <div className="py-20 text-center text-xs font-bold text-slate-300">
         Loading directory...
       </div>
     );
@@ -156,15 +154,15 @@ export function MasterWatchlist({
   return (
     <div className={`space-y-2 ${showAlphabetIndex ? 'pr-5' : ''}`}>
       {/* STICKY CONTROLS CONTAINER */}
-     <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-2 space-y-2">
-        {/* Clean Sub-Tab Header */}
+      <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-2 space-y-2">
         <div className="flex w-full items-center justify-evenly rounded-xl border border-slate-800 bg-[#1E293B] py-2.5 text-[11px] sm:text-xs font-bold shadow-md">
           <button
             onClick={() => setSubTab('active')}
+            aria-label={`View Active Shows (${showsWithMeta.length})`}
             className={`flex items-center justify-center space-x-1 px-1.5 transition-colors ${
               subTab === 'active' 
                 ? 'text-[#8CFA96]' 
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-300 hover:text-white'
             }`}
           >
             <svg className="h-4 w-4 fill-current shrink-0" viewBox="0 0 24 24">
@@ -175,10 +173,11 @@ export function MasterWatchlist({
 
           <button
             onClick={() => setSubTab('attic')}
+            aria-label={`View RetroVision Shows (${atticWithMeta.length})`}
             className={`flex items-center justify-center space-x-1 px-2 transition-colors ${
               subTab === 'attic' 
                 ? 'text-[#8CFA96]' 
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-300 hover:text-white'
             }`}
           >
             <img src={retroVisionLogo} alt="RetroVision" className="h-4 w-4 object-contain shrink-0" />
@@ -190,12 +189,13 @@ export function MasterWatchlist({
         <div className="relative w-full space-y-2">
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            aria-label="Change sorting order"
             className="flex w-full items-center justify-between rounded-xl border border-slate-800 bg-[#1E293B] px-5 py-2.5 text-[11px] sm:text-xs font-semibold text-white transition-all hover:border-slate-700 shadow-md"
           >
             <span className="truncate">
               {SORT_OPTIONS.find((opt) => opt.id === sortMode)?.label}
             </span>
-            <span className="ml-2 text-slate-400">{isDropdownOpen ? '▲' : '▼'}</span>
+            <span className="ml-2 text-slate-300">{isDropdownOpen ? '▲' : '▼'}</span>
           </button>
 
           {isDropdownOpen && (
@@ -219,7 +219,7 @@ export function MasterWatchlist({
         </div>
       </div>
 
-      {/* DYNAMICALLY VERTICALLY CENTERED ALPHABET SIDE INDEX */}
+      {/* ALPHABET SIDE INDEX */}
       {showAlphabetIndex && (
         <div 
           style={{
@@ -231,7 +231,8 @@ export function MasterWatchlist({
             <button
               key={letter}
               onClick={() => scrollToLetter(letter)}
-              className="flex h-[3.4vh] max-h-4.5 min-h-[12px] w-4 items-center justify-center text-[8px] font-black text-slate-400 hover:text-[#8CFA96] transition-all active:scale-125"
+              aria-label={`Jump to letter ${letter}`}
+              className="flex h-[3.4vh] max-h-4.5 min-h-[12px] w-4 items-center justify-center text-[8px] font-black text-slate-300 hover:text-[#8CFA96] transition-all active:scale-125"
             >
               {letter}
             </button>
@@ -243,14 +244,14 @@ export function MasterWatchlist({
       <div className="space-y-2">
         {processedShows.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-800 py-12 px-4 text-center mt-4">
-            <p className="text-sm font-medium text-slate-400">
+            <p className="text-sm font-medium text-slate-300">
               {sortMode === 'completed'
                 ? 'No completed series in this view'
                 : subTab === 'active'
                 ? 'No active shows in library'
                 : 'RetroVision is empty'}
             </p>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-slate-300">
               {subTab === 'active'
                 ? 'Tap "+ Add" above to start tracking shows'
                 : 'Move completed or ended series to RetroVision'}
@@ -314,7 +315,6 @@ function ShowCard({
       onClick={() => onSelectShow(show.id)}
       className="flex items-stretch justify-between gap-3 rounded-2xl border border-slate-800 bg-[#1E293B] p-2 shadow-md cursor-pointer hover:border-slate-700 transition-all overflow-hidden"
     >
-      {/* Left Content (Image & Details) vertically centered */}
       <div className="flex items-center space-x-3 w-0 flex-1 py-0">
         {posterUrl ? (
           <img
@@ -323,7 +323,7 @@ function ShowCard({
             className={`h-15 w-10 rounded-lg object-cover shrink-0 bg-slate-900 shadow ${isAttic ? 'opacity-80' : ''}`}
           />
         ) : (
-          <div className="h-15 w-10 rounded-lg bg-slate-900 shrink-0 flex items-center justify-center text-[9px] text-slate-600">
+          <div className="h-15 w-10 rounded-lg bg-slate-900 shrink-0 flex items-center justify-center text-[9px] text-slate-300">
             No Image
           </div>
         )}
@@ -348,12 +348,12 @@ function ShowCard({
               {show.network}
             </span>
             {sortMode === 'episodes' && show.numberOfEpisodes > 0 && (
-              <span className="rounded bg-slate-800 border border-slate-700 px-1.5 py-0.2 text-[9px] font-semibold text-slate-400 shrink-0">
+              <span className="rounded bg-slate-800 border border-slate-700 px-1.5 py-0.2 text-[9px] font-semibold text-slate-300 shrink-0">
                 {show.numberOfEpisodes} EPs
               </span>
             )}
             {(sortMode === 'age-asc' || sortMode === 'age-desc') && premiereYear && (
-              <span className="rounded bg-slate-800 border border-slate-700 px-1.5 py-0.2 text-[9px] font-semibold text-slate-400 shrink-0">
+              <span className="rounded bg-slate-800 border border-slate-700 px-1.5 py-0.2 text-[9px] font-semibold text-slate-300 shrink-0">
                 Est. {premiereYear}
               </span>
             )}
@@ -361,9 +361,7 @@ function ShowCard({
         </div>
       </div>
 
-      {/* NEW VERTICAL ACTION CLUSTER ON THE RIGHT EDGE */}
       <div className="flex flex-col justify-between items-end shrink-0 self-stretch pl-3 border-l border-slate-800/80 py-0.5">
-       {/* Delete / Remove Icon - Nudged to the left */}
         <button
           type="button"
           onClick={(e) => {
@@ -376,7 +374,7 @@ function ShowCard({
             }
           }}
           title="Remove permanently"
-          // Added mr-1.5 here to push the icon to the left
+          aria-label={`Remove ${show.name} permanently`}
           className="flex items-center justify-center text-rose-700 transition-transform active:scale-90 mr-1"
         >
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -384,7 +382,6 @@ function ShowCard({
           </svg>
         </button>
 
-        {/* Restore/RetroVision Icon - Pushed strictly to Bottom Right */}
         {isAttic ? (
           <button
             type="button"
@@ -394,6 +391,7 @@ function ShowCard({
               onRestoreFromAttic(show);
             }}
             title="Restore to Active Watchlist"
+            aria-label={`Restore ${show.name} to active watchlist`}
             className="flex h-6 w-6 items-center justify-center text-[#8CFA96] transition-transform active:scale-90"
           >
             <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24">
@@ -409,6 +407,7 @@ function ShowCard({
               onMoveToAttic(show);
             }}
             title="Move to RetroVision"
+            aria-label={`Archive ${show.name} to RetroVision`}
             className="flex h-6 w-6 items-center justify-center transition-transform active:scale-90"
           >
             <img src={retroVisionLogo} alt="Send to RetroVision" className="h-5.5 w-5.5 rounded object-cover" />

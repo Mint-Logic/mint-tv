@@ -47,7 +47,8 @@ export function Header({ onOpenSearch, onOpenProfile, hasSeenProfileOnboarding }
       <div className="flex items-center space-x-4">
         <button
           onClick={onOpenSearch}
-          className="flex items-center space-x-1 rounded-md border border-[#8CFA96]/40 bg-[#8CFA96]/10 px-2.5 py-1 text-xs font-extrabold text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-950 transition-all"
+          aria-label="Add Show"
+          className="flex items-center space-x-1 rounded-md border border-[#8CFA96] bg-[#8CFA96]/15 px-2.5 py-1 text-xs font-black text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-950 transition-all focus:outline-none focus:ring-2 focus:ring-[#8CFA96]"
         >
           <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
@@ -59,10 +60,10 @@ export function Header({ onOpenSearch, onOpenProfile, hasSeenProfileOnboarding }
           onClick={onOpenProfile}
           title="Dashboard & Settings"
           aria-label="Dashboard & Settings"
-          className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#8CFA96]/50 bg-slate-900 text-xs font-black text-[#8CFA96] shadow-sm hover:border-[#8CFA96] transition-all"
+          className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#8CFA96] bg-slate-900 text-xs font-black text-[#8CFA96] shadow-sm hover:border-[#8CFA96] focus:outline-none focus:ring-2 focus:ring-[#8CFA96] transition-all"
         >
           {customPhoto ? (
-            <img src={customPhoto} alt="Profile" className="h-full w-full object-cover rounded-full" />
+            <img src={customPhoto} alt="Profile Avatar" className="h-full w-full object-cover rounded-full" />
           ) : (
             <span className="leading-none">{initials}</span>
           )}
