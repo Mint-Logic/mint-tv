@@ -42,16 +42,28 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
     localStorage.setItem('mint_tv_disliked_ids', JSON.stringify(dislikedIds));
   }, [watchLater, dislikedIds]);
 
+  // Hydrate missing posters or network details for Watch Later items
   useEffect(() => {
     async function hydrateList() {
-      const needsHydration = watchLater.some((s) => !s.network || s.numberOfEpisodes === undefined);
+      const needsHydration = watchLater.some(
+        (s) => !s.network || s.numberOfEpisodes === undefined || (!s.poster_path && !s.poster)
+      );
       if (!needsHydration) return;
       const updated = await Promise.all(
         watchLater.map(async (show) => {
-          if (show.network && show.numberOfEpisodes !== undefined && show.numberOfSeasons !== undefined) return show;
+          if (
+            show.network &&
+            show.numberOfEpisodes !== undefined &&
+            show.numberOfSeasons !== undefined &&
+            (show.poster_path || show.poster)
+          ) {
+            return show;
+          }
           const meta = await getShowMetadata(show.id);
           return {
             ...show,
+            poster_path: show.poster_path || show.poster || meta?.poster_path || meta?.poster || null,
+            backdrop_path: show.backdrop_path || show.backdrop || meta?.backdrop_path || meta?.backdrop || null,
             network: meta?.network || null,
             first_air_date: meta?.firstAirDate || meta?.first_air_date || show.first_air_date,
             numberOfEpisodes: meta?.numberOfEpisodes || 0,
@@ -386,8 +398,10 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
           ) : (
             <>
               {feedShows.map((show) => {
-                const posterUrl = show.poster_path ? `${IMAGE_BASE_URL}${show.poster_path}` : '';
-                const backdropUrl = show.backdrop_path ? `${IMAGE_BASE_URL}${show.backdrop_path}` : '';
+                const posterPath = show.poster_path || show.poster;
+                const backdropPath = show.backdrop_path || show.backdrop;
+                const posterUrl = posterPath ? `${IMAGE_BASE_URL}${posterPath}` : '';
+                const backdropUrl = backdropPath ? `${IMAGE_BASE_URL}${backdropPath}` : '';
                 const isExpanded = expandedShowId === show.id;
 
                 const imdbSearchUrl = `https://www.imdb.com/find?q=${encodeURIComponent(show.name)}`;
@@ -528,8 +542,8 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                     {isExpanded && (
                       <div className="border-t border-slate-800 bg-slate-900/80 p-3 space-y-2.5 animate-in fade-in">
                         {backdropUrl && (
-                          <div className="relative h-32 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-950">
-                            <img src={backdropUrl} alt={show.name} className="h-full w-full object-cover" />
+                          <div className="relative aspect-video w-full max-h-64 rounded-lg overflow-hidden border border-slate-800 bg-slate-950">
+                            <img src={backdropUrl} alt={show.name} className="h-full w-full object-cover object-top" />
                             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
                           </div>
                         )}
@@ -590,7 +604,10 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
             </div>
           ) : (
             [...filteredWatchLater].reverse().map((show) => {
-              const posterUrl = show.poster_path || show.poster ? `${IMAGE_BASE_URL}${show.poster_path || show.poster}` : '';
+              const posterPath = show.poster_path || show.poster;
+              const backdropPath = show.backdrop_path || show.backdrop;
+              const posterUrl = posterPath ? `${IMAGE_BASE_URL}${posterPath}` : '';
+              const backdropUrl = backdropPath ? `${IMAGE_BASE_URL}${backdropPath}` : '';
               const isExpanded = expandedShowId === show.id;
               const imdbSearchUrl = `https://www.imdb.com/find?q=${encodeURIComponent(show.name)}`;
               const isOnAir = show.inProduction || show.status === 'Returning Series';
@@ -601,7 +618,9 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
                     {posterUrl ? (
                       <img src={posterUrl} alt={show.name} className="h-16 w-11 rounded-lg object-cover shrink-0 bg-slate-900 shadow-sm" />
                     ) : (
-                      <div className="h-16 w-11 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-300 shadow-sm">N/A</div>
+                      <div className="h-16 w-11 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-[7px] text-slate-300 shadow-sm">
+                        N/A
+                      </div>
                     )}
                     
                     <div className="w-0 flex-1 flex flex-col justify-between self-stretch">
@@ -698,6 +717,13 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
 
                   {isExpanded && (
                     <div className="border-t border-slate-800 bg-slate-900/80 p-3 space-y-2.5 animate-in fade-in">
+                      {backdropUrl && (
+                        <div className="relative aspect-video w-full max-h-64 rounded-lg overflow-hidden border border-slate-800 bg-slate-950">
+                          <img src={backdropUrl} alt={show.name} className="h-full w-full object-cover object-top" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
+                        </div>
+                      )}
+
                       <h4 className="text-xs font-black text-white leading-snug">
                         {show.name}
                       </h4>

@@ -138,7 +138,7 @@ export function DiscoverModal({ isOpen, onClose, onAddShow }) {
                       </h4>
 
                       {backdropUrl && (
-                        <div className="relative h-28 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-900">
+                        <div className="relative h-28 md:h-44 w-full rounded-lg overflow-hidden border border-slate-800 bg-slate-900">
                           <img src={backdropUrl} alt={show.name} className="h-full w-full object-cover" />
                           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
                         </div>
