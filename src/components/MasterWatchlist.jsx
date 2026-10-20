@@ -152,7 +152,7 @@ export function MasterWatchlist({
   const showAlphabetIndex = processedShows.length > 0 && ['az', 'completed'].includes(sortMode);
 
   return (
-    <div className="space-y-2 relative">
+    <div className={`space-y-2 relative transition-all ${showAlphabetIndex ? 'pr-5' : ''}`}>
       {/* STICKY CONTROLS CONTAINER */}
       <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-2 space-y-2">
         <div className="flex w-full items-center justify-evenly rounded-xl border border-slate-800 bg-[#1E293B] py-2.5 text-[11px] sm:text-xs font-bold shadow-md">
@@ -221,13 +221,13 @@ export function MasterWatchlist({
 
       {/* DYNAMIC FULL-HEIGHT ALPHABET SIDE INDEX */}
 {showAlphabetIndex && (
-  <div className="fixed right-1 top-[100px] bottom-[70px] z-40 flex flex-col items-center justify-between py-2">
+  <div className="fixed right-2 top-[100px] bottom-[70px] z-40 flex flex-col items-center justify-between py-1 w-4">
     {FULL_ALPHABET.map((letter) => (
       <button
         key={letter}
         onClick={() => scrollToLetter(letter)}
         aria-label={`Jump to letter ${letter}`}
-        className="flex flex-1 w-5 items-center justify-center text-[10px] sm:text-xs font-black text-slate-300 hover:text-[#8CFA96] transition-all active:scale-125"
+        className="flex flex-1 w-full items-center justify-center text-[9px] font-black text-slate-300 hover:text-[#8CFA96] transition-all active:scale-125"
       >
         {letter}
       </button>

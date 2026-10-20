@@ -367,10 +367,11 @@ export default function App() {
         watchlist={watchlist} 
       />
 
-      <nav className="fixed bottom-0 left-0 right-0 z-40 w-full border-t border-slate-800 bg-[#1E293B]/95 backdrop-blur-md pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+     <nav className="fixed bottom-0 left-0 right-0 z-40 w-full border-t border-slate-800 bg-[#1E293B]/95 backdrop-blur-md pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
   <div className="mx-auto flex max-w-md md:max-w-xl items-center justify-around px-4 pt-2">
     <button
       onClick={() => { setSelectedShowId(null); setActiveTab('ready'); }}
+      aria-label="Ready to watch tab"
       className={`flex flex-col items-center ${activeTab === 'ready' && !selectedShowId ? 'text-[#8CFA96]' : 'text-slate-300 hover:text-white'}`}
     >
       <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
@@ -379,6 +380,7 @@ export default function App() {
 
     <button
       onClick={() => { setSelectedShowId(null); setActiveTab('upcoming'); }}
+      aria-label="Upcoming schedule tab"
       className={`flex flex-col items-center ${activeTab === 'upcoming' && !selectedShowId ? 'text-[#8CFA96]' : 'text-slate-300 hover:text-white'}`}
     >
       <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z" /></svg>
@@ -387,7 +389,8 @@ export default function App() {
 
     <button
       onClick={() => { setSelectedShowId(null); setActiveTab('watchlist'); }}
-      className={`flex flex-col items-center ${activeTab === 'watchlist' && !selectedShowId ? 'text-[#8CFA96]' : 'text-slate-500'}`}
+      aria-label="Master watchlist tab"
+      className={`flex flex-col items-center ${activeTab === 'watchlist' && !selectedShowId ? 'text-[#8CFA96]' : 'text-slate-300 hover:text-white'}`}
     >
       <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" /></svg>
       <span className="mt-1 text-[10px] font-bold">Watchlist</span>
@@ -395,7 +398,8 @@ export default function App() {
 
     <button
       onClick={() => { setSelectedShowId(null); setActiveTab('recommended'); }}
-      className={`flex flex-col items-center ${activeTab === 'recommended' && !selectedShowId ? 'text-[#8CFA96]' : 'text-slate-500'}`}
+      aria-label="Recommendations tab"
+      className={`flex flex-col items-center ${activeTab === 'recommended' && !selectedShowId ? 'text-[#8CFA96]' : 'text-slate-300 hover:text-white'}`}
     >
       <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.4 4.8 5.3.8-3.8 3.7.9 5.3-4.8-2.5-4.8 2.5.9-5.3-3.8-3.7 5.3-.8L12 2z" /></svg>
       <span className="mt-1 text-[10px] font-bold">For You</span>
