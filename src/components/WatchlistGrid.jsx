@@ -177,7 +177,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
                   className="relative overflow-hidden rounded-2xl border border-slate-800 bg-[#1E293B] shadow-xl cursor-pointer hover:border-[#8CFA96]/50 transition-all"
                 >
                   <div
-  className="relative h-44 md:h-60 bg-slate-900 bg-cover bg-top"
+  className="relative h-44 md:h-70 bg-slate-900 bg-cover bg-top"
   style={{ backgroundImage: backdropUrl ? `url(${backdropUrl})` : 'none' }}
 >
                     <div className="absolute inset-0 bg-gradient-to-t from-[#1E293B] via-transparent to-transparent"></div>
