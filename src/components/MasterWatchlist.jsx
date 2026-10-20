@@ -221,7 +221,7 @@ export function MasterWatchlist({
 
       {/* DYNAMIC FULL-HEIGHT ALPHABET SIDE INDEX */}
 {showAlphabetIndex && (
-  <div className="fixed right-2 top-[100px] bottom-[70px] z-40 flex flex-col items-center justify-between py-1 w-4">
+  <div className="fixed right-1.5 top-[60px] bottom-[56px] z-40 flex flex-col items-center justify-between py-0.5 w-4">
     {FULL_ALPHABET.map((letter) => (
       <button
         key={letter}
