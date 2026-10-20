@@ -219,15 +219,15 @@ export function MasterWatchlist({
         </div>
       </div>
 
-      {/* DYNAMIC FULL-HEIGHT ALPHABET SIDE INDEX */}
+      {/* DYNAMIC RESPONSIVE ALPHABET SIDE INDEX */}
 {showAlphabetIndex && (
-  <div className="fixed right-1.5 top-[60px] bottom-[56px] z-40 flex flex-col items-center justify-between py-0.5 w-4">
+  <div className="fixed right-2 md:right-auto md:left-[calc(50%+19.5rem)] top-[60px] bottom-[56px] z-40 flex flex-col items-center justify-between py-0.5 w-4 md:w-7">
     {FULL_ALPHABET.map((letter) => (
       <button
         key={letter}
         onClick={() => scrollToLetter(letter)}
         aria-label={`Jump to letter ${letter}`}
-        className="flex flex-1 w-full items-center justify-center text-[9px] font-black text-slate-300 hover:text-[#8CFA96] transition-all active:scale-125"
+        className="flex flex-1 w-full items-center justify-center text-[9px] md:text-sm font-black text-slate-300 hover:text-[#8CFA96] transition-all active:scale-125"
       >
         {letter}
       </button>
