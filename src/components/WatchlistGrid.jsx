@@ -41,7 +41,12 @@ const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-$
           }
 
           const isFinalSeason = meta ? season >= meta.numberOfSeasons : false;
-          const remainingCount = Math.max(0, totalSeasonEpisodes - episode);
+          // Calculate ONLY already-aired unwatched episodes in this season
+const remainingCount = (seasonData?.episodes || []).filter((ep) => {
+  const isAhead = ep.episode_number > episode;
+  const hasAired = ep.air_date && ep.air_date <= today;
+  return isAhead && hasAired;
+}).length;
 
           const isShowEnded = meta?.status === 'Ended' || meta?.status === 'Canceled' || meta?.isEnded;
           const shouldAutoArchive = Boolean(isShowEnded && isFinalSeason && isSeasonCompleted);
