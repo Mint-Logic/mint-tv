@@ -26,7 +26,8 @@ Deno.serve(async (_req: Request) => {
     return new Response(JSON.stringify({ message: 'No subscriptions found' }), { status: 200 });
   }
 
-  const today = new Date().toISOString().split('T')[0];
+  const d = new Date();
+const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   let sentCount = 0;
 
   for (const item of subscriptions) {

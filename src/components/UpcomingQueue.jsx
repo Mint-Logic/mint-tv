@@ -8,7 +8,8 @@ export function UpcomingQueue({ watchlist, onRemoveShow, onSelectShow }) {
 
   useEffect(() => {
     async function processQueue() {
-      const today = new Date().toISOString().split('T')[0];
+      const d = new Date();
+const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       const unarchivedWatchlist = watchlist.filter((show) => !show.archived);
 
       const scheduled = [];
