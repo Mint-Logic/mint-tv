@@ -122,9 +122,18 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
       <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-3 flex justify-end">
         <button
           onClick={onBack}
-          className="flex items-center space-x-2 text-xs font-bold text-[#8CFA96] bg-slate-800/90 px-3 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-700 transition-all shadow-md active:scale-95"
+          aria-label="Go back"
+          className="inline-flex items-center justify-center gap-1 text-xs font-bold text-[#8CFA96] bg-slate-800/90 px-2 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-700 transition-all shadow-md active:scale-95"
         >
-          <span>← Back</span>
+          <svg
+            className="h-3 w-4 shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h22" />
+          </svg>
+          <span className="leading-none">Back</span>
         </button>
       </div>
 
