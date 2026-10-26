@@ -155,7 +155,7 @@ export function MasterWatchlist({
     <div className={`space-y-3 relative transition-all ${showAlphabetIndex ? 'pr-5' : ''}`}>
       {/* Sticky Pill Navigation & Sort Header */}
       <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-2 space-y-2">
-        <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1">
+        <div className="flex items-center justify-center space-x-2 py-1">
           <button
             type="button"
             onClick={() => setSubTab('active')}

@@ -118,13 +118,13 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
 
   return (
     <div className="space-y-3">
-      {/* Sticky Pill Sub-Nav (Matching Movie Top Nav) */}
+      {/* Sticky Pill Sub-Nav */}
       <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-2">
-        <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1">
+        <div className="flex items-center justify-center space-x-2 py-1">
           <button
             type="button"
             onClick={() => setSubTab('ready')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
+            className={`px-4 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
               subTab === 'ready'
                 ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
                 : 'bg-[#1E293B] border border-slate-800 text-slate-300 hover:text-white'
@@ -136,7 +136,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
           <button
             type="button"
             onClick={() => setSubTab('caughtup')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
+            className={`px-4 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
               subTab === 'caughtup'
                 ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
                 : 'bg-[#1E293B] border border-slate-800 text-slate-300 hover:text-white'

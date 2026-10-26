@@ -328,14 +328,18 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
 
   return (
     <div className="space-y-3">
-      {/* Header Structure */}
-      <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-1 space-y-2">
-        <div className="flex w-full items-center justify-evenly rounded-xl border border-slate-800 bg-[#1E293B] py-2.5 text-[11px] sm:text-xs font-bold shadow-md">
+      {/* Sticky Pill Header: Matches WatchlistGrid & Movie Views */}
+      <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-2 space-y-2">
+        {/* Primary Sub-Tabs: Feed vs Watch Later */}
+        <div className="flex items-center justify-center space-x-2 py-1">
           <button
+            type="button"
             onClick={() => setSubTab('feed')}
             aria-label="View Recommendation Feed"
-            className={`flex items-center justify-center space-x-1 px-4 transition-colors ${
-              subTab === 'feed' ? 'text-[#8CFA96]' : 'text-slate-300 hover:text-white'
+            className={`px-4 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all inline-flex items-center space-x-1.5 ${
+              subTab === 'feed'
+                ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
+                : 'bg-[#1E293B] border border-slate-800 text-slate-300 hover:text-white'
             }`}
           >
             <svg className="h-3 w-3 fill-current shrink-0" viewBox="0 0 24 24">
@@ -345,10 +349,13 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
           </button>
 
           <button
+            type="button"
             onClick={() => setSubTab('watchlater')}
             aria-label={`View Watch Later Queue (${watchLater.length})`}
-            className={`flex items-center justify-center space-x-1 px-4 transition-colors ${
-              subTab === 'watchlater' ? 'text-[#8CFA96]' : 'text-slate-300 hover:text-white'
+            className={`px-4 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all inline-flex items-center space-x-1.5 ${
+              subTab === 'watchlater'
+                ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
+                : 'bg-[#1E293B] border border-slate-800 text-slate-300 hover:text-white'
             }`}
           >
             <svg className="h-3 w-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -358,27 +365,28 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
           </button>
         </div>
 
-        {/* PERMANENT ERA FILTER PILLS - CLEAN EDGE ALIGNMENT */}
-<div 
-  onTouchStart={(e) => e.stopPropagation()}
-  onTouchEnd={(e) => e.stopPropagation()}
-  className="flex w-full gap-1 sm:gap-1.4 overflow-x-auto pb-1 pt-1 scrollbar-none touch-pan-x -px-0"
->
-  {ERAS.map((era) => (
-    <button
-      key={era.id}
-      onClick={() => handleEraSelect(era.id)}
-      aria-label={`Filter feed by era ${era.label}`}
-      className={`px-2 sm:px-3 py-1 rounded-full text-[10px] md:text-xs font-bold whitespace-nowrap shrink-0 md:shrink md:flex-1 text-center transition-all ${
-        selectedEra === era.id
-          ? 'bg-[#8CFA96] text-slate-900 shadow-sm'
-          : 'bg-slate-800 text-slate-300 hover:text-white border border-slate-700'
-      }`}
-    >
-      {era.label}
-    </button>
-  ))}
-</div>
+        {/* Horizontal Era Filter Row */}
+        <div 
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
+          className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1"
+        >
+          {ERAS.map((era) => (
+            <button
+              key={era.id}
+              type="button"
+              onClick={() => handleEraSelect(era.id)}
+              aria-label={`Filter feed by era ${era.label}`}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
+                selectedEra === era.id
+                  ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
+                  : 'bg-[#1E293B] border border-slate-800 text-slate-300 hover:text-white'
+              }`}
+            >
+              {era.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* FEED TAB */}
