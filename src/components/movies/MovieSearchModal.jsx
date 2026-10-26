@@ -76,21 +76,24 @@ export function MovieSearchModal({ isOpen, onClose, onAddMovie, movieWatchlist =
           </button>
         </div>
 
-        {/* Search Input Bar */}
-        <div className="flex gap-2">
+        {/* Input Box */}
+        <div className="shrink-0 relative">
           <input
             type="text"
-            placeholder="Search movie title (e.g. John Wick, Avatar)..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#8CFA96]"
+            placeholder="Search movie title (e.g., John Wick, Avatar)..."
             autoFocus
+            aria-label="Search movies"
+            className="w-full rounded-xl flex-1 bg-slate-900 border border-slate-700 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-[#8CFA96] focus:outline-none"
           />
-          {query && (
+          {query.length > 0 && (
             <button
               type="button"
               onClick={() => setQuery('')}
-              className="px-2 text-xs font-bold text-slate-400 hover:text-white"
+              aria-label="Clear search text"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-slate-300 hover:text-white transition-all"
+              title="Clear search"
             >
               Clear
             </button>

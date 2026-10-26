@@ -181,10 +181,10 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
                 setDidYouMean(null);
               }}
               aria-label="Clear search text"
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full bg-slate-800 text-[10px] font-bold text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full  text-[10px] font-bold text-slate-300 hover:text-white transition-all"
               title="Clear search"
             >
-              ✕
+              Clear
             </button>
           )}
         </div>
