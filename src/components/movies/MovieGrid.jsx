@@ -44,7 +44,7 @@ export function MovieGrid({
 
   const watchedMovies = movies.filter((m) => m.isWatched);
 
-  // Extract unique streaming services from released, unwatched movies
+  // Extract unique streaming services with normalized brand grouping
   const availableStreamers = useMemo(() => {
     const providerMap = new Map();
 
@@ -54,11 +54,35 @@ export function MovieGrid({
       const combined = [...flatrate, ...free];
 
       combined.forEach((p) => {
-        if (!providerMap.has(p.id)) {
-          providerMap.set(p.id, { id: p.id, name: p.name, count: 0 });
+        let cleanName = p.name;
+
+        // Group sub-tiers, ad-plans, and provider add-ons to clean brand names
+        if (/^Peacock/i.test(cleanName)) cleanName = 'Peacock';
+        else if (/^Paramount/i.test(cleanName)) cleanName = 'Paramount+';
+        else if (/^(Max|HBO)/i.test(cleanName)) cleanName = 'Max';
+        else if (/^Netflix/i.test(cleanName)) cleanName = 'Netflix';
+        else if (/^(Amazon Prime|Prime Video)/i.test(cleanName)) cleanName = 'Prime Video';
+        else if (/^Hulu/i.test(cleanName)) cleanName = 'Hulu';
+        else if (/^Disney/i.test(cleanName)) cleanName = 'Disney+';
+        else if (/^Apple TV/i.test(cleanName)) cleanName = 'Apple TV+';
+
+        const key = cleanName;
+
+        if (!providerMap.has(key)) {
+          providerMap.set(key, { id: p.id, name: cleanName, count: 0, rawIds: new Set() });
         }
-        providerMap.get(p.id).count += 1;
+        const entry = providerMap.get(key);
+        entry.rawIds.add(p.id);
       });
+    });
+
+    // Count unique movies per normalized brand
+    providerMap.forEach((entry) => {
+      entry.count = releasedMovies.filter((m) => {
+        const flatrate = m.providers?.flatrate || [];
+        const free = m.providers?.free || [];
+        return [...flatrate, ...free].some((p) => entry.rawIds.has(p.id));
+      }).length;
     });
 
     return Array.from(providerMap.values()).sort((a, b) => b.count - a.count);
@@ -83,7 +107,7 @@ export function MovieGrid({
       return upcomingMovies;
     }
 
-    // Tab 1 (Watchlist): Released movies with streamer filter applied
+    // Tab 1 (Ready/Watchlist): Released movies with streamer filter applied
     if (selectedStreamer === 'all') {
       return releasedMovies;
     }
@@ -96,12 +120,20 @@ export function MovieGrid({
       });
     }
 
+    const activeStreamerObj = availableStreamers.find((s) => s.id === selectedStreamer);
+
     return releasedMovies.filter((m) => {
       const flatrate = m.providers?.flatrate || [];
       const free = m.providers?.free || [];
-      return [...flatrate, ...free].some((p) => p.id === selectedStreamer);
+      const movieProviderIds = [...flatrate, ...free].map((p) => p.id);
+
+      if (activeStreamerObj?.rawIds) {
+        return movieProviderIds.some((id) => activeStreamerObj.rawIds.has(id));
+      }
+
+      return movieProviderIds.includes(selectedStreamer);
     });
-  }, [activeTab, releasedMovies, upcomingMovies, watchedMovies, selectedStreamer]);
+  }, [activeTab, releasedMovies, upcomingMovies, watchedMovies, selectedStreamer, availableStreamers]);
 
   return (
     <div className="space-y-3">
@@ -109,7 +141,7 @@ export function MovieGrid({
       {activeTab === 'ready' && (
         <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-2">
           <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1">
-           <button
+            <button
               type="button"
               onClick={() => setSelectedStreamer('all')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-colors ${
@@ -199,10 +231,25 @@ export function MovieGrid({
               .concat(movie.providers?.free || [])
               .find((p) => p.id === selectedStreamer);
 
-            const primaryStreamer =
+            const rawStreamerName =
               matchedStreamer?.name ||
               movie.providers?.flatrate?.[0]?.name ||
-              movie.providers?.free?.[0]?.name ||
+              movie.providers?.free?.[0]?.name;
+
+            let displayStreamerName = rawStreamerName;
+            if (rawStreamerName) {
+              if (/^Peacock/i.test(rawStreamerName)) displayStreamerName = 'Peacock';
+              else if (/^Paramount/i.test(rawStreamerName)) displayStreamerName = 'Paramount+';
+              else if (/^(Max|HBO)/i.test(rawStreamerName)) displayStreamerName = 'Max';
+              else if (/^Netflix/i.test(rawStreamerName)) displayStreamerName = 'Netflix';
+              else if (/^(Amazon Prime|Prime Video)/i.test(rawStreamerName)) displayStreamerName = 'Prime Video';
+              else if (/^Hulu/i.test(rawStreamerName)) displayStreamerName = 'Hulu';
+              else if (/^Disney/i.test(rawStreamerName)) displayStreamerName = 'Disney+';
+              else if (/^Apple TV/i.test(rawStreamerName)) displayStreamerName = 'Apple TV+';
+            }
+
+            const primaryStreamer =
+              displayStreamerName ||
               (movie.providers?.rent?.[0] ? `Rent: ${movie.providers.rent[0].name}` : isFutureFilm ? 'Upcoming' : 'In Theaters');
 
             return (
@@ -272,10 +319,10 @@ export function MovieGrid({
                       )}
 
                       {movie.overview && (
-  <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed mt-1">
-    {movie.overview}
-  </p>
-)}
+                        <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed mt-1">
+                          {movie.overview}
+                        </p>
+                      )}
 
                       <div className="flex items-center space-x-2 text-[11px] text-slate-300 font-semibold mt-1">
                         <span>{movie.releaseDate || movie.releaseYear || 'TBA'}</span>
@@ -316,25 +363,27 @@ export function MovieGrid({
         </div>
       )}
 
-      {/* Legal Footer */}
+      {/* Attribution Footer */}
       <footer className="pt-8 pb-20 flex flex-col items-center justify-center gap-2.5 text-center">
-  <div className="flex items-center justify-center gap-3">
-    <a
-      href="https://www.themoviedb.org/"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="The Movie Database"
-      className="inline-flex items-center opacity-85 hover:opacity-100 transition-opacity"
-    >
-      <img src="/tmdb-logo.svg" alt="TMDB Logo" className="h-3.5 w-auto object-contain" />
-    </a>
-    <span className="text-slate-600 text-xs">•</span>
-    <span className="text-[11px] font-bold text-[#8CFA96]">JustWatch</span>
-  </div>
-  <p className="text-[10px] leading-relaxed text-slate-400 max-w-[320px]">
-    This product uses the TMDB API but is not endorsed or certified by TMDB. Streaming data powered by JustWatch.
-  </p>
-</footer>
+        <div className="flex items-center justify-center gap-3">
+          <a
+            href="https://www.themoviedb.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="The Movie Database"
+            className="inline-flex items-center opacity-85 hover:opacity-100 transition-opacity"
+          >
+            <img src="/tmdb-logo.svg" alt="TMDB Logo" className="h-3.5 w-auto object-contain" />
+          </a>
+          <span className="text-slate-600 text-xs">•</span>
+          <span className="text-[11px] font-bold text-[#8CFA96]">JustWatch</span>
+        </div>
+        <p className="text-[10px] leading-relaxed text-slate-400 max-w-[320px]">
+          This product uses the TMDB API but is not endorsed or certified by TMDB. Streaming data powered by JustWatch.
+        </p>
+      </footer>
     </div>
   );
 }
+
+export default MovieGrid;
