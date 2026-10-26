@@ -106,6 +106,7 @@ const POPULAR_STREAMERS = [
   { id: 531, name: 'Paramount+' },
   { id: 386, name: 'Peacock' },
   { id: 283, name: 'Crunchyroll' },
+  { id: 73, name: 'Tubi' }, // Even 10th entry (or use: { id: 119, name: 'Starz' })
 ];
 
 const STREAMING_REGIONS = [
@@ -1242,7 +1243,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
       </div>
 
       {/* COPYRIGHT TEXT */}
-      <div className="pt-3 pb-0 text-center text-[10px] font-medium text-slate-300 uppercase tracking-widest">
+      <div className="pt-3 pb-0 text-center text-[10px] font-medium text-slate-300 tracking-widest">
         © {new Date().getFullYear()} Mint Logic LLC. All rights reserved.
       </div>
     </div>

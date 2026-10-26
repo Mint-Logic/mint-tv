@@ -65,6 +65,7 @@ export function MovieGrid({
         else if (/^Hulu/i.test(cleanName)) cleanName = 'Hulu';
         else if (/^Disney/i.test(cleanName)) cleanName = 'Disney+';
         else if (/^Apple TV/i.test(cleanName)) cleanName = 'Apple TV+';
+        else if (/^Tubi/i.test(cleanName)) cleanName = 'Tubi';
 
         const key = cleanName;
 
