@@ -80,7 +80,7 @@ export function MovieSearchModal({ isOpen, onClose, onAddMovie, movieWatchlist =
         <div className="flex gap-2">
           <input
             type="text"
-            placeholder="Search movie title (e.g. Glass Onion, Dune)..."
+            placeholder="Search movie title (e.g. John Wick, Avatar)..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#8CFA96]"

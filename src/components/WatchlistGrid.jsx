@@ -10,7 +10,7 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
   useEffect(() => {
     async function processQueue() {
       const d = new Date();
-const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       const unarchivedWatchlist = watchlist.filter((show) => !show.archived);
 
       const hydrated = await Promise.all(
@@ -41,12 +41,11 @@ const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-$
           }
 
           const isFinalSeason = meta ? season >= meta.numberOfSeasons : false;
-          // Calculate ONLY already-aired unwatched episodes in this season
-const remainingCount = (seasonData?.episodes || []).filter((ep) => {
-  const isAhead = ep.episode_number > episode;
-  const hasAired = ep.air_date && ep.air_date <= today;
-  return isAhead && hasAired;
-}).length;
+          const remainingCount = (seasonData?.episodes || []).filter((ep) => {
+            const isAhead = ep.episode_number > episode;
+            const hasAired = ep.air_date && ep.air_date <= today;
+            return isAhead && hasAired;
+          }).length;
 
           const isShowEnded = meta?.status === 'Ended' || meta?.status === 'Canceled' || meta?.isEnded;
           const shouldAutoArchive = Boolean(isShowEnded && isFinalSeason && isSeasonCompleted);
@@ -118,51 +117,43 @@ const remainingCount = (seasonData?.episodes || []).filter((ep) => {
   }
 
   return (
-    <div className="space-y-2">
-      {/* Sticky Sub-Tab Header */}
-      <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-2 space-y-2">
-        <div className="flex w-full items-center justify-evenly rounded-xl border border-slate-800 bg-[#1E293B] py-2 text-[11px] sm:text-xs font-bold shadow-md">
+    <div className="space-y-3">
+      {/* Sticky Pill Sub-Nav (Matching Movie Top Nav) */}
+      <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-2">
+        <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1">
           <button
             type="button"
             onClick={() => setSubTab('ready')}
-            aria-label={`View Ready to Watch shows (${airedQueue.length})`}
-            className={`flex items-center justify-center space-x-1 px-4 transition-colors ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
               subTab === 'ready'
-                ? 'text-[#8CFA96]'
-                : 'text-slate-300 hover:text-white'
+                ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
+                : 'bg-[#1E293B] border border-slate-800 text-slate-300 hover:text-white'
             }`}
           >
-            <svg className="h-4 w-4 fill-current shrink-0" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-            <span>Ready to Watch ({airedQueue.length})</span>
+            Ready to Watch ({airedQueue.length})
           </button>
-          
+
           <button
             type="button"
             onClick={() => setSubTab('caughtup')}
-            aria-label={`View Caught Up shows (${completedQueue.length})`}
-            className={`flex items-center justify-center space-x-1 px-2 transition-colors ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
               subTab === 'caughtup'
-                ? 'text-[#8CFA96]'
-                : 'text-slate-300 hover:text-white'
+                ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
+                : 'bg-[#1E293B] border border-slate-800 text-slate-300 hover:text-white'
             }`}
           >
-            <svg className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
-            </svg>
-            <span>Caught Up ({completedQueue.length})</span>
+            Caught Up ({completedQueue.length})
           </button>
         </div>
       </div>
 
       {/* READY TO WATCH SUB-TAB */}
       {subTab === 'ready' && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {airedQueue.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-800 py-12 px-4 text-center">
-              <p className="text-sm font-medium text-slate-300">All caught up!</p>
-              <p className="mt-1 text-xs text-slate-300">
+            <div className="rounded-2xl border border-dashed border-slate-800 py-16 px-4 text-center mt-4">
+              <p className="text-sm font-semibold text-slate-300">All caught up!</p>
+              <p className="mt-1 text-xs text-slate-400">
                 No unwatched episodes waiting in your queue.
               </p>
             </div>
@@ -183,9 +174,9 @@ const remainingCount = (seasonData?.episodes || []).filter((ep) => {
                   className="relative overflow-hidden rounded-2xl border border-slate-800 bg-[#1E293B] shadow-xl cursor-pointer hover:border-[#8CFA96]/50 transition-all"
                 >
                   <div
-  className="relative h-44 md:h-70 bg-slate-900 bg-cover bg-top"
-  style={{ backgroundImage: backdropUrl ? `url(${backdropUrl})` : 'none' }}
->
+                    className="relative h-44 md:h-70 bg-slate-900 bg-cover bg-top"
+                    style={{ backgroundImage: backdropUrl ? `url(${backdropUrl})` : 'none' }}
+                  >
                     <div className="absolute inset-0 bg-gradient-to-t from-[#1E293B] via-transparent to-transparent"></div>
 
                     <div className="absolute top-3 left-3 flex flex-col items-start space-y-1 z-10">
@@ -216,7 +207,7 @@ const remainingCount = (seasonData?.episodes || []).filter((ep) => {
                     </button>
                   </div>
 
-                  <div className="flex items-center justify-between p-3">
+                  <div className="flex items-center justify-between p-3.5">
                     <div className="min-w-0 flex-1 pr-3">
                       <div className="flex items-center space-x-2">
                         <span className="text-xs font-extrabold text-slate-300 truncate">{show.name}</span>
@@ -261,9 +252,9 @@ const remainingCount = (seasonData?.episodes || []).filter((ep) => {
       {subTab === 'caughtup' && (
         <div className="space-y-2">
           {completedQueue.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-800 py-12 px-4 text-center">
-              <p className="text-sm font-medium text-slate-300">No completed active shows!</p>
-              <p className="mt-1 text-xs text-slate-300">
+            <div className="rounded-2xl border border-dashed border-slate-800 py-16 px-4 text-center mt-4">
+              <p className="text-sm font-semibold text-slate-300">No completed active shows!</p>
+              <p className="mt-1 text-xs text-slate-400">
                 Shows in ongoing series move here automatically when caught up. Ended series auto-archive to RetroVision.
               </p>
             </div>
@@ -311,6 +302,26 @@ const remainingCount = (seasonData?.episodes || []).filter((ep) => {
           )}
         </div>
       )}
+
+      {/* Attribution Footer */}
+      <footer className="pt-8 pb-6 flex flex-col items-center justify-center gap-2.5 text-center">
+        <div className="flex items-center justify-center gap-3">
+          <a
+            href="https://www.themoviedb.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="The Movie Database"
+            className="inline-flex items-center opacity-85 hover:opacity-100 transition-opacity"
+          >
+            <img src="/tmdb-logo.svg" alt="TMDB Logo" className="h-3.5 w-auto object-contain" />
+          </a>
+          <span className="text-slate-600 text-xs">•</span>
+          <span className="text-[11px] font-bold text-[#8CFA96]">JustWatch</span>
+        </div>
+        <p className="text-[10px] leading-relaxed text-slate-400 max-w-[320px]">
+          This product uses the TMDB API but is not endorsed or certified by TMDB. Streaming data powered by JustWatch.
+        </p>
+      </footer>
     </div>
   );
 }

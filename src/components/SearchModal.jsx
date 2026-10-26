@@ -169,7 +169,7 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search TV shows (e.g., 'Severans', 'Sucesion')..."
+            placeholder="Search TV shows (e.g., Pluribus, Wednesday)..."
             autoFocus
             aria-label="Search TV shows"
             className="w-full rounded-xl border border-slate-500 bg-slate-900 py-2.5 pl-3.5 pr-10 text-xs text-white placeholder-slate-300 focus:border-[#8CFA96] focus:outline-none"

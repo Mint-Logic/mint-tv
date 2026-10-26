@@ -41,7 +41,7 @@ export function MovieDetails({
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
           </svg>
-          <span>Back to Movies</span>
+          <span>Back</span>
         </button>
 
         <button
@@ -227,6 +227,26 @@ export function MovieDetails({
           </div>
         </div>
       </div>
+
+      {/* TMDB & JustWatch Attribution Footer */}
+      <footer className="pt-8 pb-16 flex flex-col items-center justify-center gap-2.5 text-center">
+        <div className="flex items-center justify-center gap-3">
+          <a
+            href="https://www.themoviedb.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="The Movie Database"
+            className="inline-flex items-center opacity-85 hover:opacity-100 transition-opacity"
+          >
+            <img src="/tmdb-logo.svg" alt="TMDB Logo" className="h-3.5 w-auto object-contain" />
+          </a>
+          <span className="text-slate-600 text-xs">•</span>
+          <span className="text-[11px] font-bold text-[#8CFA96]">JustWatch</span>
+        </div>
+        <p className="text-[10px] leading-relaxed text-slate-400 max-w-[320px]">
+          This product uses the TMDB API but is not endorsed or certified by TMDB. Streaming data powered by JustWatch.
+        </p>
+      </footer>
     </div>
   );
 }

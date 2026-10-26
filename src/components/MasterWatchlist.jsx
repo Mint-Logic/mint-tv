@@ -152,45 +152,42 @@ export function MasterWatchlist({
   const showAlphabetIndex = processedShows.length > 0 && ['az', 'completed'].includes(sortMode);
 
   return (
-    <div className={`space-y-2 relative transition-all ${showAlphabetIndex ? 'pr-5' : ''}`}>
-      {/* STICKY CONTROLS CONTAINER */}
+    <div className={`space-y-3 relative transition-all ${showAlphabetIndex ? 'pr-5' : ''}`}>
+      {/* Sticky Pill Navigation & Sort Header */}
       <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-2 space-y-2">
-        <div className="flex w-full items-center justify-evenly rounded-xl border border-slate-800 bg-[#1E293B] py-2.5 text-[11px] sm:text-xs font-bold shadow-md">
+        <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1">
           <button
+            type="button"
             onClick={() => setSubTab('active')}
-            aria-label={`View Active Shows (${showsWithMeta.length})`}
-            className={`flex items-center justify-center space-x-1 px-1.5 transition-colors ${
-              subTab === 'active' 
-                ? 'text-[#8CFA96]' 
-                : 'text-slate-300 hover:text-white'
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
+              subTab === 'active'
+                ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
+                : 'bg-[#1E293B] border border-slate-800 text-slate-300 hover:text-white'
             }`}
           >
-            <svg className="h-4 w-4 fill-current shrink-0" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-            <span>Active Shows ({showsWithMeta.length})</span>
+            Active Shows ({showsWithMeta.length})
           </button>
 
           <button
+            type="button"
             onClick={() => setSubTab('attic')}
-            aria-label={`View RetroVision Shows (${atticWithMeta.length})`}
-            className={`flex items-center justify-center space-x-1 px-2 transition-colors ${
-              subTab === 'attic' 
-                ? 'text-[#8CFA96]' 
-                : 'text-slate-300 hover:text-white'
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 inline-flex items-center space-x-1.5 transition-all ${
+              subTab === 'attic'
+                ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
+                : 'bg-[#1E293B] border border-slate-800 text-slate-300 hover:text-white'
             }`}
           >
-            <img src={retroVisionLogo} alt="RetroVision" className="h-4 w-4 object-contain shrink-0" />
+            <img src={retroVisionLogo} alt="RetroVision" className="h-3.5 w-3.5 object-contain shrink-0" />
             <span>RetroVision ({atticWithMeta.length})</span>
           </button>
         </div>
 
         {/* Sort Dropdown */}
-        <div className="relative w-full space-y-2">
+        <div className="relative w-full">
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             aria-label="Change sorting order"
-            className="flex w-full items-center justify-between rounded-xl border border-slate-800 bg-[#1E293B] px-5 py-2.5 text-[11px] sm:text-xs font-semibold text-white transition-all hover:border-slate-700 shadow-md"
+            className="flex w-full items-center justify-between rounded-xl border border-slate-800 bg-[#1E293B] px-4 py-2 text-[11px] sm:text-xs font-semibold text-white transition-all hover:border-slate-700 shadow-md"
           >
             <span className="truncate">
               {SORT_OPTIONS.find((opt) => opt.id === sortMode)?.label}
@@ -220,33 +217,33 @@ export function MasterWatchlist({
       </div>
 
       {/* DYNAMIC RESPONSIVE ALPHABET SIDE INDEX */}
-{showAlphabetIndex && (
-  <div className="fixed right-2 md:right-auto md:left-[calc(50%+20.5rem)] top-[60px] bottom-[56px] z-40 flex flex-col items-center justify-between py-0.5 w-4 md:w-7">
-    {FULL_ALPHABET.map((letter) => (
-      <button
-        key={letter}
-        onClick={() => scrollToLetter(letter)}
-        aria-label={`Jump to letter ${letter}`}
-        className="flex flex-1 w-full items-center justify-center text-[9px] md:text-sm font-black text-slate-300 hover:text-[#8CFA96] transition-all active:scale-125"
-      >
-        {letter}
-      </button>
-    ))}
-  </div>
-)}
+      {showAlphabetIndex && (
+        <div className="fixed right-2 md:right-auto md:left-[calc(50%+20.5rem)] top-[60px] bottom-[56px] z-40 flex flex-col items-center justify-between py-0.5 w-4 md:w-7">
+          {FULL_ALPHABET.map((letter) => (
+            <button
+              key={letter}
+              onClick={() => scrollToLetter(letter)}
+              aria-label={`Jump to letter ${letter}`}
+              className="flex flex-1 w-full items-center justify-center text-[9px] md:text-sm font-black text-slate-300 hover:text-[#8CFA96] transition-all active:scale-125"
+            >
+              {letter}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* SHOW LIST */}
       <div className="space-y-2">
         {processedShows.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-800 py-12 px-4 text-center mt-4">
-            <p className="text-sm font-medium text-slate-300">
+          <div className="rounded-2xl border border-dashed border-slate-800 py-16 px-4 text-center mt-4">
+            <p className="text-sm font-semibold text-slate-300">
               {sortMode === 'completed'
                 ? 'No completed series in this view'
                 : subTab === 'active'
                 ? 'No active shows in library'
                 : 'RetroVision is empty'}
             </p>
-            <p className="mt-1 text-xs text-slate-300">
+            <p className="mt-1 text-xs text-slate-400">
               {subTab === 'active'
                 ? 'Tap "+ Add" above to start tracking shows'
                 : 'Move completed or ended series to RetroVision'}
@@ -286,6 +283,26 @@ export function MasterWatchlist({
           })
         )}
       </div>
+
+      {/* Attribution Footer */}
+      <footer className="pt-8 pb-6 flex flex-col items-center justify-center gap-2.5 text-center">
+        <div className="flex items-center justify-center gap-3">
+          <a
+            href="https://www.themoviedb.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="The Movie Database"
+            className="inline-flex items-center opacity-85 hover:opacity-100 transition-opacity"
+          >
+            <img src="/tmdb-logo.svg" alt="TMDB Logo" className="h-3.5 w-auto object-contain" />
+          </a>
+          <span className="text-slate-600 text-xs">•</span>
+          <span className="text-[11px] font-bold text-[#8CFA96]">JustWatch</span>
+        </div>
+        <p className="text-[10px] leading-relaxed text-slate-400 max-w-[320px]">
+          This product uses the TMDB API but is not endorsed or certified by TMDB. Streaming data powered by JustWatch.
+        </p>
+      </footer>
     </div>
   );
 }

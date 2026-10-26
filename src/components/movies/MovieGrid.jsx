@@ -158,7 +158,7 @@ export function MovieGrid({
         <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-2">
           <div className="flex w-full items-center justify-center space-x-2 rounded-xl border border-slate-800 bg-[#1E293B] py-2 text-xs font-bold shadow-md text-[#8CFA96]">
             <img src={retroVisionLogo} alt="RetroVision" className="h-4 w-4 object-contain shrink-0" />
-            <span>RetroVision Log ({watchedMovies.length} Watched)</span>
+            <span>RetroVision ({watchedMovies.length} Watched)</span>
           </div>
         </div>
       )}
@@ -271,6 +271,12 @@ export function MovieGrid({
                         </p>
                       )}
 
+                      {movie.overview && (
+  <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed mt-1">
+    {movie.overview}
+  </p>
+)}
+
                       <div className="flex items-center space-x-2 text-[11px] text-slate-300 font-semibold mt-1">
                         <span>{movie.releaseDate || movie.releaseYear || 'TBA'}</span>
                         <span>•</span>
@@ -311,24 +317,24 @@ export function MovieGrid({
       )}
 
       {/* Legal Footer */}
-      <footer className="pt-8 pb-6 flex flex-col items-center justify-center gap-2.5 text-center">
-        <div className="flex items-center justify-center gap-3">
-          <a
-            href="https://www.themoviedb.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="The Movie Database"
-            className="inline-flex items-center opacity-85 hover:opacity-100 transition-opacity"
-          >
-            <img src="/tmdb-logo.svg" alt="TMDB Logo" className="h-3.5 w-auto object-contain" />
-          </a>
-          <span className="text-slate-600 text-xs">•</span>
-          <span className="text-[11px] font-bold text-[#8CFA96]">JustWatch</span>
-        </div>
-        <p className="text-[10px] leading-relaxed text-slate-400 max-w-[320px]">
-          This product uses the TMDB API but is not endorsed or certified by TMDB. Streaming data powered by JustWatch.
-        </p>
-      </footer>
+      <footer className="pt-8 pb-20 flex flex-col items-center justify-center gap-2.5 text-center">
+  <div className="flex items-center justify-center gap-3">
+    <a
+      href="https://www.themoviedb.org/"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="The Movie Database"
+      className="inline-flex items-center opacity-85 hover:opacity-100 transition-opacity"
+    >
+      <img src="/tmdb-logo.svg" alt="TMDB Logo" className="h-3.5 w-auto object-contain" />
+    </a>
+    <span className="text-slate-600 text-xs">•</span>
+    <span className="text-[11px] font-bold text-[#8CFA96]">JustWatch</span>
+  </div>
+  <p className="text-[10px] leading-relaxed text-slate-400 max-w-[320px]">
+    This product uses the TMDB API but is not endorsed or certified by TMDB. Streaming data powered by JustWatch.
+  </p>
+</footer>
     </div>
   );
 }

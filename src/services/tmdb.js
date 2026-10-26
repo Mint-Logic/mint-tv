@@ -279,24 +279,26 @@ export async function getMovieWatchProviders(movieId, region = 'US') {
 /**
  * Discover movies by Era and popularity for the For You tab
  */
-export async function getMovieRecommendationsByEra(era = '2020s', page = 1) {
+export async function getMovieRecommendationsByEra(era, page = 1) {
   const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+  const eraDateRanges = {
+    '2020s': { gte: '2020-01-01', lte: '2029-12-31' },
+    '2010s': { gte: '2010-01-01', lte: '2019-12-31' },
+    '2000s': { gte: '2000-01-01', lte: '2009-12-31' },
+    '1990s': { gte: '1990-01-01', lte: '1999-12-31' },
+    Classic: { gte: '1920-01-01', lte: '1989-12-31' },
+  };
 
-  let dateFilter = '';
-  if (era === '2020s') dateFilter = '&primary_release_date.gte=2020-01-01';
-  else if (era === '2010s') dateFilter = '&primary_release_date.gte=2010-01-01&primary_release_date.lte=2019-12-31';
-  else if (era === '2000s') dateFilter = '&primary_release_date.gte=2000-01-01&primary_release_date.lte=2009-12-31';
-  else if (era === '1990s') dateFilter = '&primary_release_date.gte=1990-01-01&primary_release_date.lte=1999-12-31';
-  else if (era === 'Classic') dateFilter = '&primary_release_date.lte=1989-12-31';
+  const range = eraDateRanges[era] || eraDateRanges['2020s'];
 
   try {
     const res = await fetch(
-      `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc&vote_count.gte=300&include_adult=false&page=${page}${dateFilter}`
+      `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&primary_release_date.gte=${range.gte}&primary_release_date.lte=${range.lte}&sort_by=vote_count.desc&vote_count.gte=300&page=${page}&include_adult=false`
     );
     const data = await res.json();
     return data.results || [];
   } catch (err) {
-    console.error('TMDB Movie Discover Error:', err);
+    console.error('TMDB Era Recommendations Error:', err);
     return [];
   }
 }

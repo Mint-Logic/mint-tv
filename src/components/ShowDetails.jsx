@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getShowDetails, IMAGE_BASE_URL } from '../services/tmdb';
 
-export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
+export function ShowDetails({ showId, showData, onBack, onUpdateEpisode, onRemoveShow }) {
   const [details, setDetails] = useState(null);
   
   const [selectedSeason, setSelectedSeason] = useState(() => {
@@ -118,32 +118,42 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
 
   return (
     <div className="space-y-4 pb-12">
-      {/* STICKY BACK BUTTON CONTAINER */}
-      <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-3 flex justify-end">
-        <button
-          onClick={onBack}
-          aria-label="Go back"
-          className="inline-flex items-center justify-center gap-1 text-xs font-bold text-[#8CFA96] bg-slate-800/90 px-2 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-700 transition-all shadow-md active:scale-95"
-        >
-          <svg
-            className="h-3 w-4 shrink-0"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+      {/* STICKY TOP NAV: MATCHES MOVIE DETAILS HEADER */}
+      <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-2 pb-2">
+        <div className="flex items-center justify-between py-1 border-b border-slate-800">
+          <button
+            type="button"
+            onClick={onBack}
+            className="flex items-center space-x-1.5 text-xs font-bold text-slate-300 hover:text-white transition-colors"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h22" />
-          </svg>
-          <span className="leading-none">Back</span>
-        </button>
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
+            </svg>
+            <span>Back</span>
+          </button>
+
+          {onRemoveShow && (
+            <button
+              type="button"
+              onClick={() => {
+                onRemoveShow(showId);
+                onBack();
+              }}
+              className="text-xs font-bold text-rose-500 hover:text-rose-400 transition-colors"
+            >
+              Remove Show
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Hero Backdrop & Show Info */}
       <div 
         onClick={() => setIsOverviewExpanded(!isOverviewExpanded)}
-        className="-mt-3 relative z-0 min-h-[14rem] rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl cursor-pointer"
+        className="relative z-0 min-h-[14rem] rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl cursor-pointer"
       >
         {backdropUrl && (
-          <img src={backdropUrl} alt={details.name} className="absolute inset-0 -w-90 -h-90 object-cover" />
+          <img src={backdropUrl} alt={details.name} className="absolute inset-0 w-full h-full object-cover" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/60 to-transparent"></div>
         <div className="relative p-4 pt-20 flex flex-col justify-end min-h-[14rem]">
@@ -337,22 +347,23 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode }) {
         })}
       </div>
 
-      {/* 508-Compliant TMDB Legal Credit */}
-      <footer className="pt-8 pb-6 flex flex-col items-center justify-center gap-2 text-center">
-        <a 
-          href="https://www.themoviedb.org" 
-          target="_blank" 
-          rel="noreferrer"
-          className="flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#8CFA96] rounded p-0.5"
-        >
-          <img
-            src="/tmdb-logo.svg"
-            alt="The Movie Database"
-            className="w-12 h-auto object-contain brightness-200"
-          />
-        </a>
-        <p className="text-[10px] leading-tight text-slate-300 max-w-[220px]">
-          This product uses the TMDB API but is not endorsed or certified by TMDB.
+      {/* Standardized Attribution Footer */}
+      <footer className="pt-8 pb-6 flex flex-col items-center justify-center gap-2.5 text-center">
+        <div className="flex items-center justify-center gap-3">
+          <a
+            href="https://www.themoviedb.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="The Movie Database"
+            className="inline-flex items-center opacity-85 hover:opacity-100 transition-opacity"
+          >
+            <img src="/tmdb-logo.svg" alt="TMDB Logo" className="h-3.5 w-auto object-contain" />
+          </a>
+          <span className="text-slate-600 text-xs">•</span>
+          <span className="text-[11px] font-bold text-[#8CFA96]">JustWatch</span>
+        </div>
+        <p className="text-[10px] leading-relaxed text-slate-400 max-w-[320px]">
+          This product uses the TMDB API but is not endorsed or certified by TMDB. Streaming data powered by JustWatch.
         </p>
       </footer>
     </div>

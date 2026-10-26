@@ -14,6 +14,7 @@ import { MovieGrid } from './components/movies/MovieGrid';
 import { MovieSearchModal } from './components/movies/MovieSearchModal';
 import { MovieDetails } from './components/movies/MovieDetails';
 import { MovieRecommendations } from './components/movies/MovieRecommendations';
+import retroVisionLogo from './assets/retro-vision-logo.png';
 
 const TAB_ORDER = ['ready', 'upcoming', 'watchlist', 'recommended'];
 
@@ -467,6 +468,7 @@ export default function App() {
 
       <main className="mx-auto max-w-md md:max-w-xl px-4 pt-0 pb-24">
         {activeMode === 'tv' ? (
+         
           /* ================= TV MODE ================= */
           selectedShowId ? (
             <ShowDetails
@@ -477,6 +479,7 @@ export default function App() {
               }
               onBack={() => setSelectedShowId(null)}
               onUpdateEpisode={handleUpdateEpisode}
+              onRemoveShow={handleRemoveShow}
             />
           ) : (
             <>
@@ -576,39 +579,32 @@ export default function App() {
       <nav className="fixed bottom-0 left-0 right-0 z-40 w-full border-t border-slate-800 bg-[#1E293B]/95 backdrop-blur-md pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
         <div className="mx-auto flex max-w-md md:max-w-xl items-center justify-around px-4 pt-2">
           {/* TAB 1 */}
-          <button
-            onClick={() => {
-              setSelectedShowId(null);
-              setSelectedMovieId(null);
-              setActiveTab('ready');
-            }}
-            aria-label={activeMode === 'tv' ? 'Ready tab' : 'Watchlist tab'}
-            className={`flex flex-col items-center relative ${
-              activeTab === 'ready' && !selectedShowId && !selectedMovieId
-                ? 'text-[#8CFA96]'
-                : 'text-slate-300 hover:text-white'
-            }`}
-          >
-            <div className="relative">
-              {activeMode === 'tv' ? (
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              ) : (
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
-                </svg>
-              )}
-              {(activeMode === 'tv' ? tvReadyCount : movieReadyCount) > 0 && (
-                <span className="absolute -top-1.5 -right-3.5 bg-[#8CFA96] text-slate-950 font-black text-[9px] px-1 rounded-full min-w-[14px] text-center leading-tight">
-                  {activeMode === 'tv' ? tvReadyCount : movieReadyCount}
-                </span>
-              )}
-            </div>
-            <span className="mt-1 text-[10px] font-bold">
-              {activeMode === 'tv' ? 'Ready' : 'Watchlist'}
-            </span>
-          </button>
+<button
+  onClick={() => {
+    setSelectedShowId(null);
+    setSelectedMovieId(null);
+    setActiveTab('ready');
+  }}
+  aria-label={activeMode === 'tv' ? 'Ready tab' : 'Watchlist tab'}
+  className={`flex flex-col items-center relative ${
+    activeTab === 'ready' && !selectedShowId && !selectedMovieId
+      ? 'text-[#8CFA96]'
+      : 'text-slate-300 hover:text-white'
+  }`}
+>
+  {activeMode === 'tv' ? (
+    <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M8 5v14l11-7z" />
+    </svg>
+  ) : (
+    <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
+    </svg>
+  )}
+  <span className="mt-1 text-[10px] font-bold">
+    {activeMode === 'tv' ? 'Ready' : 'Watchlist'}
+  </span>
+</button>
 
           {/* TAB 2 */}
           <button
@@ -630,33 +626,36 @@ export default function App() {
             <span className="mt-1 text-[10px] font-bold">Upcoming</span>
           </button>
 
-          {/* TAB 3 */}
           <button
-            onClick={() => {
-              setSelectedShowId(null);
-              setSelectedMovieId(null);
-              setActiveTab('watchlist');
-            }}
-            aria-label={activeMode === 'tv' ? 'Watchlist tab' : 'RetroVision tab'}
-            className={`flex flex-col items-center ${
-              activeTab === 'watchlist' && !selectedShowId && !selectedMovieId
-                ? 'text-[#8CFA96]'
-                : 'text-slate-300 hover:text-white'
-            }`}
-          >
-            {activeMode === 'tv' ? (
-              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
-              </svg>
-            ) : (
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-              </svg>
-            )}
-            <span className="mt-1 text-[10px] font-bold">
-              {activeMode === 'tv' ? 'Watchlist' : 'RetroVision'}
-            </span>
-          </button>
+  onClick={() => {
+    setSelectedShowId(null);
+    setSelectedMovieId(null);
+    setActiveTab('watchlist');
+  }}
+  aria-label={activeMode === 'tv' ? 'Watchlist tab' : 'RetroVision tab'}
+  className={`flex flex-col items-center ${
+    activeTab === 'watchlist' && !selectedShowId && !selectedMovieId
+      ? 'text-[#8CFA96]'
+      : 'text-slate-300 hover:text-white'
+  }`}
+>
+  {activeMode === 'tv' ? (
+    <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
+    </svg>
+  ) : (
+    <img
+      src={retroVisionLogo}
+      alt="RetroVision"
+      className={`h-5 w-5 object-contain ${
+        activeTab === 'watchlist' ? 'brightness-110 drop-shadow-[0_0_6px_#8CFA96]' : 'opacity-70'
+      }`}
+    />
+  )}
+  <span className="mt-1 text-[10px] font-bold">
+    {activeMode === 'tv' ? 'Watchlist' : 'RetroVision'}
+  </span>
+</button>
 
           {/* TAB 4 */}
           <button
