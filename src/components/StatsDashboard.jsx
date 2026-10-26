@@ -1105,7 +1105,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                     Mint TV - Beginner's Guide & Feature Overview
                   </h3>
                   <p className="text-[11px] text-slate-300 leading-relaxed">
-                    Welcome to Mint TV! Whether you are keeping track of a few active shows or managing a massive lifetime collection, Mint TV makes it simple to log episodes, discover new series, and never miss a season premiere[cite: 72].
+                    Welcome to Mint TV! Whether you are keeping track of a few active shows or managing a massive lifetime collection, Mint TV makes it simple to log episodes, discover new series, and never miss a season premiere.
                   </p>
                 </div>
 
@@ -1125,7 +1125,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                       Adding Shows to Your Library
                     </span>
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Tap the green <strong className="text-white">+ Add Show</strong> button in the top-right header at any time to search TMDB for any TV series[cite: 73]. You can type titles (even with typos!), browse trending shows, and instantly tap <strong className="text-white">Add</strong> to start tracking them[cite: 73].
+                      Tap the green <strong className="text-white">+ Add Show</strong> button in the top-right header at any time to search TMDB for any TV series. You can type titles (even with typos!), browse trending shows, and instantly tap <strong className="text-white">Add</strong> to start tracking them.
                     </p>
                   </div>
 
@@ -1134,24 +1134,24 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                       Main Navigation Tabs
                     </span>
                     <p className="text-[11px] text-slate-400 leading-relaxed mb-1">
-                      At the bottom of your screen, you'll find the four main tabs that drive the app[cite: 74]:
+                      At the bottom of your screen, you'll find the four main tabs that drive the app:
                     </p>
                     <ul className="space-y-1.5 text-[11px] text-slate-400">
                       <li className="flex items-start space-x-1.5">
                         <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Ready (Play Icon):</strong> Your active dashboard[cite: 74]. Shows with newly aired, unwatched episodes appear here first[cite: 74].</span>
+                        <span><strong className="text-white">Ready (Play Icon):</strong> Your active dashboard. Shows with newly aired, unwatched episodes appear here first.</span>
                       </li>
                       <li className="flex items-start space-x-1.5">
                         <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Upcoming (Calendar Icon):</strong> Your future schedule[cite: 75]. Tracks confirmed release dates and shows currently in production[cite: 75].</span>
+                        <span><strong className="text-white">Upcoming (Calendar Icon):</strong> Your future schedule. Tracks confirmed release dates and shows currently in production.</span>
                       </li>
                       <li className="flex items-start space-x-1.5">
                         <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Watchlist (List Icon):</strong> Your complete directory[cite: 75]. Browse all active series or switch to your RetroVision museum[cite: 75].</span>
+                        <span><strong className="text-white">Watchlist (List Icon):</strong> Your complete directory. Browse all active series or switch to your RetroVision museum.</span>
                       </li>
                       <li className="flex items-start space-x-1.5">
                         <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">For You (Star Icon):</strong> Recommendation engine[cite: 75]. Features your Feed of fresh recommendations and your Watch Later queue[cite: 75].</span>
+                        <span><strong className="text-white">For You (Star Icon):</strong> Recommendation engine. Features your Feed of fresh recommendations and your Watch Later queue.</span>
                       </li>
                     </ul>
                   </div>
@@ -1175,11 +1175,11 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                     <ul className="space-y-1 text-[11px] text-slate-400">
                       <li className="flex items-start space-x-1.5">
                         <span className="text-[#8CFA96] font-bold">•</span>
-                        <span>Tap any show in Ready to Watch to open its Show Details view and see its episode guide, summary, and air date[cite: 77].</span>
+                        <span>Tap any show in Ready to Watch to open its Show Details view and see its episode guide, summary, and air date.</span>
                       </li>
                       <li className="flex items-start space-x-1.5">
                         <span className="text-[#8CFA96] font-bold">•</span>
-                        <span>Tap the green checkmark button on the right side of the card to mark your current episode as watched and advance your progress counter[cite: 77].</span>
+                        <span>Tap the green checkmark button on the right side of the card to mark your current episode as watched and advance your progress counter.</span>
                       </li>
                     </ul>
                   </div>
@@ -1189,20 +1189,20 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                       Episode & Season Shortcuts
                     </span>
                     <p className="text-[11px] text-slate-400 leading-relaxed mb-1">
-                      When you tap on a show card to open its Show Details view[cite: 78]:
+                      When you tap on a show card to open its Show Details view:
                     </p>
                     <ul className="space-y-1 text-[11px] text-slate-400">
                       <li className="flex items-start space-x-1.5">
                         <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Season Tabs:</strong> Easily jump between seasons using the top scroll bar[cite: 78].</span>
+                        <span><strong className="text-white">Season Tabs:</strong> Easily jump between seasons using the top scroll bar.</span>
                       </li>
                       <li className="flex items-start space-x-1.5">
                         <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Season Finale Shortcut:</strong> Tap the Finale badge on the last episode of a season to mark the entire season as watched in one go[cite: 79].</span>
+                        <span><strong className="text-white">Season Finale Shortcut:</strong> Tap the Finale badge on the last episode of a season to mark the entire season as watched in one go.</span>
                       </li>
                       <li className="flex items-start space-x-1.5">
                         <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Season Premiere Shortcut:</strong> Tap the Premiere badge on the first episode to reset that entire season back to episode 1[cite: 79].</span>
+                        <span><strong className="text-white">Season Premiere Shortcut:</strong> Tap the Premiere badge on the first episode to reset that entire season back to episode 1.</span>
                       </li>
                     </ul>
                   </div>
@@ -1214,11 +1214,11 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                     <ul className="space-y-1 text-[11px] text-slate-400">
                       <li className="flex items-start space-x-1.5">
                         <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Ready to Watch:</strong> Contains shows that currently have aired, unwatched episodes waiting for you[cite: 80].</span>
+                        <span><strong className="text-white">Ready to Watch:</strong> Contains shows that currently have aired, unwatched episodes waiting for you.</span>
                       </li>
                       <li className="flex items-start space-x-1.5">
                         <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Caught Up:</strong> When you finish the last available episode of an ongoing show, it automatically moves to the Caught Up sub-tab[cite: 80]. The moment a new episode airs in the real world, the show automatically moves back into Ready to Watch![cite: 80]</span>
+                        <span><strong className="text-white">Caught Up:</strong> When you finish the last available episode of an ongoing show, it automatically moves to the Caught Up sub-tab. The moment a new episode airs in the real world, the show automatically moves back into Ready to Watch!</span>
                       </li>
                     </ul>
                   </div>
@@ -1235,16 +1235,16 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                     </h4>
                   </div>
                   <p className="text-[11px] text-slate-400 leading-relaxed">
-                    Mint TV uses two distinct spaces to keep your library clean and uncluttered[cite: 81, 82]:
+                    Mint TV uses two distinct spaces to keep your library clean and uncluttered:
                   </p>
                   <ul className="space-y-1.5 text-[11px] text-slate-400">
                     <li className="flex items-start space-x-1.5">
                       <span className="text-[#8CFA96] font-bold">•</span>
-                      <span><strong className="text-white">Active Shows:</strong> Shows you are currently watching or waiting for new seasons to release[cite: 82].</span>
+                      <span><strong className="text-white">Active Shows:</strong> Shows you are currently watching or waiting for new seasons to release.</span>
                     </li>
                     <li className="flex items-start space-x-1.5">
                       <span className="text-[#8CFA96] font-bold">•</span>
-                      <span><strong className="text-white">RetroVision (Museum Vault):</strong> Your personal lifetime TV vault[cite: 82]. When a series completely ends or gets canceled, it auto-archives here so it doesn't clutter your daily queue[cite: 82]. You can also manually send any show here to maintain a complete history of every series you've ever finished without diluting your active tracking stats[cite: 82, 83].</span>
+                      <span><strong className="text-white">RetroVision (Museum Vault):</strong> Your personal lifetime TV vault. When a series completely ends or gets canceled, it auto-archives here so it doesn't clutter your daily queue. You can also manually send any show here to maintain a complete history of every series you've ever finished without diluting your active tracking stats.</span>
                     </li>
                   </ul>
                 </div>
@@ -1260,7 +1260,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                     </h4>
                   </div>
                   <p className="text-[11px] text-slate-400 leading-relaxed">
-                    The For You tab helps you find your next favorite show across two primary views[cite: 84]:
+                    The For You tab helps you find your next favorite show across two primary views:
                   </p>
 
                   <div className="space-y-1.5 pt-1">
@@ -1268,24 +1268,24 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                       1. Feed
                     </span>
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      A personalized pipeline of show recommendations tailored to your taste[cite: 84]. Each card offers instant actions[cite: 84]:
+                      A personalized pipeline of show recommendations tailored to your taste. Each card offers instant actions:
                     </p>
                     <ul className="space-y-1 text-[11px] text-slate-400">
                       <li className="flex items-start space-x-1.5">
                         <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Watch Later (Clock):</strong> Saves the show to your temporary "Watch Later" queue[cite: 85].</span>
+                        <span><strong className="text-white">Watch Later (Clock):</strong> Saves the show to your temporary "Watch Later" queue.</span>
                       </li>
                       <li className="flex items-start space-x-1.5">
                         <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Add to Watchlist (Play):</strong> Sends the show straight to your main active watchlist[cite: 85].</span>
+                        <span><strong className="text-white">Add to Watchlist (Play):</strong> Sends the show straight to your main active watchlist.</span>
                       </li>
                       <li className="flex items-start space-x-1.5">
                         <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">RetroVision (TV Logo):</strong> Logs the show directly into your archived history[cite: 85].</span>
+                        <span><strong className="text-white">RetroVision (TV Logo):</strong> Logs the show directly into your archived history.</span>
                       </li>
                       <li className="flex items-start space-x-1.5">
                         <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Hide (Top-Right Eye/X):</strong> Blacklists the title so it won't appear in recommendations again[cite: 86].</span>
+                        <span><strong className="text-white">Hide (Top-Right Eye/X):</strong> Blacklists the title so it won't appear in recommendations again.</span>
                       </li>
                     </ul>
                   </div>
@@ -1295,7 +1295,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                       2. Watch Later
                     </span>
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Your personal holding deck for saved discoveries[cite: 86]. Switch to this sub-tab at the top of the screen to review saved shows, check their details, or officially move them to your Watchlist or RetroVision whenever you're ready to start watching[cite: 86].
+                      Your personal holding deck for saved discoveries. Switch to this sub-tab at the top of the screen to review saved shows, check their details, or officially move them to your Watchlist or RetroVision whenever you're ready to start watching.
                     </p>
                   </div>
 
@@ -1304,7 +1304,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                       Era Filter Pills
                     </span>
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Filter feed recommendations by specific decades (e.g., 2020s, 2010s, 1990s, or Vintage 1950s-60s) using the pill buttons at the top of the Feed[cite: 87].
+                      Filter feed recommendations by specific decades (e.g., 2020s, 2010s, 1990s, or Vintage 1950s-60s) using the pill buttons at the top of the Feed.
                     </p>
                   </div>
                 </div>
@@ -1320,23 +1320,23 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                     </h4>
                   </div>
                   <p className="text-[11px] text-slate-400 leading-relaxed">
-                    You can fine-tune the recommendation algorithm to match your exact taste[cite: 88]:
+                    You can fine-tune the recommendation algorithm to match your exact taste:
                   </p>
                   <ol className="space-y-1.5 text-[11px] text-slate-400">
                     <li>
-                      <strong className="text-white">Content & Sub-Genre Guardrails:</strong>[cite: 88, 89]
+                      <strong className="text-white">Content & Sub-Genre Guardrails:</strong>
                       <br />
-                      Enable content filters at the top to refine your feed without muting entire broad categories[cite: 89]. Toggle specific guardrails (such as Anime, Reality TV, True Crime, or English Audio Only to hide subtitle-dependent shows) or focus documentary suggestions on Nature, Space & Science topics[cite: 89].
+                      Enable content filters at the top to refine your feed without muting entire broad categories. Toggle specific guardrails (such as Anime, Reality TV, True Crime, or English Audio Only to hide subtitle-dependent shows) or focus documentary suggestions on Nature, Space & Science topics.
                     </li>
                     <li>
-                      <strong className="text-white">Like (+):</strong>[cite: 89]
+                      <strong className="text-white">Like (+):</strong>
                       <br />
-                      Boosts preferred broad genres in your feed[cite: 89].
+                      Boosts preferred broad genres in your feed.
                     </li>
                     <li>
-                      <strong className="text-white">Mute (-):</strong>[cite: 89]
+                      <strong className="text-white">Mute (-):</strong>
                       <br />
-                      Hides specific broad genres completely[cite: 89].
+                      Hides specific broad genres completely.
                     </li>
                   </ol>
                 </div>
@@ -1354,15 +1354,15 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                   <ul className="space-y-1.5 text-[11px] text-slate-400">
                     <li className="flex items-start space-x-1.5">
                       <span className="text-[#8CFA96] font-bold">•</span>
-                      <span><strong className="text-white">Collector Levels:</strong> As you mark episodes watched, you gain watch time and level up your profile rank-from Novice (Level 1) all the way up to Legend (Level 5)[cite: 91].</span>
+                      <span><strong className="text-white">Collector Levels:</strong> As you mark episodes watched, you gain watch time and level up your profile rank-from Novice (Level 1) all the way up to Legend (Level 5).</span>
                     </li>
                     <li className="flex items-start space-x-1.5">
                       <span className="text-[#8CFA96] font-bold">•</span>
-                      <span><strong className="text-white">Cloud Sync:</strong> Mint TV works completely offline out of the box[cite: 91]. To backup and sync your progress across multiple devices, tap your profile avatar and select Log In / Sign Up under Cloud Backup & Sync[cite: 91].</span>
+                      <span><strong className="text-white">Cloud Sync:</strong> Mint TV works completely offline out of the box. To backup and sync your progress across multiple devices, tap your profile avatar and select Log In / Sign Up under Cloud Backup & Sync.</span>
                     </li>
                     <li className="flex items-start space-x-1.5">
                       <span className="text-[#8CFA96] font-bold">•</span>
-                      <span><strong className="text-white">Manual Backups:</strong> You can export a .json backup file at any time from your profile menu to keep a local hard copy of your library[cite: 91, 92].</span>
+                      <span><strong className="text-white">Manual Backups:</strong> You can export a .json backup file at any time from your profile menu to keep a local hard copy of your library.</span>
                     </li>
                   </ul>
                 </div>
@@ -1380,13 +1380,13 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                   <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
                     <h4 className="text-[11px] font-bold text-white">Can I watch or stream TV episodes directly inside Mint TV?</h4>
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      No[cite: 93]. Mint TV is a dedicated progress tracker, release schedule guide, and discovery tool[cite: 93]. It keeps track of what you've watched, when new episodes air, and where to find recommendations, but it does not host or stream video content[cite: 93].
+                      No. Mint TV is a dedicated progress tracker, release schedule guide, and discovery tool. It keeps track of what you've watched, when new episodes air, and where to find recommendations, but it does not host or stream video content.
                     </p>
                   </div>
                   <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
                     <h4 className="text-[11px] font-bold text-white">How do I set my progress if I'm already halfway through a show?</h4>
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      When you add a show, tap its card to open <strong className="text-slate-300">Show Details</strong>[cite: 93, 94]. Select your current season using the top season tabs, then tap the <strong className="text-slate-300">Finale</strong> badge on any previous season to mark all its episodes completed in one tap[cite: 94]. From there, simply adjust to your exact episode[cite: 94].
+                      When you add a show, tap its card to open <strong className="text-slate-300">Show Details</strong>. Select your current season using the top season tabs, then tap the <strong className="text-slate-300">Finale</strong> badge on any previous season to mark all its episodes completed in one tap. From there, simply adjust to your exact episode.
                     </p>
                   </div>
                 </div>
@@ -1399,19 +1399,19 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                   <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
                     <h4 className="text-[11px] font-bold text-white">What's the difference between "Watch Later" and my main "Watchlist"?</h4>
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Think of <strong className="text-slate-300">Watch Later</strong> as a temporary holding deck for shows you might want to check out later without cluttering your main screen[cite: 95]. Your <strong className="text-slate-300">Watchlist</strong> (and <strong className="text-slate-300">Ready to Watch</strong>) is for shows you are actively tracking and watching on a regular basis[cite: 95].
+                      Think of <strong className="text-slate-300">Watch Later</strong> as a temporary holding deck for shows you might want to check out later without cluttering your main screen. Your <strong className="text-slate-300">Watchlist</strong> (and <strong className="text-slate-300">Ready to Watch</strong>) is for shows you are actively tracking and watching on a regular basis.
                     </p>
                   </div>
                   <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
                     <h4 className="text-[11px] font-bold text-white">Why did a show disappear from "Ready" and move to "Caught Up"?</h4>
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      When you finish the latest available episode of an ongoing series, Mint TV moves it to <strong className="text-slate-300">Caught Up</strong> so your daily queue stays clean and manageable[cite: 96]. You don't need to do anything - as soon as a brand-new episode airs, the show will automatically pop back into <strong className="text-slate-300">Ready to Watch</strong>![cite: 96]
+                      When you finish the latest available episode of an ongoing series, Mint TV moves it to <strong className="text-slate-300">Caught Up</strong> so your daily queue stays clean and manageable. You don't need to do anything - as soon as a brand-new episode airs, the show will automatically pop back into <strong className="text-slate-300">Ready to Watch</strong>!
                     </p>
                   </div>
                   <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
                     <h4 className="text-[11px] font-bold text-white">What should I send to the "RetroVision" museum vault?</h4>
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      <strong className="text-slate-300">RetroVision</strong> acts as your personal lifetime TV archive[cite: 96, 97]. When an active series completely ends or gets canceled, it automatically moves here[cite: 97]. You can also manually add older shows you finished years ago to maintain a full history of every series you've experienced without polluting your active queue or skewing your active tracking stats![cite: 97]
+                      <strong className="text-slate-300">RetroVision</strong> acts as your personal lifetime TV archive. When an active series completely ends or gets canceled, it automatically moves here. You can also manually add older shows you finished years ago to maintain a full history of every series you've experienced without polluting your active queue or skewing your active tracking stats!
                     </p>
                   </div>
                 </div>
@@ -1424,19 +1424,19 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                   <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
                     <h4 className="text-[11px] font-bold text-white">What if I accidentally mark an episode as watched?</h4>
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Simply tap the show card to open <strong className="text-slate-300">Show Details</strong>[cite: 98]. You can tap any individual episode number to set your progress back, or tap <strong className="text-slate-300">Premiere</strong> on Episode 1 of a season if you want to reset that entire season back to the beginning[cite: 98].
+                      Simply tap the show card to open <strong className="text-slate-300">Show Details</strong>. You can tap any individual episode number to set your progress back, or tap <strong className="text-slate-300">Premiere</strong> on Episode 1 of a season if you want to reset that entire season back to the beginning.
                     </p>
                   </div>
                   <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
                     <h4 className="text-[11px] font-bold text-white">How do I stop seeing certain types of shows in my "For You" feed?</h4>
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Tap your <strong className="text-slate-300">Profile Avatar</strong> in the top header and open <strong className="text-slate-300">Manage Genre Preferences</strong>[cite: 99]. You can tap <strong className="text-slate-300">-</strong> on genres you dislike to mute them, or use the <strong className="text-slate-300">Discovery Tuning Rules</strong> checkboxes to filter out specific content like Japanese Anime or True Crime docuseries[cite: 99].
+                      Tap your <strong className="text-slate-300">Profile Avatar</strong> in the top header and open <strong className="text-slate-300">Manage Genre Preferences</strong>. You can tap <strong className="text-slate-300">-</strong> on genres you dislike to mute them, or use the <strong className="text-slate-300">Discovery Tuning Rules</strong> checkboxes to filter out specific content like Japanese Anime or True Crime docuseries.
                     </p>
                   </div>
                   <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
                     <h4 className="text-[11px] font-bold text-white">Do I need to create an account, and is my data safe?</h4>
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      No account is required![cite: 100] Mint TV works 100% offline out of the box using your device's local storage[cite: 100]. Creating a free cloud account is completely optional and simply allows you to both backup and sync your watchlist across multiple phones or tablets[cite: 100]. You can also export a <code className="text-[#8CFA96]">.json</code> backup file at any time to keep a personal hard copy of your data[cite: 100].
+                      No account is required! Mint TV works 100% offline out of the box using your device's local storage. Creating a free cloud account is completely optional and simply allows you to both backup and sync your watchlist across multiple phones or tablets. You can also export a <code className="text-[#8CFA96]">.json</code> backup file at any time to keep a personal hard copy of your data.
                     </p>
                   </div>
                 </div>
