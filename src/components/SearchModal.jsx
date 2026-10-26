@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { searchShows as searchTMDB, IMAGE_BASE_URL, getShowMetadata } from '../services/tmdb';
+import { IMAGE_BASE_URL, getShowMetadata } from '../services/tmdb';
 
 function getLevenshteinDistance(a, b) {
   const matrix = Array.from({ length: a.length + 1 }, () =>
@@ -23,10 +23,10 @@ function getLevenshteinDistance(a, b) {
   return matrix[a.length][b.length];
 }
 
-function normalizeQuery(str) {
-  return str
+function normalize(str) {
+  return (str || '')
     .toLowerCase()
-    .replace(/[^a-z0-9\s]/gi, '')
+    .replace(/[^a-z0-9]/gi, '')
     .trim();
 }
 
@@ -74,7 +74,8 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
   }, [isOpen]);
 
   useEffect(() => {
-    if (!query.trim()) {
+    const clean = query.trim();
+    if (!clean) {
       setSearchResults([]);
       setDidYouMean(null);
       return;
@@ -83,32 +84,63 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
     setLoading(true);
 
     const timer = setTimeout(async () => {
-      const cleanInput = normalizeQuery(query);
-      let results = await searchTMDB(query);
+      const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+      const fetchRaw = async (q) => {
+        try {
+          const res = await fetch(
+            `https://api.themoviedb.org/3/search/tv?api_key=${apiKey}&query=${encodeURIComponent(
+              q
+            )}&include_adult=false`
+          );
+          const data = await res.json();
+          return data.results || [];
+        } catch {
+          return [];
+        }
+      };
 
-      let suggestedTitle = null;
-      if (results.length === 0 && cleanInput.length > 2) {
-        let bestMatch = null;
-        let lowestDistance = Infinity;
+      // 1. Direct query
+      let rawResults = await fetchRaw(clean);
+      let correctedName = null;
 
-        trendingShows.forEach((show) => {
-          const normalizedShowName = normalizeQuery(show.name);
-          const dist = getLevenshteinDistance(cleanInput, normalizedShowName);
+      // 2. Fuzzy fallback: If 0 results, query prefixes/stems and find closest match
+      if (rawResults.length === 0 && clean.length >= 3) {
+        const stems = [
+          clean.slice(0, -1),
+          clean.slice(0, -2),
+          clean.slice(0, 3),
+        ].filter((s) => s.length >= 3);
 
-          if (dist < lowestDistance && dist <= 3) {
-            lowestDistance = dist;
-            bestMatch = show;
+        let candidates = [];
+        for (const stem of stems) {
+          const stemResults = await fetchRaw(stem);
+          if (stemResults.length > 0) {
+            candidates = stemResults;
+            break;
           }
-        });
+        }
 
-        if (bestMatch) {
-          suggestedTitle = bestMatch.name;
-          results = await searchTMDB(bestMatch.name);
+        if (candidates.length > 0) {
+          const cleanNorm = normalize(clean);
+          candidates.sort((a, b) => {
+            const distA = getLevenshteinDistance(cleanNorm, normalize(a.name));
+            const distB = getLevenshteinDistance(cleanNorm, normalize(b.name));
+            return distA - distB;
+          });
+
+          const best = candidates[0];
+          const dist = getLevenshteinDistance(cleanNorm, normalize(best.name));
+
+          // If close enough, adopt the results
+          if (dist <= 4 || normalize(best.name).includes(cleanNorm) || cleanNorm.includes(normalize(best.name))) {
+            correctedName = best.name;
+            rawResults = candidates;
+          }
         }
       }
 
-      const hydratedResults = await Promise.all(
-        results.map(async (show) => {
+      const hydrated = await Promise.all(
+        rawResults.map(async (show) => {
           const meta = await getShowMetadata(show.id);
           return {
             ...show,
@@ -119,13 +151,13 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
         })
       );
 
-      setDidYouMean(suggestedTitle);
-      setSearchResults(hydratedResults);
+      setDidYouMean(correctedName);
+      setSearchResults(hydrated);
       setLoading(false);
-    }, 500);
+    }, 350);
 
     return () => clearTimeout(timer);
-  }, [query, trendingShows]);
+  }, [query]);
 
   if (!isOpen) return null;
 
@@ -172,7 +204,7 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
             placeholder="Search TV shows (e.g., Pluribus, Reacher)..."
             autoFocus
             aria-label="Search TV shows"
-            className="w-full rounded-xl border flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-[#8CFA96] focus:outline-none"
+            className="w-full rounded-xl flex-1 bg-slate-900 border border-slate-700 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-[#8CFA96] focus:outline-none"
           />
           {query.length > 0 && (
             <button
@@ -181,7 +213,7 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
                 setDidYouMean(null);
               }}
               aria-label="Clear search text"
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full  text-[10px] font-bold text-slate-300 hover:text-white transition-all"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-slate-300 hover:text-white transition-all"
               title="Clear search"
             >
               Clear
@@ -199,7 +231,7 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
               onClick={() => setQuery(didYouMean)}
               className="text-[10px] font-extrabold text-amber-400 underline hover:text-amber-300"
             >
-              Use corrected title
+              Use title
             </button>
           </div>
         )}
@@ -208,15 +240,15 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
         <div className="overflow-y-auto space-y-2.5 flex-1 pr-1">
           {loading ? (
             <div className="py-12 text-center text-xs font-bold text-slate-300 animate-pulse">
-              {query.trim() ? 'Analyzing & searching TMDB...' : 'Fetching trending shows...'}
+              {query.trim() ? 'Searching TMDB...' : 'Fetching trending shows...'}
             </div>
           ) : showsToDisplay.length === 0 ? (
             <div className="py-12 text-center text-xs text-slate-300">
-              {query.trim() ? 'No shows found matching your query.' : 'No recommendations available.'}
+              {query.trim() ? `No shows found for "${query}".` : 'No recommendations available.'}
             </div>
           ) : (
             showsToDisplay.map((show) => {
-              const isAdded = watchlist.some((s) => s.id === show.id);
+              const isAdded = watchlist.some((s) => Number(s.id) === Number(show.id));
               const posterUrl = show.poster_path ? `${IMAGE_BASE_URL}${show.poster_path}` : '';
               const backdropUrl = show.backdrop_path ? `${IMAGE_BASE_URL}${show.backdrop_path}` : '';
               const isExpanded = expandedShowId === show.id;
@@ -250,15 +282,7 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
 
                       <div className="w-0 flex-1">
                         <h3 
-                          className="text-xs font-bold text-white leading-snug"
-                          style={{
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden',
-                            wordBreak: 'break-word',
-                            whiteSpace: 'normal'
-                          }}
+                          className="text-xs font-bold text-white leading-snug truncate"
                         >
                           {show.name}
                         </h3>
@@ -294,9 +318,9 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
                         if (!isAdded) handleSelectShow(show);
                       }}
                       aria-label={isAdded ? `${show.name} is already on watchlist` : `Add ${show.name} to watchlist`}
-                      className={`px-1 py-1.5 pt-1 pb-1.5 pr-2 rounded-lg text-xs font-bold shrink-0 transition-all active:scale-95 flex items-center self-center ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all active:scale-95 flex items-center self-center ${
                         isAdded
-                          ? 'bg-slate-800 text-slate-300 border border-slate-700 cursor-not-allowed'
+                          ? 'bg-slate-800 text-slate-400 border border-slate-700 cursor-not-allowed'
                           : 'bg-[#8CFA96] text-slate-950 hover:bg-[#7be385]'
                       }`}
                       title={isAdded ? "Already on Watchlist" : "Add to Watchlist"}
@@ -304,12 +328,7 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
                       {isAdded ? (
                         <span>Added ✓</span>
                       ) : (
-                        <>
-                          <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 20">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" />
-                          </svg>
-                          <span>Add</span>
-                        </>
+                        <span>+ Add</span>
                       )}
                     </button>
                   </div>

@@ -1,14 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { searchMovies, getTrendingMovies, getMovieDetails, THUMB_BASE_URL } from '../../services/tmdb';
+import { getTrendingMovies, getMovieDetails, THUMB_BASE_URL } from '../../services/tmdb';
+
+function getLevenshteinDistance(a, b) {
+  const matrix = Array.from({ length: a.length + 1 }, () =>
+    Array(b.length + 1).fill(0)
+  );
+
+  for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
+  for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1].toLowerCase() === b[j - 1].toLowerCase() ? 0 : 1;
+      matrix[i][j] = Math.min(
+        matrix[i - 1][j] + 1,
+        matrix[i][j - 1] + 1,
+        matrix[i - 1][j - 1] + cost
+      );
+    }
+  }
+
+  return matrix[a.length][b.length];
+}
+
+function normalize(str) {
+  return (str || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/gi, '')
+    .trim();
+}
 
 export function MovieSearchModal({ isOpen, onClose, onAddMovie, movieWatchlist = [] }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [trendingMovies, setTrendingMovies] = useState([]);
+  const [didYouMean, setDidYouMean] = useState(null);
   const [loading, setLoading] = useState(false);
   const [addingId, setAddingId] = useState(null);
 
-  // Load Trending Movies immediately when modal opens
   useEffect(() => {
     if (!isOpen) return;
 
@@ -28,19 +57,75 @@ export function MovieSearchModal({ isOpen, onClose, onAddMovie, movieWatchlist =
     };
   }, [isOpen]);
 
-  // Live Debounced Search
   useEffect(() => {
-    if (!query.trim()) {
+    const clean = query.trim();
+    if (!clean) {
       setResults([]);
+      setDidYouMean(null);
       return;
     }
 
+    setLoading(true);
+
     const timer = setTimeout(async () => {
-      setLoading(true);
-      const searchData = await searchMovies(query);
-      setResults(searchData);
+      const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+      const fetchRaw = async (q) => {
+        try {
+          const res = await fetch(
+            `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(
+              q
+            )}&include_adult=false`
+          );
+          const data = await res.json();
+          return data.results || [];
+        } catch {
+          return [];
+        }
+      };
+
+      // 1. Direct query
+      let rawResults = await fetchRaw(clean);
+      let correctedTitle = null;
+
+      // 2. Fuzzy fallback: If 0 results, query prefixes/stems and find closest match
+      if (rawResults.length === 0 && clean.length >= 3) {
+        const stems = [
+          clean.slice(0, -1),
+          clean.slice(0, -2),
+          clean.slice(0, 3),
+        ].filter((s) => s.length >= 3);
+
+        let candidates = [];
+        for (const stem of stems) {
+          const stemResults = await fetchRaw(stem);
+          if (stemResults.length > 0) {
+            candidates = stemResults;
+            break;
+          }
+        }
+
+        if (candidates.length > 0) {
+          const cleanNorm = normalize(clean);
+          candidates.sort((a, b) => {
+            const distA = getLevenshteinDistance(cleanNorm, normalize(a.title));
+            const distB = getLevenshteinDistance(cleanNorm, normalize(b.title));
+            return distA - distB;
+          });
+
+          const best = candidates[0];
+          const dist = getLevenshteinDistance(cleanNorm, normalize(best.title));
+
+          if (dist <= 4 || normalize(best.title).includes(cleanNorm) || cleanNorm.includes(normalize(best.title))) {
+            correctedTitle = best.title;
+            rawResults = candidates;
+          }
+        }
+      }
+
+      setDidYouMean(correctedTitle);
+      setResults(rawResults);
       setLoading(false);
-    }, 300);
+    }, 350);
 
     return () => clearTimeout(timer);
   }, [query]);
@@ -90,7 +175,10 @@ export function MovieSearchModal({ isOpen, onClose, onAddMovie, movieWatchlist =
           {query.length > 0 && (
             <button
               type="button"
-              onClick={() => setQuery('')}
+              onClick={() => {
+                setQuery('');
+                setDidYouMean(null);
+              }}
               aria-label="Clear search text"
               className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-slate-300 hover:text-white transition-all"
               title="Clear search"
@@ -99,6 +187,21 @@ export function MovieSearchModal({ isOpen, onClose, onAddMovie, movieWatchlist =
             </button>
           )}
         </div>
+
+        {/* Smart Typo Notice Badge */}
+        {didYouMean && (
+          <div className="shrink-0 flex items-center justify-between rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs">
+            <span className="text-slate-300">
+              Showing results for: <strong className="text-amber-400">{didYouMean}</strong>
+            </span>
+            <button
+              onClick={() => setQuery(didYouMean)}
+              className="text-[10px] font-extrabold text-amber-400 underline hover:text-amber-300"
+            >
+              Use title
+            </button>
+          </div>
+        )}
 
         {/* Section Subline */}
         <div className="flex justify-between items-center text-[10px] font-extrabold uppercase tracking-wider text-slate-400 px-0.5">
@@ -115,7 +218,7 @@ export function MovieSearchModal({ isOpen, onClose, onAddMovie, movieWatchlist =
           )}
 
           {displayList.map((movie) => {
-            const isAdded = movieWatchlist.some((m) => m.id === movie.id);
+            const isAdded = movieWatchlist.some((m) => Number(m.id) === Number(movie.id));
             const isAdding = addingId === movie.id;
             const posterUrl = movie.poster_path ? `${THUMB_BASE_URL}${movie.poster_path}` : '';
             const year = movie.release_date ? movie.release_date.split('-')[0] : 'TBA';

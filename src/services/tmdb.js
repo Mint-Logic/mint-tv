@@ -5,17 +5,86 @@ export const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 export const THUMB_BASE_URL = 'https://image.tmdb.org/t/p/w185';
 
 /* ==========================================================================
+   STRING SIMILARITY UTILITIES (Dice's Bigram Coefficient)
+   ========================================================================== */
+
+function getSimilarityScore(str1, str2) {
+  const s1 = (str1 || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const s2 = (str2 || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (!s1 || !s2) return 0;
+  if (s1 === s2) return 1.0;
+  if (s1.includes(s2) || s2.includes(s1)) return 0.85;
+
+  const getBigrams = (str) => {
+    const bigrams = new Set();
+    for (let i = 0; i < str.length - 1; i++) {
+      bigrams.add(str.slice(i, i + 2));
+    }
+    return bigrams;
+  };
+
+  const b1 = getBigrams(s1);
+  const b2 = getBigrams(s2);
+  let intersection = 0;
+  b1.forEach((bg) => {
+    if (b2.has(bg)) intersection++;
+  });
+
+  return (2.0 * intersection) / (b1.size + b2.size);
+}
+
+/* ==========================================================================
    TV API FUNCTIONS
    ========================================================================== */
 
 export async function searchShows(query) {
-  if (!query) return [];
+  const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+  const clean = query?.trim();
+  if (!clean) return [];
+
+  const rawUrl = (q) =>
+    `https://api.themoviedb.org/3/search/tv?api_key=${apiKey}&query=${encodeURIComponent(
+      q
+    )}&include_adult=false`;
+
   try {
-    const res = await fetch(`${BASE_URL}/search/tv?api_key=${API_KEY}&query=${encodeURIComponent(query)}`);
+    // 1. Direct query
+    const res = await fetch(rawUrl(clean));
     const data = await res.json();
-    return data.results || [];
+    let results = data.results || [];
+    if (results.length > 0) return results;
+
+    // 2. Typo recovery: Query truncated prefixes and filter by Dice similarity
+    if (clean.length >= 4) {
+      const variants = [
+        clean.slice(0, -1),
+        clean.slice(0, -2),
+        clean.slice(0, -3),
+        clean.replace(/[aeiou]/gi, ''),
+      ].filter((v) => v.length >= 3);
+
+      for (const variant of variants) {
+        const fallbackRes = await fetch(rawUrl(variant));
+        const fallbackData = await fallbackRes.json();
+        const candidates = fallbackData.results || [];
+
+        if (candidates.length > 0) {
+          const scored = candidates
+            .map((item) => ({
+              ...item,
+              _score: getSimilarityScore(clean, item.name || ''),
+            }))
+            .filter((item) => item._score >= 0.35)
+            .sort((a, b) => b._score - a._score);
+
+          if (scored.length > 0) return scored;
+        }
+      }
+    }
+
+    return [];
   } catch (err) {
-    console.error('TMDB Search Error:', err);
+    console.error('TMDB TV Search Error:', err);
     return [];
   }
 }
@@ -32,7 +101,9 @@ export async function getShowDetails(showId) {
 
 export async function getEpisodeDetails(showId, seasonNumber, episodeNumber) {
   try {
-    const res = await fetch(`${BASE_URL}/tv/${showId}/season/${seasonNumber}/episode/${episodeNumber}?api_key=${API_KEY}`);
+    const res = await fetch(
+      `${BASE_URL}/tv/${showId}/season/${seasonNumber}/episode/${episodeNumber}?api_key=${API_KEY}`
+    );
     return await res.json();
   } catch (err) {
     console.error('TMDB Episode Error:', err);
@@ -45,10 +116,9 @@ export async function getNextEpisodeInfo(showId, seasonNumber, episodeNumber) {
     const res = await fetch(
       `${BASE_URL}/tv/${showId}/season/${seasonNumber}/episode/${episodeNumber}?api_key=${API_KEY}`
     );
-    if (!res.ok) return null; // Returns null silently on 404
+    if (!res.ok) return null;
     return await res.json();
   } catch (err) {
-    // Silently return null when episode doesn't exist
     return null;
   }
 }
@@ -58,21 +128,21 @@ export async function getShowMetadata(showId) {
     const res = await fetch(`${BASE_URL}/tv/${showId}?api_key=${API_KEY}`);
     if (!res.ok) return null;
     const data = await res.json();
-    
+
     const network = data.networks?.[0]?.name || 'Unknown Streamer';
     const airTime = data.episode_run_time?.[0] ? `${data.episode_run_time[0]} mins` : 'TBA';
     const genres = data.genres?.map((g) => g.name) || [];
-    
-    return { 
-      network, 
-      airTime, 
+
+    return {
+      network,
+      airTime,
       status: data.status,
       inProduction: data.in_production ?? true,
       genres,
       numberOfSeasons: data.number_of_seasons || 1,
       numberOfEpisodes: data.number_of_episodes || 0,
       isEnded: data.status === 'Ended' || data.status === 'Canceled',
-      firstAirDate: data.first_air_date, // Passes the premiere date to the watchlist
+      firstAirDate: data.first_air_date,
     };
   } catch (err) {
     console.error('TMDB Metadata Error:', err);
@@ -82,7 +152,9 @@ export async function getShowMetadata(showId) {
 
 export async function getShowRecommendations(showId) {
   try {
-    const res = await fetch(`${BASE_URL}/tv/${showId}/recommendations?api_key=${API_KEY}&language=en-US&page=1`);
+    const res = await fetch(
+      `${BASE_URL}/tv/${showId}/recommendations?api_key=${API_KEY}&language=en-US&page=1`
+    );
     if (!res.ok) return [];
     const data = await res.json();
     return data.results || [];
@@ -118,9 +190,6 @@ export async function getShowExternalIds(showId) {
    MOVIE API FUNCTIONS
    ========================================================================== */
 
-/**
- * Search movies by text query
- */
 export async function getTrendingMovies() {
   const apiKey = import.meta.env.VITE_TMDB_API_KEY;
   try {
@@ -136,26 +205,57 @@ export async function getTrendingMovies() {
 }
 
 export async function searchMovies(query) {
-  if (!query || !query.trim()) return [];
   const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+  const clean = query?.trim();
+  if (!clean) return [];
+
+  const rawUrl = (q) =>
+    `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(
+      q
+    )}&include_adult=false`;
+
   try {
-    const res = await fetch(
-      `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(
-        query.trim()
-      )}&include_adult=false`
-    );
+    // 1. Direct query
+    const res = await fetch(rawUrl(clean));
     const data = await res.json();
-    return data.results || [];
+    let results = data.results || [];
+    if (results.length > 0) return results;
+
+    // 2. Typo recovery: Query truncated prefixes and filter by Dice similarity
+    if (clean.length >= 4) {
+      const variants = [
+        clean.slice(0, -1),
+        clean.slice(0, -2),
+        clean.slice(0, -3),
+        clean.replace(/[aeiou]/gi, ''),
+      ].filter((v) => v.length >= 3);
+
+      for (const variant of variants) {
+        const fallbackRes = await fetch(rawUrl(variant));
+        const fallbackData = await fallbackRes.json();
+        const candidates = fallbackData.results || [];
+
+        if (candidates.length > 0) {
+          const scored = candidates
+            .map((item) => ({
+              ...item,
+              _score: getSimilarityScore(clean, item.title || ''),
+            }))
+            .filter((item) => item._score >= 0.35)
+            .sort((a, b) => b._score - a._score);
+
+          if (scored.length > 0) return scored;
+        }
+      }
+    }
+
+    return [];
   } catch (err) {
     console.error('TMDB Movie Search Error:', err);
     return [];
   }
 }
 
-/**
- * Fetch full movie details including credits (cast), release dates (MPAA certification),
- * and watch providers (streaming/rental options) in a single round-trip.
- */
 export async function getMovieDetails(movieId, region = 'US') {
   try {
     const res = await fetch(
@@ -164,7 +264,6 @@ export async function getMovieDetails(movieId, region = 'US') {
     const data = await res.json();
     if (!data || data.success === false) return null;
 
-    // 1. Extract US (or target region) MPAA Certification
     let mpaaRating = 'NR';
     const releaseResults = data.release_dates?.results || [];
     const regionRelease =
@@ -178,12 +277,8 @@ export async function getMovieDetails(movieId, region = 'US') {
       if (match) mpaaRating = match.certification;
     }
 
-    // 2. Extract Top 3 Lead Actors (Option B Card Layout)
-    const leadActors = (data.credits?.cast || [])
-      .slice(0, 3)
-      .map((actor) => actor.name);
+    const leadActors = (data.credits?.cast || []).slice(0, 3).map((actor) => actor.name);
 
-    // 3. Extract Watch Providers for Target Region
     const regionProviders = data['watch/providers']?.results?.[region] || {};
     const flatrate = (regionProviders.flatrate || []).map((p) => ({
       id: p.provider_id,
@@ -206,7 +301,6 @@ export async function getMovieDetails(movieId, region = 'US') {
       logo: p.logo_path,
     }));
 
-    // 4. Format Runtime (e.g., 124 -> "2h 04m")
     const runtimeFormatted = data.runtime
       ? `${Math.floor(data.runtime / 60)}h ${String(data.runtime % 60).padStart(2, '0')}m`
       : 'N/A';
@@ -240,14 +334,9 @@ export async function getMovieDetails(movieId, region = 'US') {
   }
 }
 
-/**
- * Lightweight check to refresh only watch providers (for background revalidation)
- */
 export async function getMovieWatchProviders(movieId, region = 'US') {
   try {
-    const res = await fetch(
-      `${BASE_URL}/movie/${movieId}/watch/providers?api_key=${API_KEY}`
-    );
+    const res = await fetch(`${BASE_URL}/movie/${movieId}/watch/providers?api_key=${API_KEY}`);
     const data = await res.json();
     const regionProviders = data.results?.[region] || {};
 
@@ -276,9 +365,6 @@ export async function getMovieWatchProviders(movieId, region = 'US') {
   }
 }
 
-/**
- * Discover movies by Era and popularity for the For You tab
- */
 export async function getMovieRecommendationsByEra(era, page = 1) {
   const apiKey = import.meta.env.VITE_TMDB_API_KEY;
   const eraDateRanges = {
