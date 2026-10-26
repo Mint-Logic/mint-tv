@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import mintTvLogo from '../assets/mint-tv-logo.png';
 
-export function Header({ onOpenSearch, onOpenProfile, hasSeenProfileOnboarding }) {
+export function Header({
+  activeMode = 'tv',
+  onToggleMode,
+  onOpenSearch,
+  onOpenProfile,
+  hasSeenProfileOnboarding,
+}) {
   const [profileName, setProfileName] = useState('TV Collector');
   const [customPhoto, setCustomPhoto] = useState('');
 
@@ -19,41 +25,68 @@ export function Header({ onOpenSearch, onOpenProfile, hasSeenProfileOnboarding }
     return () => window.removeEventListener('mint_tv_profile_update', loadProfile);
   }, []);
 
-  const initials = profileName
-    .trim()
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0].toUpperCase())
-    .join('') || 'TV';
+  const initials =
+    profileName
+      .trim()
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((word) => word[0].toUpperCase())
+      .join('') || 'TV';
 
   return (
-    <header 
+    <header
       style={{
         paddingTop: 'calc(env(safe-area-inset-top, 0px) + 8px)',
       }}
-      className="sticky top-0 z-50 flex h-[46px] items-center justify-between border-b border-slate-800 bg-[#0F172A] px-3.5 pb-2 backdrop-blur-md transition-all box-border"
+      className="sticky top-0 z-50 flex h-[48px] items-center justify-between border-b border-slate-800 bg-[#0F172A] px-3.5 pb-2 backdrop-blur-md transition-all box-border"
     >
       {/* Brand Logo */}
-      <div className="flex items-center">
-        <img 
-          src={mintTvLogo} 
-          alt="Mint TV" 
-          className="h-7 w-auto max-w-[150px] object-contain drop-shadow-[0_0_8px_rgba(140,250,150,0.25)]"
+      <div className="flex items-center shrink-0">
+        <img
+          src={mintTvLogo}
+          alt="Mint TV"
+          className="h-7 w-auto max-w-[120px] object-contain drop-shadow-[0_0_8px_rgba(140,250,150,0.25)]"
         />
       </div>
 
-      {/* Action Controls & Compact Profile Avatar */}
-      <div className="flex items-center space-x-4">
+      {/* Mode Switcher: TV | Movies */}
+      <div className="flex items-center rounded-lg bg-slate-900/90 p-0.5 border border-slate-800">
+        <button
+          type="button"
+          onClick={() => onToggleMode('tv')}
+          className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition-all ${
+            activeMode === 'tv'
+              ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          TV
+        </button>
+        <button
+          type="button"
+          onClick={() => onToggleMode('movies')}
+          className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition-all ${
+            activeMode === 'movies'
+              ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          Movies
+        </button>
+      </div>
+
+      {/* Action Controls & Profile Avatar */}
+      <div className="flex items-center space-x-2.5 shrink-0">
         <button
           onClick={onOpenSearch}
-          aria-label="Add Show"
+          aria-label={activeMode === 'tv' ? 'Add Show' : 'Add Movie'}
           className="flex items-center space-x-1 rounded-md border border-[#8CFA96] bg-[#8CFA96]/15 px-2.5 py-1 text-xs font-black text-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-950 transition-all focus:outline-none focus:ring-2 focus:ring-[#8CFA96]"
         >
           <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
           </svg>
-          <span>Add Show</span>
+          <span>{activeMode === 'tv' ? 'Add Show' : 'Add Movie'}</span>
         </button>
 
         <button

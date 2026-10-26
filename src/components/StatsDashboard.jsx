@@ -96,6 +96,25 @@ const PRESET_TITLES = [
   'Custom...',
 ];
 
+const POPULAR_STREAMERS = [
+  { id: 8, name: 'Netflix' },
+  { id: 1899, name: 'Max' },
+  { id: 337, name: 'Disney+' },
+  { id: 15, name: 'Hulu' },
+  { id: 350, name: 'Apple TV+' },
+  { id: 9, name: 'Amazon Prime' },
+  { id: 531, name: 'Paramount+' },
+  { id: 386, name: 'Peacock' },
+  { id: 283, name: 'Crunchyroll' },
+];
+
+const STREAMING_REGIONS = [
+  { code: 'US', label: 'United States (US)' },
+  { code: 'CA', label: 'Canada (CA)' },
+  { code: 'GB', label: 'United Kingdom (UK)' },
+  { code: 'AU', label: 'Australia (AU)' },
+];
+
 const TMDB_TV_GENRES = [
   { id: 10759, name: 'Action & Adventure' },
   { id: 16, name: 'Animation' },
@@ -136,6 +155,16 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
     return saved ? JSON.parse(saved) : { x: 0, y: 0, scale: 1 };
   });
 
+  // STREAMER SETTINGS STATE
+  const [userProviders, setUserProviders] = useState(() => {
+    const saved = localStorage.getItem('mint_user_providers');
+    return saved ? JSON.parse(saved) : [8, 1899, 337, 15, 350, 9];
+  });
+
+  const [userRegion, setUserRegion] = useState(() => {
+    return localStorage.getItem('mint_user_region') || 'US';
+  });
+
   const [likedGenres, setLikedGenres] = useState(() => {
     const saved = localStorage.getItem('mint_tv_liked_genres');
     return saved ? JSON.parse(saved) : [10765, 18, 35, 99];
@@ -166,6 +195,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
     return localStorage.getItem('mint_tv_exclude_foreign') === 'true';
   });
 
+  const [isStreamersDrawerOpen, setIsStreamersDrawerOpen] = useState(false);
   const [isGenreDrawerOpen, setIsGenreDrawerOpen] = useState(false);
   const [isHelpFaqDrawerOpen, setIsHelpFaqDrawerOpen] = useState(false);
 
@@ -214,6 +244,8 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
       localStorage.setItem('mint_tv_user_title', profileTitle);
       localStorage.setItem('mint_tv_user_photo', customPhoto);
       localStorage.setItem('mint_tv_photo_pos', JSON.stringify(photoPos));
+      localStorage.setItem('mint_user_providers', JSON.stringify(userProviders));
+      localStorage.setItem('mint_user_region', userRegion);
       localStorage.setItem('mint_tv_liked_genres', JSON.stringify(likedGenres));
       localStorage.setItem('mint_tv_muted_genres', JSON.stringify(mutedGenres));
       localStorage.setItem('mint_tv_exclude_anime', excludeAnime);
@@ -223,10 +255,17 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
       localStorage.setItem('mint_tv_exclude_foreign', excludeForeign); 
       
       window.dispatchEvent(new Event('mint_tv_profile_update'));
+      window.dispatchEvent(new Event('mint_providers_update'));
     } catch (e) {
       console.warn('LocalStorage limit reached while saving profile settings', e);
     }
-  }, [profileName, profileTitle, customPhoto, photoPos, likedGenres, mutedGenres, excludeAnime, excludeTrueCrime, boostNature, excludeReality, excludeForeign]); 
+  }, [profileName, profileTitle, customPhoto, photoPos, userProviders, userRegion, likedGenres, mutedGenres, excludeAnime, excludeTrueCrime, boostNature, excludeReality, excludeForeign]); 
+
+  function toggleProvider(providerId) {
+    setUserProviders((prev) =>
+      prev.includes(providerId) ? prev.filter((id) => id !== providerId) : [...prev, providerId]
+    );
+  }
 
   function moveGenre(genreId, targetState) {
     setLikedGenres((prev) => prev.filter((id) => id !== genreId));
@@ -271,7 +310,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
       return {
         level: 4,
         title: 'CULTIST',
-        nextReq: `${episodes}/5000 eps to Lvl 5`,
+        nextReq: `${episodes}/5000 eps to Lvl 4`,
         progress: Math.min(100, Math.round((episodes / 5000) * 100)),
         color: 'text-purple-300 border-purple-400/50 bg-purple-400/10',
         badgeSvg: trophySvg,
@@ -399,6 +438,8 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
         title: localStorage.getItem('mint_tv_user_title') || '',
         photo: localStorage.getItem('mint_tv_user_photo') || '',
         photoPos: JSON.parse(localStorage.getItem('mint_tv_photo_pos') || '{"x":0,"y":0,"scale":1}'),
+        userProviders,
+        userRegion,
         likedGenres,
         mutedGenres,
         excludeAnime,
@@ -451,6 +492,8 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
               if (importedData.profile.title) localStorage.setItem('mint_tv_user_title', importedData.profile.title);
               if (importedData.profile.photo) localStorage.setItem('mint_tv_user_photo', importedData.profile.photo);
               if (importedData.profile.photoPos) localStorage.setItem('mint_tv_photo_pos', JSON.stringify(importedData.profile.photoPos));
+              if (importedData.profile.userProviders) localStorage.setItem('mint_user_providers', JSON.stringify(importedData.profile.userProviders));
+              if (importedData.profile.userRegion) localStorage.setItem('mint_user_region', importedData.profile.userRegion);
               if (importedData.profile.likedGenres) localStorage.setItem('mint_tv_liked_genres', JSON.stringify(importedData.profile.likedGenres));
               if (importedData.profile.mutedGenres) localStorage.setItem('mint_tv_muted_genres', JSON.stringify(importedData.profile.mutedGenres));
               if (typeof importedData.profile.excludeAnime === 'boolean') localStorage.setItem('mint_tv_exclude_anime', importedData.profile.excludeAnime);
@@ -487,7 +530,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
               Welcome to Mint TV!
             </span>
             <p className="text-[10px] text-slate-300 leading-relaxed w-full">
-              Tailor recommendations in <strong className="text-white">Genre Preferences</strong>, turn on <strong className="text-white">Episode Alerts</strong> for push notifications, sign in to sync across devices, or check out the <strong className="text-white">Help & User Guide</strong> below to learn more!
+              Tailor subscriptions in <strong className="text-white">Streaming Subscriptions</strong>, refine recommendations in <strong className="text-white">Genre Preferences</strong>, turn on <strong className="text-white">Episode Alerts</strong> for push notifications, or check out the <strong className="text-white">Help & User Guide</strong> below to learn more!
             </p>
           </div>
 
@@ -721,6 +764,79 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
             {days}d {hours}h
           </div>
         </div>
+      </div>
+
+      {/* MY STREAMING SUBSCRIPTIONS ACCORDION */}
+      <div className="-mx-3 sm:-mx-4 overflow-hidden rounded-2xl border border-slate-800 bg-[#1E293B] shadow-lg">
+        <button
+          onClick={() => setIsStreamersDrawerOpen(!isStreamersDrawerOpen)}
+          className="w-full flex justify-between items-center px-4 py-2.5 bg-slate-900/60 hover:bg-slate-900 transition-all cursor-pointer"
+        >
+          <div className="flex items-center space-x-2">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-300">
+              MY STREAMING SUBSCRIPTIONS
+            </span>
+            <span className="text-[9px] font-bold text-[#8CFA96] bg-[#8CFA96]/15 border border-[#8CFA96]/30 px-1.5 py-0.2 rounded-full">
+              {userProviders.length} active
+            </span>
+          </div>
+          <span className="text-[10px] font-bold text-[#8CFA96] transition-transform duration-200">
+            {isStreamersDrawerOpen ? '▲' : '▼'}
+          </span>
+        </button>
+
+        {isStreamersDrawerOpen && (
+          <div className="p-4 space-y-4 border-t border-slate-800 animate-in fade-in">
+            <p className="text-[11px] text-slate-300 leading-relaxed">
+              Select the platforms you subscribe to. Movies available on these services will automatically appear under <strong className="text-white">Free with Subscription</strong> in your Ready queue.
+            </p>
+
+            {/* Streaming Region Selector */}
+            <div>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                Streaming Country / Region
+              </label>
+              <select
+                value={userRegion}
+                onChange={(e) => setUserRegion(e.target.value)}
+                className="w-full rounded-xl border border-slate-600 bg-slate-900 px-3 py-2 text-xs font-bold text-white focus:border-[#8CFA96] focus:outline-none cursor-pointer"
+              >
+                {STREAMING_REGIONS.map((r) => (
+                  <option key={r.code} value={r.code}>
+                    {r.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Provider Grid */}
+            <div className="space-y-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                Active Subscriptions
+              </span>
+              <div className="grid grid-cols-2 gap-2">
+                {POPULAR_STREAMERS.map((provider) => {
+                  const isChecked = userProviders.includes(provider.id);
+                  return (
+                    <button
+                      key={provider.id}
+                      type="button"
+                      onClick={() => toggleProvider(provider.id)}
+                      className={`flex items-center justify-between p-2 rounded-xl border text-xs font-bold transition-all text-left ${
+                        isChecked
+                          ? 'border-[#8CFA96] bg-[#8CFA96]/15 text-[#8CFA96] shadow-sm'
+                          : 'border-slate-800 bg-slate-900/60 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                      }`}
+                    >
+                      <span className="truncate">{provider.name}</span>
+                      <span className="text-xs shrink-0 pl-1">{isChecked ? '✓' : '+'}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* MINIMALIST GENRE PREFERENCES ACCORDION */}
@@ -967,7 +1083,7 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                     Mint TV — User Guide & Feature Overview
                   </h3>
                   <p className="text-[11px] text-slate-300 leading-relaxed">
-                    Welcome to Mint TV! Whether you are keeping track of a few active shows or managing a massive lifetime collection, Mint TV makes it simple to log episodes, discover new series, and never miss a season premiere.
+                    Welcome to Mint TV! Track your favorite TV series and movies in one seamless experience.
                   </p>
                 </div>
 
@@ -977,69 +1093,17 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
                       1
                     </span>
                     <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-white">
-                      Getting Started: Adding Shows & Navigation
+                      Movie Tracking & Subscriptions
                     </h4>
                   </div>
 
                   <div className="space-y-1.5">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
-                      Adding Shows to Your Library
+                      Free with Subscription vs Rent/Buy
                     </span>
                     <p className="text-[11px] text-slate-300 leading-relaxed">
-                      Tap the green <strong className="text-white">+ Add Show</strong> button in the top-right header at any time to search TMDB for any TV series. You can type titles (even with typos!), browse trending shows, and instantly tap <strong className="text-white">Add</strong> to start tracking them.
+                      Select your active subscriptions in the settings above. In Movie mode, titles currently included on your services automatically appear under <strong className="text-white">Free with Subscription</strong>, while other films display under <strong className="text-white">Available to Rent/Buy</strong>.
                     </p>
-                  </div>
-
-                  <div className="space-y-1.5 pt-1 border-t border-slate-800/60">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
-                      Main Navigation Tabs
-                    </span>
-                    <ul className="space-y-1.5 text-[11px] text-slate-300">
-                      <li className="flex items-start space-x-1.5">
-                        <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Ready (Play Icon):</strong> Your active dashboard. Shows with newly aired, unwatched episodes appear here first.</span>
-                      </li>
-                      <li className="flex items-start space-x-1.5">
-                        <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Upcoming (Calendar Icon):</strong> Your future schedule. Tracks confirmed release dates and shows currently in production.</span>
-                      </li>
-                      <li className="flex items-start space-x-1.5">
-                        <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">Watchlist (List Icon):</strong> Your complete directory. Browse all active series or switch to your RetroVision museum.</span>
-                      </li>
-                      <li className="flex items-start space-x-1.5">
-                        <span className="text-[#8CFA96] font-bold">•</span>
-                        <span><strong className="text-white">For You (Star Icon):</strong> Recommendation engine. Features your Feed of fresh recommendations and your Watch Later queue.</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-
-                {/* Section 2: Progress Tracking */}
-                <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3.5 space-y-2.5">
-                  <div className="flex items-center space-x-2 border-b border-slate-800 pb-1.5">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#8CFA96]/20 text-[10px] font-black text-[#8CFA96]">
-                      2
-                    </span>
-                    <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-white">
-                      Tracking & Watching Progress
-                    </h4>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8CFA96] block">
-                      Tracking Episodes
-                    </span>
-                    <ul className="space-y-1 text-[11px] text-slate-300">
-                      <li className="flex items-start space-x-1.5">
-                        <span className="text-[#8CFA96] font-bold">•</span>
-                        <span>Tap any show in Ready to Watch to open its Show Details view and see its episode guide, summary, and air date.</span>
-                      </li>
-                      <li className="flex items-start space-x-1.5">
-                        <span className="text-[#8CFA96] font-bold">•</span>
-                        <span>Tap the green checkmark button on the right side of the card to mark your current episode as watched.</span>
-                      </li>
-                    </ul>
                   </div>
                 </div>
               </div>
@@ -1049,13 +1113,13 @@ export function StatsDashboard({ watchlist, atticShows = [], currentUser, onOpen
               <div className="space-y-3 animate-in fade-in">
                 <div className="space-y-2">
                   <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#8CFA96] block ml-2">
-                    Getting Started & Clarifications
+                    Frequently Asked Questions
                   </span>
 
                   <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-1">
-                    <h4 className="text-[11px] font-bold text-white">Can I watch or stream TV episodes directly inside Mint TV?</h4>
+                    <h4 className="text-[11px] font-bold text-white">How does Mint TV know which movies are free to watch?</h4>
                     <p className="text-[11px] text-slate-300 leading-relaxed">
-                      No. Mint TV is a dedicated progress tracker, release schedule guide, and discovery tool.
+                      Mint TV matches streaming availability data powered by JustWatch against the services you configure in your <strong className="text-white">Streaming Subscriptions</strong> list.
                     </p>
                   </div>
                 </div>
