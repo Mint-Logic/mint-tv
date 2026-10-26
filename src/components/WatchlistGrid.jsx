@@ -124,9 +124,9 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
           <button
             type="button"
             onClick={() => setSubTab('ready')}
-            className={`px-4 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
+            className={`px-4 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-colors ${
               subTab === 'ready'
-                ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
+                ? 'bg-[#1E293B] border border-[#8CFA96]/40 text-[#8CFA96] shadow-sm'
                 : 'bg-[#1E293B] border border-slate-800 text-slate-300 hover:text-white'
             }`}
           >
@@ -136,9 +136,9 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
           <button
             type="button"
             onClick={() => setSubTab('caughtup')}
-            className={`px-4 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
+            className={`px-4 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-colors ${
               subTab === 'caughtup'
-                ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
+                ? 'bg-[#1E293B] border border-[#8CFA96]/40 text-[#8CFA96] shadow-sm'
                 : 'bg-[#1E293B] border border-slate-800 text-slate-300 hover:text-white'
             }`}
           >

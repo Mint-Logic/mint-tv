@@ -109,12 +109,12 @@ export function MovieGrid({
       {activeTab === 'ready' && (
         <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-2">
           <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1">
-            <button
+           <button
               type="button"
               onClick={() => setSelectedStreamer('all')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-colors ${
                 selectedStreamer === 'all'
-                  ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
+                  ? 'bg-[#1E293B] border border-[#8CFA96]/40 text-[#8CFA96] shadow-sm'
                   : 'bg-[#1E293B] border border-slate-800 text-slate-300 hover:text-white'
               }`}
             >
@@ -126,9 +126,9 @@ export function MovieGrid({
                 key={streamer.id}
                 type="button"
                 onClick={() => setSelectedStreamer(streamer.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-colors ${
                   selectedStreamer === streamer.id
-                    ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
+                    ? 'bg-[#1E293B] border border-[#8CFA96]/40 text-[#8CFA96] shadow-sm'
                     : 'bg-[#1E293B] border border-slate-800 text-slate-300 hover:text-white'
                 }`}
               >
@@ -140,9 +140,9 @@ export function MovieGrid({
               <button
                 type="button"
                 onClick={() => setSelectedStreamer('rent_buy')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-colors ${
                   selectedStreamer === 'rent_buy'
-                    ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
+                    ? 'bg-[#1E293B] border border-[#8CFA96]/40 text-[#8CFA96] shadow-sm'
                     : 'bg-[#1E293B] border border-slate-800 text-slate-300 hover:text-white'
                 }`}
               >

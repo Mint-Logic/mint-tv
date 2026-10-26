@@ -564,7 +564,10 @@ export default function App() {
           isOpen={isSearchOpen} 
           onClose={() => setIsSearchOpen(false)} 
           onAddShow={handleAddShow}
-          watchlist={[...watchlist, ...atticShows]} 
+          watchlist={[
+            ...watchlist.map(s => ({ ...s, id: Number(s.id) })),
+            ...atticShows.map(s => ({ ...s, id: Number(s.id) }))
+          ]} 
         />
       ) : (
         <MovieSearchModal

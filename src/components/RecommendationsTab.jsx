@@ -336,9 +336,9 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
             type="button"
             onClick={() => setSubTab('feed')}
             aria-label="View Recommendation Feed"
-            className={`px-4 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all inline-flex items-center space-x-1.5 ${
+            className={`px-4 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-colors inline-flex items-center space-x-1.5 ${
               subTab === 'feed'
-                ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
+                ? 'bg-[#1E293B] border border-[#8CFA96]/40 text-[#8CFA96] shadow-sm'
                 : 'bg-[#1E293B] border border-slate-800 text-slate-300 hover:text-white'
             }`}
           >
@@ -352,9 +352,9 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
             type="button"
             onClick={() => setSubTab('watchlater')}
             aria-label={`View Watch Later Queue (${watchLater.length})`}
-            className={`px-4 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all inline-flex items-center space-x-1.5 ${
+            className={`px-4 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-colors inline-flex items-center space-x-1.5 ${
               subTab === 'watchlater'
-                ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
+                ? 'bg-[#1E293B] border border-[#8CFA96]/40 text-[#8CFA96] shadow-sm'
                 : 'bg-[#1E293B] border border-slate-800 text-slate-300 hover:text-white'
             }`}
           >
@@ -369,17 +369,16 @@ export function RecommendationsTab({ watchlist, atticShows, onAddShow, onMoveToA
         <div 
           onTouchStart={(e) => e.stopPropagation()}
           onTouchEnd={(e) => e.stopPropagation()}
-          className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1"
+          className="flex w-full gap-1 sm:gap-1.5 overflow-x-auto pb-1 pt-1 scrollbar-none touch-pan-x"
         >
           {ERAS.map((era) => (
             <button
               key={era.id}
-              type="button"
               onClick={() => handleEraSelect(era.id)}
-              aria-label={`Filter feed by era ${era.label}`}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
+              aria-label={`Filter recommendations by ${era.label}`}
+              className={`px-3 py-1.5 rounded-xl text-[10px] md:text-xs font-bold whitespace-nowrap shrink-0 transition-colors ${
                 selectedEra === era.id
-                  ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
+                  ? 'bg-[#1E293B] border border-[#8CFA96]/40 text-[#8CFA96] shadow-sm'
                   : 'bg-[#1E293B] border border-slate-800 text-slate-300 hover:text-white'
               }`}
             >

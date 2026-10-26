@@ -159,9 +159,9 @@ export function MasterWatchlist({
           <button
             type="button"
             onClick={() => setSubTab('active')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-colors ${
               subTab === 'active'
-                ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
+                ? 'bg-[#1E293B] border border-[#8CFA96]/40 text-[#8CFA96] shadow-sm'
                 : 'bg-[#1E293B] border border-slate-800 text-slate-300 hover:text-white'
             }`}
           >
@@ -171,9 +171,9 @@ export function MasterWatchlist({
           <button
             type="button"
             onClick={() => setSubTab('attic')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 inline-flex items-center space-x-1.5 transition-all ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 inline-flex items-center space-x-1.5 transition-colors ${
               subTab === 'attic'
-                ? 'bg-[#8CFA96] text-slate-950 shadow-sm'
+                ? 'bg-[#1E293B] border border-[#8CFA96]/40 text-[#8CFA96] shadow-sm'
                 : 'bg-[#1E293B] border border-slate-800 text-slate-300 hover:text-white'
             }`}
           >
