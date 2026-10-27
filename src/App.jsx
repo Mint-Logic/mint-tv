@@ -54,6 +54,8 @@ export default function App() {
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
 
+  
+
   // TV Active Watchlist
   const [watchlist, setWatchlist] = useState(() => {
     return JSON.parse(localStorage.getItem('mint_tv_shows') || '[]');
@@ -208,24 +210,40 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, [selectedShowId, isSearchOpen, isProfileOpen, isAuthOpen]);
 
-  // Touch Gesture Handlers
+  // Touch Swipe Gesture Handlers
   function handleTouchStart(e) {
+    // Ignore swipe initiation if touch starts inside any horizontally scrollable container or pill strip
+    if (e.target.closest('.overflow-x-auto, [data-no-swipe="true"]')) {
+      touchStartX.current = null;
+      touchStartY.current = null;
+      return;
+    }
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
   }
 
   function handleTouchEnd(e) {
     if (selectedShowId || isSearchOpen || isProfileOpen || isAuthOpen) return;
+    if (touchStartX.current === null || touchStartY.current === null) return;
 
     const deltaX = e.changedTouches[0].clientX - touchStartX.current;
     const deltaY = e.changedTouches[0].clientY - touchStartY.current;
 
+    // Reset touch coordinates
+    touchStartX.current = null;
+    touchStartY.current = null;
+
     if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
       const currentIndex = TAB_ORDER.indexOf(activeTab);
+
       if (deltaX < 0) {
-        if (currentIndex < TAB_ORDER.length - 1) setActiveTab(TAB_ORDER[currentIndex + 1]);
+        if (currentIndex < TAB_ORDER.length - 1) {
+          setActiveTab(TAB_ORDER[currentIndex + 1]);
+        }
       } else {
-        if (currentIndex > 0) setActiveTab(TAB_ORDER[currentIndex - 1]);
+        if (currentIndex > 0) {
+          setActiveTab(TAB_ORDER[currentIndex - 1]);
+        }
       }
     }
   }

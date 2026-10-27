@@ -140,8 +140,18 @@ export function MovieGrid({
     <div className="space-y-3">
       {/* ================= TAB 1: DYNAMIC STREAMER SELECTOR PILLS ================= */}
       {activeTab === 'ready' && (
-        <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-2">
-          <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1">
+        <div 
+          className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-2 touch-pan-x"
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
+        >
+          <div 
+            className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1 overscroll-x-contain touch-pan-x"
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
+          >
             <button
               type="button"
               onClick={() => setSelectedStreamer('all')}

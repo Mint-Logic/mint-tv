@@ -184,12 +184,18 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
 
   return (
     <div className="space-y-3">
-      {/* Sticky Era Filter Bar */}
-      <div className="sticky top-[45px] z-30 bg-[#0F172A] -mt-[3px] pt-3 pb-1">
+      {/* Sticky Era Bar */}
+      <div 
+        className="sticky top-[45px] z-20 bg-[#0F172A] touch-pan-x"
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
+      >
         <div 
+          className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1 overscroll-x-contain touch-pan-x"
           onTouchStart={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
           onTouchEnd={(e) => e.stopPropagation()}
-          className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1"
         >
           {ERAS.map((era) => (
             <button
