@@ -57,17 +57,17 @@ const ERAS = [
   { id: 'vintage', label: '1950s–60s' },
 ];
 
-// Major streaming studio production company IDs in TMDB
+// Dedicated direct-to-streaming production divisions (excludes wide theatrical studios)
 const STREAMER_COMPANIES = {
-  8: '178464|10142', // Netflix
-  350: '108998|159489', // Apple Studios / Apple TV+
-  9: '103986|20580', // Amazon MGM / Amazon Studios
-  337: '2', // Walt Disney Pictures
-  15: '10642', // Hulu
-  1899: '3268', // HBO / Max
-  531: '24955', // Paramount+
-  386: '133890', // Peacock
-  all: '178464|108998|103986|2|10642|3268|24955|133890',
+  8: '178464|10142', // Netflix Originals
+  350: '108998|159489', // Apple Original Films
+  9: '103986|20580', // Amazon Studios / Prime Video
+  337: '104277|164609', // Disney+ Original Films (excludes Walt Disney Pictures)
+  15: '10642', // Hulu Originals
+  1899: '168393', // Max Originals (excludes Warner Bros)
+  531: '24955', // Paramount+ Originals
+  386: '133890', // Peacock Originals
+  all: '178464|10142|108998|159489|103986|20580|104277|164609|10642|168393|24955|133890',
 };
 
 function getAvailabilityBadge(movie) {
@@ -170,29 +170,28 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
 
     try {
       const fetchPage = async (p) => {
-        let url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=${p}&vote_count.gte=25&include_adult=false`;
-
-        // Streamer filter
-        if (activeStreamer !== 'all') {
-          url += `&with_watch_providers=${activeStreamer}&watch_region=${userRegion}&with_watch_monetization_types=flatrate|free`;
-        }
+        let url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=${p}&vote_count.gte=20&include_adult=false`;
 
         // Genre filter
         if (activeGenre !== 'all') {
           url += `&with_genres=${activeGenre}`;
         }
 
-        // Release Type filter
+        // Release Type & Provider parameters
         if (activeRelease === 'theatrical') {
           url += `&with_release_type=2|3`;
           const today = new Date().toISOString().split('T')[0];
           const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
           url += `&primary_release_date.gte=${ninetyDaysAgo}&primary_release_date.lte=${today}`;
         } else if (activeRelease === 'originals') {
-          const companies = STREAMER_COMPANIES[activeStreamer] || STREAMER_COMPANIES.all;
-          url += `&with_companies=${companies}`;
+          // Exclude wide theatrical release type (3) and target subscription streaming
+          url += `&without_release_type=3`;
+          const targetProviders = activeStreamer !== 'all' ? activeStreamer : '8|337|15|350|9|531|386|1899';
+          url += `&with_watch_providers=${targetProviders}&watch_region=${userRegion}&with_watch_monetization_types=flatrate|free`;
         } else if (activeRelease === 'digital') {
           url += `&with_release_type=4`;
+        } else if (activeStreamer !== 'all') {
+          url += `&with_watch_providers=${activeStreamer}&watch_region=${userRegion}&with_watch_monetization_types=flatrate|free`;
         }
 
         // Era filter
@@ -218,7 +217,8 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
         const combinedRaw = [...p1Results, ...p2Results];
         if (combinedRaw.length === 0) break;
 
-        const pageFiltered = combinedRaw.filter((movie) => {
+        // 1. Initial exclusion check (watchlist, blacklist, seen in session)
+        const unvisited = combinedRaw.filter((movie) => {
           if (
             watchlistIds.has(movie.id) ||
             blacklistedIds.has(movie.id) ||
@@ -229,28 +229,48 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
           return true;
         });
 
-        pageFiltered.forEach((m) => sessionSeenIds.current.add(m.id));
-        accumulatedFiltered.push(...pageFiltered);
+        unvisited.forEach((m) => sessionSeenIds.current.add(m.id));
+
+        // 2. Hydrate details so we have hadWideTheatrical & provider data
+        const batchHydrated = await Promise.all(
+          unvisited.map(async (movie) => {
+            const details = await getMovieDetails(movie.id, userRegion);
+            return details || movie;
+          })
+        );
+
+        // 3. Filter for true Streamer Originals
+        const validBatch = batchHydrated.filter((movie) => {
+          if (activeRelease === 'originals') {
+            const flatrate = movie.providers?.flatrate || [];
+            const free = movie.providers?.free || [];
+            const hasStream = flatrate.length > 0 || free.length > 0;
+            if (!hasStream) return false;
+
+            // Reject any movie that had a standard wide theatrical run in theaters
+            if (movie.hadWideTheatrical) return false;
+          }
+          return true;
+        });
+
+        // Ensure no duplicate IDs enter the accumulator
+        validBatch.forEach((m) => {
+          if (!accumulatedFiltered.some((existing) => existing.id === m.id)) {
+            accumulatedFiltered.push(m);
+          }
+        });
 
         currentPage += 2;
         maxAttempts--;
       }
 
-      const itemsToHydrate = accumulatedFiltered.slice(0, 40);
-      const hydratedMovies = await Promise.all(
-        itemsToHydrate.map(async (movie) => {
-          const details = await getMovieDetails(movie.id, userRegion);
-          return details || movie;
-        })
-      );
-
       if (isLoadMore) {
-        setFeedMovies((prev) => [...prev, ...hydratedMovies.slice(0, 20)]);
-        setBufferMovies((prev) => [...prev, ...hydratedMovies.slice(20)]);
+        setFeedMovies((prev) => [...prev, ...accumulatedFiltered.slice(0, 20)]);
+        setBufferMovies((prev) => [...prev, ...accumulatedFiltered.slice(20)]);
         setPage(currentPage);
       } else {
-        setFeedMovies(hydratedMovies.slice(0, 20));
-        setBufferMovies(hydratedMovies.slice(20));
+        setFeedMovies(accumulatedFiltered.slice(0, 20));
+        setBufferMovies(accumulatedFiltered.slice(20));
         setPage(currentPage);
       }
     } catch (err) {
@@ -420,7 +440,7 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
           </div>
         ) : (
           <>
-            {feedMovies.map((movie) => {
+            {feedMovies.map((movie, index) => {
               const posterUrl = movie.poster ? `${IMAGE_BASE_URL}${movie.poster}` : movie.poster_path ? `${THUMB_BASE_URL}${movie.poster_path}` : '';
               const backdropUrl = movie.backdrop ? `${IMAGE_BASE_URL}${movie.backdrop}` : movie.backdrop_path ? `${IMAGE_BASE_URL}${movie.backdrop_path}` : '';
               const isExpanded = expandedMovieId === movie.id;
@@ -431,7 +451,7 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
               const availability = getAvailabilityBadge(movie);
 
               return (
-                <div key={movie.id} className="rounded-xl border border-slate-800 bg-[#1E293B] overflow-hidden transition-all">
+                <div key={`${movie.id}-${index}`} className="rounded-xl border border-slate-800 bg-[#1E293B] overflow-hidden transition-all">
                   <div
                     onClick={() => setExpandedMovieId(isExpanded ? null : movie.id)}
                     className="flex items-start space-x-3 p-2 cursor-pointer select-none"

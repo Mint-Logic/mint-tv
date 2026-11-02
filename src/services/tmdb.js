@@ -265,6 +265,7 @@ export async function getMovieDetails(movieId, region = 'US') {
     if (!data || data.success === false) return null;
 
     let mpaaRating = 'NR';
+    let hadWideTheatrical = false;
     const releaseResults = data.release_dates?.results || [];
     const regionRelease =
       releaseResults.find((r) => r.iso_3166_1 === region) ||
@@ -275,6 +276,9 @@ export async function getMovieDetails(movieId, region = 'US') {
         (d) => d.certification && d.certification.trim() !== ''
       );
       if (match) mpaaRating = match.certification;
+
+      // Check if it had a standard wide theatrical run (type 3)
+      hadWideTheatrical = regionRelease.release_dates.some((d) => d.type === 3);
     }
 
     const leadActors = (data.credits?.cast || []).slice(0, 3).map((actor) => actor.name);
@@ -318,6 +322,7 @@ export async function getMovieDetails(movieId, region = 'US') {
       runtime: data.runtime || 0,
       runtimeFormatted,
       mpaaRating,
+      hadWideTheatrical,
       tmdbRating: data.vote_average ? data.vote_average.toFixed(1) : null,
       leadActors,
       imdbId: data.imdb_id || null,
