@@ -385,7 +385,7 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
               type="button"
               onClick={() => handleEraSelect(era.id)}
               aria-label={`Filter recommendations by ${era.label}`}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-colors ${
+              className={`px-3 py-1.5 rounded-xl text-[10px] md:text-xs font-bold whitespace-nowrap shrink-0 transition-colors ${
                 selectedEra === era.id
                   ? 'bg-[#1E293B] border border-[#8CFA96]/40 text-[#8CFA96] shadow-sm'
                   : 'bg-[#1E293B] border border-slate-800 text-slate-300 hover:text-white'
