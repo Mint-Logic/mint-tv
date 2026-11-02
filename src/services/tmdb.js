@@ -282,11 +282,13 @@ export async function getMovieDetails(movieId, region = 'US') {
     const regionProviders = data['watch/providers']?.results?.[region] || {};
     const flatrate = (regionProviders.flatrate || []).map((p) => ({
       id: p.provider_id,
+      provider_id: p.provider_id,
       name: p.provider_name,
       logo: p.logo_path,
     }));
     const free = (regionProviders.free || regionProviders.ads || []).map((p) => ({
       id: p.provider_id,
+      provider_id: p.provider_id,
       name: p.provider_name,
       logo: p.logo_path,
     }));

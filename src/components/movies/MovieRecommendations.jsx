@@ -2,6 +2,49 @@ import React, { useState, useEffect, useRef } from 'react';
 import { getMovieDetails, THUMB_BASE_URL, IMAGE_BASE_URL } from '../../services/tmdb';
 import retroVisionLogo from '../../assets/retro-vision-logo.png';
 
+const POPULAR_STREAMERS = [
+  { id: 'all', name: 'All Streamers' },
+  { id: 8, name: 'Netflix' },
+  { id: 1899, name: 'HBO Max' },
+  { id: 337, name: 'Disney+' },
+  { id: 15, name: 'Hulu' },
+  { id: 350, name: 'Apple TV+' },
+  { id: 9, name: 'Amazon Prime' },
+  { id: 531, name: 'Paramount+' },
+  { id: 386, name: 'Peacock' },
+  { id: 283, name: 'Crunchyroll' },
+  { id: 73, name: 'Tubi' },
+];
+
+const MOVIE_GENRES = [
+  { id: 'all', name: 'All Genres' },
+  { id: 28, name: 'Action' },
+  { id: 12, name: 'Adventure' },
+  { id: 16, name: 'Animation' },
+  { id: 35, name: 'Comedy' },
+  { id: 80, name: 'Crime' },
+  { id: 99, name: 'Documentary' },
+  { id: 18, name: 'Drama' },
+  { id: 10751, name: 'Family' },
+  { id: 14, name: 'Fantasy' },
+  { id: 36, name: 'History' },
+  { id: 27, name: 'Horror' },
+  { id: 10402, name: 'Music' },
+  { id: 9648, name: 'Mystery' },
+  { id: 10749, name: 'Romance' },
+  { id: 878, name: 'Sci-Fi' },
+  { id: 53, name: 'Thriller' },
+  { id: 10752, name: 'War' },
+  { id: 37, name: 'Western' },
+];
+
+const RELEASE_TYPES = [
+  { id: 'all', name: 'All Releases' },
+  { id: 'theatrical', name: 'Theaters' },
+  { id: 'originals', name: 'Streamer Originals' },
+  { id: 'digital', name: 'Digital / VOD' },
+];
+
 const ERAS = [
   { id: 'all', label: 'All Eras' },
   { id: '2020s', label: '2020s' },
@@ -13,6 +56,62 @@ const ERAS = [
   { id: 'vintage', label: '1950s–60s' },
 ];
 
+// Major streaming studio production company IDs in TMDB
+const STREAMER_COMPANIES = {
+  8: '178464|10142', // Netflix
+  350: '108998|159489', // Apple Studios / Apple TV+
+  9: '103986|20580', // Amazon MGM / Amazon Studios
+  337: '2', // Walt Disney Pictures
+  15: '10642', // Hulu
+  1899: '3268', // HBO / Max
+  531: '24955', // Paramount+
+  386: '133890', // Peacock
+  all: '178464|108998|103986|2|10642|3268|24955|133890',
+};
+
+function getAvailabilityBadge(movie) {
+  const flatrate = movie.providers?.flatrate || [];
+  const free = movie.providers?.free || [];
+  const allStreams = [...flatrate, ...free];
+
+  if (allStreams.length > 0) {
+    let name = allStreams[0].name || allStreams[0].provider_name || '';
+    if (/^Peacock/i.test(name)) name = 'Peacock';
+    else if (/^Paramount/i.test(name)) name = 'Paramount+';
+    else if (/^(Max|HBO)/i.test(name)) name = 'HBO Max';
+    else if (/^Netflix/i.test(name)) name = 'Netflix';
+    else if (/^(Amazon Prime|Prime Video)/i.test(name)) name = 'Prime Video';
+    else if (/^Hulu/i.test(name)) name = 'Hulu';
+    else if (/^Disney/i.test(name)) name = 'Disney+';
+    else if (/^Apple TV/i.test(name)) name = 'Apple TV+';
+    else if (/^Tubi/i.test(name)) name = 'Tubi';
+    else if (/^Crunchyroll/i.test(name)) name = 'Crunchyroll';
+
+    return { label: `Stream on ${name}`, type: 'stream' };
+  }
+
+  const releaseStr = movie.releaseDate || movie.release_date;
+  if (releaseStr) {
+    const releaseTime = new Date(releaseStr).getTime();
+    const now = Date.now();
+    const ninetyDaysMs = 90 * 24 * 60 * 60 * 1000;
+
+    if (releaseTime > now) {
+      return { label: 'In Theaters Soon', type: 'theaters' };
+    }
+    if (now - releaseTime <= ninetyDaysMs) {
+      return { label: 'In Theaters', type: 'theaters' };
+    }
+  }
+
+  const rentBuy = [...(movie.providers?.rent || []), ...(movie.providers?.buy || [])];
+  if (rentBuy.length > 0) {
+    return { label: 'Rent / Buy', type: 'rent' };
+  }
+
+  return null;
+}
+
 export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
   const [feedMovies, setFeedMovies] = useState([]);
   const [bufferMovies, setBufferMovies] = useState([]);
@@ -20,12 +119,15 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [expandedMovieId, setExpandedMovieId] = useState(null);
   const [page, setPage] = useState(1);
+
+  const [selectedStreamer, setSelectedStreamer] = useState('all');
+  const [selectedGenre, setSelectedGenre] = useState('all');
+  const [selectedRelease, setSelectedRelease] = useState('all');
   const [selectedEra, setSelectedEra] = useState('all');
 
   const sessionSeenIds = useRef(new Set());
   const isFetchingRef = useRef(false);
 
-  // Track dismissed movie IDs in localStorage (matches TV blacklist logic)
   const [dislikedIds, setDislikedIds] = useState(() => {
     const saved = localStorage.getItem('mint_movie_disliked_ids');
     return saved ? JSON.parse(saved) : [];
@@ -35,7 +137,13 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
     localStorage.setItem('mint_movie_disliked_ids', JSON.stringify(dislikedIds));
   }, [dislikedIds]);
 
-  async function fetchDiscoverFeed(isLoadMore = false, eraOverride = null) {
+  async function fetchDiscoverFeed(
+    isLoadMore = false,
+    eraOverride = null,
+    streamerOverride = null,
+    genreOverride = null,
+    releaseOverride = null
+  ) {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
 
@@ -45,7 +153,11 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
       setIsLoadingMore(true);
     }
 
-    const activeEra = eraOverride || selectedEra;
+    const activeEra = eraOverride !== null ? eraOverride : selectedEra;
+    const activeStreamer = streamerOverride !== null ? streamerOverride : selectedStreamer;
+    const activeGenre = genreOverride !== null ? genreOverride : selectedGenre;
+    const activeRelease = releaseOverride !== null ? releaseOverride : selectedRelease;
+    const userRegion = localStorage.getItem('mint_user_region') || 'US';
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
 
     const watchlistIds = new Set(movieWatchlist.map((m) => m.id));
@@ -53,12 +165,36 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
 
     let currentPage = isLoadMore ? page + 2 : 1;
     let accumulatedFiltered = [];
-    let maxAttempts = 5;
+    let maxAttempts = 6;
 
     try {
       const fetchPage = async (p) => {
-        let url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=${p}&vote_count.gte=100&include_adult=false`;
+        let url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=${p}&vote_count.gte=25&include_adult=false`;
 
+        // Streamer filter
+        if (activeStreamer !== 'all') {
+          url += `&with_watch_providers=${activeStreamer}&watch_region=${userRegion}&with_watch_monetization_types=flatrate|free`;
+        }
+
+        // Genre filter
+        if (activeGenre !== 'all') {
+          url += `&with_genres=${activeGenre}`;
+        }
+
+        // Release Type filter
+        if (activeRelease === 'theatrical') {
+          url += `&with_release_type=2|3`;
+          const today = new Date().toISOString().split('T')[0];
+          const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+          url += `&primary_release_date.gte=${ninetyDaysAgo}&primary_release_date.lte=${today}`;
+        } else if (activeRelease === 'originals') {
+          const companies = STREAMER_COMPANIES[activeStreamer] || STREAMER_COMPANIES.all;
+          url += `&with_companies=${companies}`;
+        } else if (activeRelease === 'digital') {
+          url += `&with_release_type=4`;
+        }
+
+        // Era filter
         if (activeEra === '2020s') url += '&primary_release_date.gte=2020-01-01';
         else if (activeEra === '2010s') url += '&primary_release_date.gte=2010-01-01&primary_release_date.lte=2019-12-31';
         else if (activeEra === '2000s') url += '&primary_release_date.gte=2000-01-01&primary_release_date.lte=2009-12-31';
@@ -102,7 +238,7 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
       const itemsToHydrate = accumulatedFiltered.slice(0, 40);
       const hydratedMovies = await Promise.all(
         itemsToHydrate.map(async (movie) => {
-          const details = await getMovieDetails(movie.id);
+          const details = await getMovieDetails(movie.id, userRegion);
           return details || movie;
         })
       );
@@ -129,7 +265,6 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
     fetchDiscoverFeed(false);
   }, []);
 
-  // Replenish visible feed when buffer has items
   useEffect(() => {
     if (feedMovies.length < 20 && bufferMovies.length > 0) {
       const needed = 20 - feedMovies.length;
@@ -139,19 +274,42 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
     }
   }, [feedMovies.length, bufferMovies.length]);
 
-  // Background buffer fetch
   useEffect(() => {
     if (!loading && bufferMovies.length < 10 && !isFetchingRef.current) {
       fetchDiscoverFeed(true);
     }
   }, [bufferMovies.length, loading]);
 
+  function handleStreamerSelect(streamerId) {
+    setSelectedStreamer(streamerId);
+    sessionSeenIds.current.clear();
+    setFeedMovies([]);
+    setBufferMovies([]);
+    fetchDiscoverFeed(false, selectedEra, streamerId, selectedGenre, selectedRelease);
+  }
+
+  function handleGenreSelect(genreId) {
+    setSelectedGenre(genreId);
+    sessionSeenIds.current.clear();
+    setFeedMovies([]);
+    setBufferMovies([]);
+    fetchDiscoverFeed(false, selectedEra, selectedStreamer, genreId, selectedRelease);
+  }
+
+  function handleReleaseSelect(releaseId) {
+    setSelectedRelease(releaseId);
+    sessionSeenIds.current.clear();
+    setFeedMovies([]);
+    setBufferMovies([]);
+    fetchDiscoverFeed(false, selectedEra, selectedStreamer, selectedGenre, releaseId);
+  }
+
   function handleEraSelect(eraId) {
     setSelectedEra(eraId);
     sessionSeenIds.current.clear();
     setFeedMovies([]);
     setBufferMovies([]);
-    fetchDiscoverFeed(false, eraId);
+    fetchDiscoverFeed(false, eraId, selectedStreamer, selectedGenre, selectedRelease);
   }
 
   function handleAddWatchlist(movie) {
@@ -183,16 +341,81 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
   }
 
   return (
-    <div className="space-y-3">
-      {/* Sticky Era Bar */}
+    <div className="space-y-1">
+      {/* Sticky Filter Header: 3-Column Dropdown Grid + Era Bar */}
       <div 
-        className="sticky top-[45px] z-20 bg-[#0F172A] touch-pan-x"
+        className="sticky top-[45px] z-20 bg-[#0F172A] pt-2 pb-1.5 space-y-2 touch-pan-x"
+        data-no-swipe="true"
         onTouchStart={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
         onTouchEnd={(e) => e.stopPropagation()}
       >
+        {/* 3-Column Dropdown Bar: Streamers + Genres + Release */}
+        <div className="grid grid-cols-3 gap-1.5">
+          {/* Streamer Dropdown */}
+          <div className="relative">
+            <select
+              value={selectedStreamer}
+              onChange={(e) => handleStreamerSelect(e.target.value)}
+              className="w-full appearance-none rounded-xl border border-slate-700 bg-slate-900 pl-2.5 pr-6 py-2 text-[10px] sm:text-[11px] font-bold text-white focus:border-[#8CFA96] focus:outline-none cursor-pointer truncate"
+            >
+              {POPULAR_STREAMERS.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-slate-400">
+              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Genre Dropdown */}
+          <div className="relative">
+            <select
+              value={selectedGenre}
+              onChange={(e) => handleGenreSelect(e.target.value)}
+              className="w-full appearance-none rounded-xl border border-slate-700 bg-slate-900 pl-2.5 pr-6 py-2 text-[10px] sm:text-[11px] font-bold text-white focus:border-[#8CFA96] focus:outline-none cursor-pointer truncate"
+            >
+              {MOVIE_GENRES.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-slate-400">
+              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Release Dropdown */}
+          <div className="relative">
+            <select
+              value={selectedRelease}
+              onChange={(e) => handleReleaseSelect(e.target.value)}
+              className="w-full appearance-none rounded-xl border border-slate-700 bg-slate-900 pl-2.5 pr-6 py-2 text-[10px] sm:text-[11px] font-bold text-white focus:border-[#8CFA96] focus:outline-none cursor-pointer truncate"
+            >
+              {RELEASE_TYPES.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-slate-400">
+              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Horizontal Era Pills Bar */}
         <div 
-          className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1 overscroll-x-contain touch-pan-x"
+          className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar pt-0.5 pb-3.5 overscroll-x-contain touch-pan-x"
           onTouchStart={(e) => e.stopPropagation()}
           onTouchMove={(e) => e.stopPropagation()}
           onTouchEnd={(e) => e.stopPropagation()}
@@ -223,9 +446,17 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
           </div>
         ) : feedMovies.length === 0 ? (
           <div className="rounded-xl border border-dashed border-slate-800 py-8 text-center space-y-2">
-            <p className="text-xs text-slate-300">No movies found for this era.</p>
-            <button onClick={() => handleEraSelect('all')} className="text-xs font-bold text-[#8CFA96] underline">
-              Show All Eras
+            <p className="text-xs text-slate-300">No movies found matching these filters.</p>
+            <button
+              onClick={() => {
+                setSelectedStreamer('all');
+                setSelectedGenre('all');
+                setSelectedRelease('all');
+                handleEraSelect('all');
+              }}
+              className="text-xs font-bold text-[#8CFA96] underline"
+            >
+              Reset Filters
             </button>
           </div>
         ) : (
@@ -238,6 +469,7 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
               const rating = movie.tmdbRating || (movie.vote_average ? movie.vote_average.toFixed(1) : null);
               const imdbSearchUrl = `https://www.imdb.com/find?q=${encodeURIComponent(movie.title)}`;
               const rtSearchUrl = `https://www.rottentomatoes.com/search?search=${encodeURIComponent(movie.title)}`;
+              const availability = getAvailabilityBadge(movie);
 
               return (
                 <div key={movie.id} className="rounded-xl border border-slate-800 bg-[#1E293B] overflow-hidden transition-all">
@@ -256,9 +488,7 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
                     <div className="w-0 flex-1 flex flex-col justify-between self-stretch">
                       <div className="space-y-0.5">
                         <div className="flex justify-between items-start gap-2">
-                          <h3
-                            className="text-xs font-extrabold text-white leading-snug truncate"
-                          >
+                          <h3 className="text-xs font-extrabold text-white leading-snug truncate">
                             {movie.title}
                           </h3>
                           <button
@@ -296,6 +526,23 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
                           )}
                         </div>
 
+                        {/* Availability Badge */}
+                        {availability && (
+                          <div className="pt-0.5">
+                            <span
+                              className={`inline-block px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-tight border ${
+                                availability.type === 'stream'
+                                  ? 'bg-[#8CFA96]/10 text-[#8CFA96] border-[#8CFA96]/30'
+                                  : availability.type === 'theaters'
+                                  ? 'bg-amber-500/10 text-amber-300 border-amber-400/30'
+                                  : 'bg-slate-800 text-slate-300 border-slate-700'
+                              }`}
+                            >
+                              {availability.label}
+                            </span>
+                          </div>
+                        )}
+
                         {movie.leadActors && movie.leadActors.length > 0 && (
                           <p className="text-[10px] text-slate-400 truncate pt-0.5">
                             {movie.leadActors.join(' • ')}
@@ -305,7 +552,6 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
 
                       {/* Action Buttons */}
                       <div className="flex items-center justify-end gap-3 mt-1 -mb-1 ml-auto">
-                        {/* Direct to Main Watchlist */}
                         <button
                           type="button"
                           onClick={(e) => {
@@ -322,7 +568,6 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
                           </svg>
                         </button>
 
-                        {/* Direct to RetroVision */}
                         <button
                           type="button"
                           onClick={(e) => {

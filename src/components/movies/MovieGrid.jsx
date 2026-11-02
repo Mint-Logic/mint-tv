@@ -251,7 +251,7 @@ export function MovieGrid({
             if (rawStreamerName) {
               if (/^Peacock/i.test(rawStreamerName)) displayStreamerName = 'Peacock';
               else if (/^Paramount/i.test(rawStreamerName)) displayStreamerName = 'Paramount+';
-              else if (/^(Max|HBO)/i.test(rawStreamerName)) displayStreamerName = 'Max';
+              else if (/^(Max|HBO)/i.test(rawStreamerName)) displayStreamerName = 'HBO Max';
               else if (/^Netflix/i.test(rawStreamerName)) displayStreamerName = 'Netflix';
               else if (/^(Amazon Prime|Prime Video)/i.test(rawStreamerName)) displayStreamerName = 'Prime Video';
               else if (/^Hulu/i.test(rawStreamerName)) displayStreamerName = 'Hulu';

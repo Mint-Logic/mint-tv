@@ -105,7 +105,7 @@ const PRESET_TITLES = [
 
 const POPULAR_STREAMERS = [
   { id: 8, name: 'Netflix' },
-  { id: 1899, name: 'Max' },
+  { id: 1899, name: 'HBO Max' },
   { id: 337, name: 'Disney+' },
   { id: 15, name: 'Hulu' },
   { id: 350, name: 'Apple TV+' },
