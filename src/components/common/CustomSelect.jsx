@@ -52,7 +52,7 @@ export function CustomSelect({ value, onChange, options, placeholder }) {
 
       {/* Styled Theme Menu */}
       {isOpen && (
-        <div className="absolute left-0 top-full mt-1.5 w-full min-w-[140px] max-h-60 overflow-y-auto no-scrollbar rounded-xl border border-slate-700 bg-[#1E293B] p-1 shadow-2xl z-50 animate-in fade-in zoom-in-95">
+        <div className="absolute right-0 top-full mt-1.5 w-max min-w-full max-w-[calc(100vw-1.5rem)] max-h-60 overflow-y-auto no-scrollbar rounded-xl border border-slate-700 bg-[#1E293B] p-1 shadow-2xl z-50 animate-in fade-in zoom-in-95">
           {options.map((opt) => {
             const isSelected = String(opt.id) === String(value);
             return (
@@ -63,7 +63,7 @@ export function CustomSelect({ value, onChange, options, placeholder }) {
                   onChange(opt.id);
                   setIsOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-bold transition-colors text-left ${
+                className={`w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-bold transition-colors text-left ${
                   isSelected
                     ? 'bg-[#8CFA96]/15 text-[#8CFA96]'
                     : 'text-slate-300 hover:bg-slate-800 hover:text-white'
@@ -71,7 +71,7 @@ export function CustomSelect({ value, onChange, options, placeholder }) {
               >
                 <span className="truncate">{opt.name}</span>
                 {isSelected && (
-                  <span className="text-[#8CFA96] text-[10px] font-black pl-1">✓</span>
+                  <span className="text-[#8CFA96] text-[10px] font-black shrink-0">✓</span>
                 )}
               </button>
             );
