@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getMovieDetails, THUMB_BASE_URL, IMAGE_BASE_URL } from '../../services/tmdb';
 import retroVisionLogo from '../../assets/retro-vision-logo.png';
+import { CustomSelect } from '../common/CustomSelect';
 
 const POPULAR_STREAMERS = [
   { id: 'all', name: 'All Streamers' },
@@ -352,65 +353,23 @@ export function MovieRecommendations({ movieWatchlist = [], onAddMovie }) {
       >
         {/* 3-Column Dropdown Bar: Streamers + Genres + Release */}
         <div className="grid grid-cols-3 gap-1.5">
-          {/* Streamer Dropdown */}
-          <div className="relative">
-            <select
-              value={selectedStreamer}
-              onChange={(e) => handleStreamerSelect(e.target.value)}
-              className="w-full appearance-none rounded-xl border border-slate-700 bg-slate-900 pl-2.5 pr-6 py-2 text-[10px] sm:text-[11px] font-bold text-white focus:border-[#8CFA96] focus:outline-none cursor-pointer truncate"
-            >
-              {POPULAR_STREAMERS.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-slate-400">
-              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
+          <CustomSelect
+            value={selectedStreamer}
+            onChange={(val) => handleStreamerSelect(val)}
+            options={POPULAR_STREAMERS}
+          />
 
-          {/* Genre Dropdown */}
-          <div className="relative">
-            <select
-              value={selectedGenre}
-              onChange={(e) => handleGenreSelect(e.target.value)}
-              className="w-full appearance-none rounded-xl border border-slate-700 bg-slate-900 pl-2.5 pr-6 py-2 text-[10px] sm:text-[11px] font-bold text-white focus:border-[#8CFA96] focus:outline-none cursor-pointer truncate"
-            >
-              {MOVIE_GENRES.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name}
-                </option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-slate-400">
-              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
+          <CustomSelect
+            value={selectedGenre}
+            onChange={(val) => handleGenreSelect(val)}
+            options={MOVIE_GENRES}
+          />
 
-          {/* Release Dropdown */}
-          <div className="relative">
-            <select
-              value={selectedRelease}
-              onChange={(e) => handleReleaseSelect(e.target.value)}
-              className="w-full appearance-none rounded-xl border border-slate-700 bg-slate-900 pl-2.5 pr-6 py-2 text-[10px] sm:text-[11px] font-bold text-white focus:border-[#8CFA96] focus:outline-none cursor-pointer truncate"
-            >
-              {RELEASE_TYPES.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.name}
-                </option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-slate-400">
-              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
+          <CustomSelect
+            value={selectedRelease}
+            onChange={(val) => handleReleaseSelect(val)}
+            options={RELEASE_TYPES}
+          />
         </div>
 
         {/* Horizontal Era Pills Bar */}
