@@ -263,44 +263,64 @@ export default function App() {
     setAtticShows(atticShows.filter((s) => s.id !== id));
   }
 
-  function handleAdvanceEpisode(id) {
-    setWatchlist(
-      watchlist.map((show) => {
-        if (show.id === id) {
-          return { ...show, currentEpisode: (show.currentEpisode || 1) + 1 };
+  async function applyShowProgress(id, season, episode) {
+    const targetShow = watchlist.find((s) => s.id === id) || atticShows.find((s) => s.id === id);
+    if (!targetShow) return;
+
+    const targetSeason = season ?? targetShow.currentSeason ?? 1;
+    const targetEp = Math.max(1, episode ?? targetShow.currentEpisode ?? 1);
+
+    const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+    let isSeriesComplete = false;
+
+    try {
+      // Query canonical show details to compare against actual season episode limits
+      const res = await fetch(`https://api.themoviedb.org/3/tv/${id}?api_key=${API_KEY}`);
+      if (res.ok) {
+        const data = await res.json();
+        // Discard specials (season 0)
+        const regularSeasons = (data.seasons || []).filter((s) => s.season_number > 0);
+        const lastSeason = regularSeasons[regularSeasons.length - 1];
+
+        if (lastSeason) {
+          const isAtLastSeason = targetSeason >= lastSeason.season_number;
+          const isAtOrPastFinale = targetEp >= lastSeason.episode_count;
+          isSeriesComplete = isAtLastSeason && isAtOrPastFinale;
         }
-        return show;
-      })
-    );
-  }
-
-  async function handleUpdateEpisode(id, season, episode) {
-    const meta = await getShowMetadata(id);
-    const isEnded = meta?.status === 'Ended' || meta?.status === 'Canceled' || meta?.isEnded;
-    const isFinalSeason = meta?.numberOfSeasons ? season >= meta.numberOfSeasons : true;
-    const newEp = Math.max(1, episode);
-    const shouldArchiveNow = Boolean(isEnded && isFinalSeason && newEp > (meta?.numberOfEpisodes || 0));
-
-    if (shouldArchiveNow) {
-      const targetShow = watchlist.find((s) => s.id === id) || atticShows.find((s) => s.id === id);
-      if (targetShow) {
-        const archivedShow = { ...targetShow, currentSeason: season, currentEpisode: newEp, archived: true };
-        setAtticShows((prevAttic) => {
-          const filtered = prevAttic.filter((s) => s.id !== id);
-          return [archivedShow, ...filtered];
-        });
-        setWatchlist((prevWatchlist) => prevWatchlist.filter((s) => s.id !== id));
       }
+    } catch (err) {
+      console.error('Error verifying series finale status:', err);
+    }
+
+    if (isSeriesComplete) {
+      const archivedShow = {
+        ...targetShow,
+        currentSeason: targetSeason,
+        currentEpisode: targetEp,
+        completed: true,
+        archived: true,
+        watchedAt: new Date().toISOString(),
+      };
+      setAtticShows((prev) => [archivedShow, ...prev.filter((s) => s.id !== id)]);
+      setWatchlist((prev) => prev.filter((s) => s.id !== id));
     } else {
-      setWatchlist((prevWatchlist) =>
-        prevWatchlist.map((show) => {
-          if (show.id === id) {
-            return { ...show, currentSeason: season, currentEpisode: newEp };
-          }
-          return show;
-        })
+      setWatchlist((prev) =>
+        prev.map((s) =>
+          s.id === id ? { ...s, currentSeason: targetSeason, currentEpisode: targetEp } : s
+        )
       );
     }
+  }
+
+  function handleAdvanceEpisode(id) {
+    const show = watchlist.find((s) => s.id === id);
+    if (!show) return;
+    const nextEp = (show.currentEpisode || 1) + 1;
+    applyShowProgress(id, show.currentSeason || 1, nextEp);
+  }
+
+  function handleUpdateEpisode(id, season, episode) {
+    applyShowProgress(id, season, episode);
   }
 
   function handleMoveToAttic(show) {
@@ -497,6 +517,26 @@ export default function App() {
               }
               onBack={() => setSelectedShowId(null)}
               onUpdateEpisode={handleUpdateEpisode}
+              onArchiveShow={(showToArchive) => {
+                if (!showToArchive) return;
+                
+                // Construct the archived version
+                const archivedShow = {
+                  ...showToArchive,
+                  completed: true,
+                  archived: true,
+                  watchedAt: new Date().toISOString(),
+                };
+                
+                // Add to Attic/RetroVision and remove from Watchlist
+                setAtticShows((prev) => {
+                  const filtered = prev.filter((s) => s.id !== showToArchive.id);
+                  return [archivedShow, ...filtered];
+                });
+                
+                setWatchlist((prev) => prev.filter((s) => s.id !== showToArchive.id));
+                setSelectedShowId(null);
+              }}
               onRemoveShow={handleRemoveShow}
             />
           ) : (

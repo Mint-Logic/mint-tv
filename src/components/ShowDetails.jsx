@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getShowDetails, IMAGE_BASE_URL } from '../services/tmdb';
 
-export function ShowDetails({ showId, showData, onBack, onUpdateEpisode, onRemoveShow }) {
+export function ShowDetails({ showId, showData, onBack, onUpdateEpisode, onRemoveShow, onArchiveShow }) {
   const [details, setDetails] = useState(null);
   
   const [selectedSeason, setSelectedSeason] = useState(() => {
@@ -84,11 +84,17 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode, onRemov
   const currentSeason = showData?.currentSeason || 1;
   const currentEpisode = showData?.currentEpisode || 1;
 
-  function toggleEpisodeWatched(epNumber, isWatched) {
+  function toggleEpisodeWatched(epNumber, isWatched, isUltimateSeriesFinaleFlag) {
     if (isWatched) {
+      // Un-watching: step back one episode
       onUpdateEpisode(showId, selectedSeason, epNumber);
     } else {
-      onUpdateEpisode(showId, selectedSeason, epNumber + 1);
+      // Watching
+      if (isUltimateSeriesFinaleFlag && onArchiveShow) {
+        onArchiveShow(showData);
+      } else {
+        onUpdateEpisode(showId, selectedSeason, epNumber + 1);
+      }
     }
   }
 
@@ -316,7 +322,7 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode, onRemov
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    toggleEpisodeWatched(ep.episode_number, isWatched);
+                    toggleEpisodeWatched(ep.episode_number, isWatched, isUltimateSeriesFinale);
                   }}
                   title={isWatched ? "Click to mark as Unwatched" : "Click to mark as Watched"}
                   aria-label={
