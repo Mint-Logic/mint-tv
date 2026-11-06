@@ -330,9 +330,12 @@ export function MovieGrid({
                       )}
 
                       {movie.overview && (
-                        <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed mt-1">
-                          {movie.overview}
-                        </p>
+                        <div className="relative overflow-hidden h-9 mt-1">
+                          <p className="text-[11px] text-slate-300 leading-snug">
+                            {movie.overview}
+                          </p>
+                          <div className="absolute bottom-0 right-0 left-0 h-4 bg-gradient-to-t from-[#1E293B] to-transparent" />
+                        </div>
                       )}
 
                       <div className="flex items-center space-x-2 text-[11px] text-slate-300 font-semibold mt-1">

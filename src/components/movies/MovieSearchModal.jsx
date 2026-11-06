@@ -37,6 +37,7 @@ export function MovieSearchModal({ isOpen, onClose, onAddMovie, movieWatchlist =
   const [didYouMean, setDidYouMean] = useState(null);
   const [loading, setLoading] = useState(false);
   const [addingId, setAddingId] = useState(null);
+  const [expandedMovieId, setExpandedMovieId] = useState(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -220,16 +221,26 @@ export function MovieSearchModal({ isOpen, onClose, onAddMovie, movieWatchlist =
           {displayList.map((movie) => {
             const isAdded = movieWatchlist.some((m) => Number(m.id) === Number(movie.id));
             const isAdding = addingId === movie.id;
-            const posterUrl = movie.poster_path ? `${THUMB_BASE_URL}${movie.poster_path}` : '';
-            const year = movie.release_date ? movie.release_date.split('-')[0] : 'TBA';
-            const rating = movie.vote_average ? movie.vote_average.toFixed(1) : null;
+            const isExpanded = expandedMovieId === movie.id;
+            
+            const posterUrl = movie.poster_path ? `${THUMB_BASE_URL}${movie.poster_path}` : movie.poster ? `https://image.tmdb.org/t/p/w185${movie.poster}` : '';
+            const backdropUrl = movie.backdrop_path ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` : movie.backdrop ? `https://image.tmdb.org/t/p/w500${movie.backdrop}` : '';
+            const year = movie.release_date ? movie.release_date.split('-')[0] : movie.releaseYear || 'TBA';
+            const rating = movie.vote_average ? movie.vote_average.toFixed(1) : movie.tmdbRating || null;
+            
+            const imdbSearchUrl = `https://www.imdb.com/find?q=${encodeURIComponent(movie.title)}`;
+            const rtSearchUrl = `https://www.rottentomatoes.com/search?search=${encodeURIComponent(movie.title)}`;
 
             return (
               <div
                 key={movie.id}
-                className="flex items-center justify-between p-2 rounded-xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-all gap-3"
+                className="rounded-xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-all overflow-hidden"
               >
-                <div className="flex items-center gap-2.5 min-w-0">
+                <div 
+                  onClick={() => setExpandedMovieId(isExpanded ? null : movie.id)}
+                  className="flex items-center justify-between p-2 gap-3 cursor-pointer select-none"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0 pointer-events-none">
                   {posterUrl ? (
                     <img
                       src={posterUrl}
@@ -257,17 +268,67 @@ export function MovieSearchModal({ isOpen, onClose, onAddMovie, movieWatchlist =
                 </div>
 
                 <button
-                  type="button"
-                  disabled={isAdded || isAdding}
-                  onClick={() => handleSelectMovie(movie.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all ${
-                    isAdded
-                      ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
-                      : 'bg-[#8CFA96]/15 text-[#8CFA96] border border-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-950 active:scale-95'
-                  }`}
-                >
-                  {isAdding ? 'Adding...' : isAdded ? 'Tracked' : '+ Add'}
-                </button>
+                    type="button"
+                    disabled={isAdded || isAdding}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSelectMovie(movie.id);
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all z-10 ${
+                      isAdded
+                        ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+                        : 'bg-[#8CFA96]/15 text-[#8CFA96] border border-[#8CFA96] hover:bg-[#8CFA96] hover:text-slate-950 active:scale-95'
+                    }`}
+                  >
+                    {isAdding ? 'Adding...' : isAdded ? 'Tracked' : '+ Add'}
+                  </button>
+                </div>
+
+                {/* Expandable Overview Drawer */}
+                {isExpanded && (
+                  <div className="border-t border-slate-800 bg-slate-950/80 p-3 space-y-2.5 animate-in fade-in">
+                    {backdropUrl && (
+                      <div className="relative aspect-video w-full max-h-48 rounded-lg overflow-hidden border border-slate-800 bg-slate-900">
+                        <img src={backdropUrl} alt={movie.title} className="h-full w-full object-cover object-top" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
+                      </div>
+                    )}
+
+                    <h4 className="text-xs font-black text-white leading-snug">
+                      {movie.title}
+                    </h4>
+
+                    <p className="text-[11px] text-slate-300 leading-relaxed">
+                      {movie.overview || 'No overview available for this title.'}
+                    </p>
+
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-800/80 pt-2.5">
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <a
+                          href={imdbSearchUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-[9px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 px-2 py-0.5 rounded border border-amber-400/30 transition-all whitespace-nowrap"
+                        >
+                          IMDB
+                        </a>
+                        <a
+                          href={rtSearchUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-[9px] font-black uppercase tracking-wider text-red-400 bg-red-500/10 hover:bg-red-500/20 px-2 py-0.5 rounded border border-red-500/30 transition-all whitespace-nowrap"
+                        >
+                          ROTTEN TOMATOES
+                        </a>
+                      </div>
+                      <span className="text-[9px] text-slate-300 font-medium shrink-0 ml-auto whitespace-nowrap">
+                        Released: {movie.release_date || movie.releaseDate || 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
