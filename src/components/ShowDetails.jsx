@@ -183,6 +183,30 @@ export function ShowDetails({ showId, showData, onBack, onUpdateEpisode, onRemov
           <span className="text-[10px] text-[#8CFA96] font-semibold mt-1">
             {isOverviewExpanded ? 'Less ▲' : 'More ▼'}
           </span>
+
+          {/* External Links */}
+          {isOverviewExpanded && (
+            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-700/50">
+              <a
+                href={`https://www.imdb.com/find?q=${encodeURIComponent(details.name)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="text-[9px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 px-2 py-1 rounded border border-amber-400/30 transition-all"
+              >
+                IMDB
+              </a>
+              <a
+                href={`https://www.rottentomatoes.com/search?search=${encodeURIComponent(details.name)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="text-[9px] font-black uppercase tracking-wider text-red-400 bg-red-500/10 hover:bg-red-500/20 px-2 py-1 rounded border border-red-500/30 transition-all"
+              >
+                ROTTEN TOMATOES
+              </a>
+            </div>
+          )}
         </div>
       </div>
 
