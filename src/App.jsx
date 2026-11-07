@@ -337,6 +337,7 @@ export default function App() {
       name: show.name,
       poster: show.poster_path || show.poster,
       backdrop: show.backdrop_path || show.backdrop,
+      overview: show.overview || '',
       currentSeason: 1,
       currentEpisode: 1,
       completed: false,

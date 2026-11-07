@@ -167,6 +167,7 @@ export function SearchModal({ isOpen, onClose, onAddShow, watchlist = [] }) {
       name: show.name,
       poster: show.poster_path,
       backdrop: show.backdrop_path,
+      overview: show.overview || '',
       currentSeason: 1,
       currentEpisode: 1,
       completed: false,
