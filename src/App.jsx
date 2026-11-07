@@ -142,6 +142,7 @@ export default function App() {
         title: m.title,
         poster: m.poster,
         backdrop: m.backdrop,
+        overview: m.overview || '', // Added overview mapping
         releaseDate: m.release_date,
         releaseYear: m.release_year,
         runtime: m.runtime,
@@ -366,6 +367,7 @@ export default function App() {
         tmdb_rating: movie.tmdbRating,
         lead_actors: movie.leadActors,
         imdb_id: movie.imdbId,
+        overview: movie.overview,
         is_watched: false,
       });
     }
