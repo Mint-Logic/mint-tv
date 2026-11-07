@@ -333,19 +333,19 @@ export function MovieGrid({
 
                       {movie.overview && (
                         <div className="mt-1.5">
-                          <button
+                         <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               setExpandedOverviewId(isOverviewExpanded ? null : movie.id);
                             }}
-                            className="flex items-center space-x-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 hover:text-white transition-colors"
+                            className="flex items-center space-x-1 text-[9px] font-extrabold tracking-wider text-[#8CFA96] hover:text-[#7be385] transition-colors"
                           >
                             <span>Overview</span>
-                            <span className="text-[#8CFA96]">{isOverviewExpanded ? '▲' : '▼'}</span>
+                            <span>{isOverviewExpanded ? '▲' : '▼'}</span>
                           </button>
                           {isOverviewExpanded && (
-                            <p className="text-[11px] text-slate-300 leading-relaxed mt-1 animate-in fade-in">
+                            <p className="text-[10px] text-slate-300 leading-relaxed mt-1 animate-in fade-in">
                               {movie.overview}
                             </p>
                           )}
