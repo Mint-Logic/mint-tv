@@ -31,6 +31,7 @@ export function MovieGrid({
   onSelectMovie,
 }) {
   const [selectedStreamer, setSelectedStreamer] = useState('all');
+  const [expandedOverviewId, setExpandedOverviewId] = useState(null);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -262,6 +263,7 @@ export function MovieGrid({
             const primaryStreamer =
               displayStreamerName ||
               (movie.providers?.rent?.[0] ? `Rent: ${movie.providers.rent[0].name}` : isFutureFilm ? 'Upcoming' : 'In Theaters');
+              const isOverviewExpanded = expandedOverviewId === movie.id;
 
             return (
               <div
@@ -271,13 +273,13 @@ export function MovieGrid({
                 {/* Backdrop Banner */}
                 <div
                   onClick={() => onSelectMovie && onSelectMovie(movie.id)}
-                  className="relative h-44 w-full bg-slate-900 cursor-pointer overflow-hidden"
+                  className="relative h-36 md:h-48 w-full bg-slate-900 cursor-pointer overflow-hidden"
                 >
                   {backdropUrl && (
                     <img
                       src={backdropUrl}
                       alt={movie.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover object-top"
                     />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#1E293B] via-transparent to-black/40" />
@@ -330,11 +332,23 @@ export function MovieGrid({
                       )}
 
                       {movie.overview && (
-                        <div className="relative overflow-hidden h-9 mt-1">
-                          <p className="text-[11px] text-slate-300 leading-snug">
-                            {movie.overview}
-                          </p>
-                          <div className="absolute bottom-0 right-0 left-0 h-4 bg-gradient-to-t from-[#1E293B] to-transparent" />
+                        <div className="mt-1.5">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setExpandedOverviewId(isOverviewExpanded ? null : movie.id);
+                            }}
+                            className="flex items-center space-x-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 hover:text-white transition-colors"
+                          >
+                            <span>Overview</span>
+                            <span className="text-[#8CFA96]">{isOverviewExpanded ? '▲' : '▼'}</span>
+                          </button>
+                          {isOverviewExpanded && (
+                            <p className="text-[11px] text-slate-300 leading-relaxed mt-1 animate-in fade-in">
+                              {movie.overview}
+                            </p>
+                          )}
                         </div>
                       )}
 

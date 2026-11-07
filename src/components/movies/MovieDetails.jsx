@@ -57,12 +57,12 @@ export function MovieDetails({
       </div>
 
       {/* Backdrop & Primary Banner */}
-      <div className="relative h-56 w-full rounded-2xl bg-slate-900 overflow-hidden border border-slate-800 shadow-xl">
+      <div className="relative h-44 md:h-56 w-full rounded-2xl bg-slate-900 overflow-hidden border border-slate-800 shadow-xl">
         {backdropUrl && (
           <img
             src={backdropUrl}
             alt={movie.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-top"
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-slate-950/40 to-transparent" />
@@ -85,17 +85,17 @@ export function MovieDetails({
       </div>
 
       {/* Title, Year, Meta and Outbound Rating Chips */}
-      <div className="flex gap-4 items-start pt-1">
+      <div className="flex gap-3 md:gap-4 items-start pt-1">
         {posterUrl && (
           <img
             src={posterUrl}
             alt={movie.title}
-            className="w-20 h-28 object-cover rounded-xl border border-slate-800 shadow-lg shrink-0 -mt-10 relative z-10 bg-slate-900"
+            className="w-16 h-24 md:w-20 md:h-28 object-cover rounded-xl border border-slate-800 shadow-lg shrink-0 -mt-8 md:-mt-10 relative z-10 bg-slate-900"
           />
         )}
 
-        <div className="flex-1 min-w-0 space-y-1.5">
-          <h1 className="text-xl font-black text-white leading-tight">
+        <div className="flex-1 min-w-0 space-y-1 md:space-y-1.5">
+          <h1 className="text-lg md:text-xl font-black text-white leading-tight">
             {movie.title}
           </h1>
 

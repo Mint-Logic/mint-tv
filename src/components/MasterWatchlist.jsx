@@ -317,6 +317,7 @@ function ShowCard({
   onMoveToAttic, 
   onRestoreFromAttic 
 }) {
+  const [isOverviewExpanded, setIsOverviewExpanded] = useState(false);
   const posterUrl = show.poster_path || show.poster ? `${IMAGE_BASE_URL}${show.poster_path || show.poster}` : '';
   const premiereYear = show.firstAirDate && show.firstAirDate !== '9999-12-31' 
     ? show.firstAirDate.substring(0, 4) 
@@ -356,11 +357,23 @@ function ShowCard({
           </h3>
 
           {show.overview && (
-            <div className="relative overflow-hidden h-9 mt-1">
-              <p className="text-[11px] text-slate-300 leading-snug">
-                {show.overview}
-              </p>
-              <div className="absolute bottom-0 right-0 left-0 h-4 bg-gradient-to-t from-[#1E293B] to-transparent" />
+            <div className="mt-1">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsOverviewExpanded(!isOverviewExpanded);
+                }}
+                className="flex items-center space-x-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 hover:text-white transition-colors"
+              >
+                <span>Overview</span>
+                <span className="text-[#8CFA96]">{isOverviewExpanded ? '▲' : '▼'}</span>
+              </button>
+              {isOverviewExpanded && (
+                <p className="text-[11px] text-slate-300 leading-relaxed mt-1 animate-in fade-in">
+                  {show.overview}
+                </p>
+              )}
             </div>
           )}
 
