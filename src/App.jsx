@@ -188,6 +188,18 @@ export default function App() {
     pushToCloud(currentUser.id, watchlist, atticShows);
   }, [watchlist, atticShows, currentUser, hasLoadedFromCloud]);
 
+  // Listen for profile edits from the Stats Dashboard and force a cloud sync
+  useEffect(() => {
+    function handleProfileSync() {
+      if (currentUser && hasLoadedFromCloud) {
+        pushToCloud(currentUser.id, watchlist, atticShows);
+      }
+    }
+
+    window.addEventListener('mint_tv_profile_update', handleProfileSync);
+    return () => window.removeEventListener('mint_tv_profile_update', handleProfileSync);
+  }, [currentUser, hasLoadedFromCloud, watchlist, atticShows]);
+
   useEffect(() => {
     if (selectedShowId || isSearchOpen || isProfileOpen || isAuthOpen) {
       window.history.pushState({ appState: 'subview' }, '');
@@ -400,7 +412,7 @@ export default function App() {
     }
   }
 
-  /* ================= BACKGROUND PROVIDER REVALIDATION ================= */
+  /* ================= BACKGROUND PROVIDER REVALIDATION & SELF-HEALING ================= */
   useEffect(() => {
     if (activeMode !== 'movies' || movieWatchlist.length === 0) return;
 
@@ -408,9 +420,9 @@ export default function App() {
     const now = Date.now();
     const userRegion = localStorage.getItem('mint_user_region') || 'US';
 
-    // Find movies that need a provider refresh
+    // Find movies that need a provider refresh OR are missing their overview
     const staleMovies = movieWatchlist.filter(
-      (m) => !m.lastFetched || now - m.lastFetched > SEVEN_DAYS_MS
+      (m) => !m.lastFetched || now - m.lastFetched > SEVEN_DAYS_MS || !m.overview
     );
 
     if (staleMovies.length === 0) return;
@@ -424,23 +436,48 @@ export default function App() {
       for (const stale of staleMovies) {
         if (isCancelled) break;
 
-        const freshProviders = await getMovieWatchProviders(stale.id, userRegion);
-        if (freshProviders) {
-          const index = updatedMovies.findIndex((m) => m.id === stale.id);
-          if (index !== -1) {
-            updatedMovies[index] = {
-              ...updatedMovies[index],
-              providers: {
-                ...updatedMovies[index].providers,
-                ...freshProviders,
-              },
-              lastFetched: Date.now(),
-            };
-            hasChanges = true;
+        let needsStateUpdate = false;
+        const index = updatedMovies.findIndex((m) => m.id === stale.id);
+        if (index === -1) continue;
+
+        let updatedMovie = { ...updatedMovies[index] };
+
+        // 1. Self-Heal Missing Overview
+        if (!stale.overview) {
+          const fullDetails = await getMovieDetails(stale.id);
+          if (fullDetails && fullDetails.overview) {
+            updatedMovie.overview = fullDetails.overview;
+            needsStateUpdate = true;
+            
+            // Patch the database for this specific user
+            if (currentUser) {
+              await supabase
+                .from('mint_movies')
+                .update({ overview: fullDetails.overview })
+                .match({ id: stale.id, user_id: currentUser.id });
+            }
           }
         }
 
-        // 150ms debounce between TMDB calls
+        // 2. Fetch Watch Providers
+        if (!stale.lastFetched || now - stale.lastFetched > SEVEN_DAYS_MS) {
+          const freshProviders = await getMovieWatchProviders(stale.id, userRegion);
+          if (freshProviders) {
+            updatedMovie.providers = {
+              ...updatedMovie.providers,
+              ...freshProviders,
+            };
+            updatedMovie.lastFetched = Date.now();
+            needsStateUpdate = true;
+          }
+        }
+
+        if (needsStateUpdate) {
+          updatedMovies[index] = updatedMovie;
+          hasChanges = true;
+        }
+
+        // 150ms debounce between TMDB calls to avoid rate limits
         await new Promise((resolve) => setTimeout(resolve, 150));
       }
 
@@ -454,7 +491,7 @@ export default function App() {
     return () => {
       isCancelled = true;
     };
-  }, [activeMode]);
+  }, [activeMode, movieWatchlist, currentUser]);
 
   // Count calculations for bottom navigation badges
   const tvReadyCount = watchlist.length;
