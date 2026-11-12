@@ -297,8 +297,11 @@ export default function App() {
 
         if (lastSeason) {
           const isAtLastSeason = targetSeason >= lastSeason.season_number;
-          const isAtOrPastFinale = targetEp >= lastSeason.episode_count;
-          isSeriesComplete = isAtLastSeason && isAtOrPastFinale;
+          const isAtOrPastFinale = targetEp > lastSeason.episode_count;
+          
+          // Only auto-archive if TMDB officially marks the series as Ended or Canceled
+          const isShowEnded = data.status === 'Ended' || data.status === 'Canceled';
+          isSeriesComplete = isAtLastSeason && isAtOrPastFinale && isShowEnded;
         }
       }
     } catch (err) {

@@ -287,7 +287,9 @@ export function WatchlistGrid({ watchlist, onAdvanceEpisode, onSelectShow, onRem
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
                         </svg>
                         <p className="text-[10px] text-[#8CFA96] font-semibold">
-                          All episodes watched
+                          {show.currentSeason === 1 && show.currentEpisode === 1 
+                            ? 'Awaiting Premiere' 
+                            : 'All episodes watched'}
                         </p>
                       </div>
                     </div>
